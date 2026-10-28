@@ -240,6 +240,13 @@ async function browser() {
   g = await G();
   ok(g.stones === 5 && g.moves[g.moves.length - 1].player === 1, 'the computer (Black) replied');
 
+  // --- restart asks first in the middle of a game ---
+  await page.click('#restartBtn');
+  ok(await page.locator('#drawDlg[open]').count() === 1, 'restart mid-game asks first');
+  await page.screenshot({ path: OUT + '/gomoku-restart-dialog.png' });
+  await page.click('#drawCancel');
+  ok((await G()).stones === 5, 'cancel keeps the game');
+
   // --- the computer opens; you play Black; level hard for timing ---
   await page.click('#levelSeg button[data-v="hard"]');
   await page.evaluate(() => { window.__gomoku.nextGame(); window.__gomoku.nextGame(); });
@@ -254,13 +261,6 @@ async function browser() {
   ok(st.length >= 4 && Math.max(...ms) < 1500, `hard in the browser worker: ${ms.join(', ')} ms`);
   await page.waitForTimeout(400);
   await page.screenshot({ path: OUT + '/gomoku-hard.png' });
-
-  // --- restart asks first in the middle of a game ---
-  await page.click('#restartBtn');
-  ok(await page.locator('#drawDlg[open]').count() === 1, 'restart mid-game asks first');
-  await page.screenshot({ path: OUT + '/gomoku-restart-dialog.png' });
-  await page.click('#drawCancel');
-  ok((await G()).stones > 0, 'cancel keeps the game');
 
   // --- two players: play to five ---
   await page.click('#modeSeg button[data-v="pvp"]');
