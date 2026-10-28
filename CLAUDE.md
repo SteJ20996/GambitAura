@@ -42,24 +42,37 @@ deterministic. `app.js` is the UI: a piece first means a step, a tile first mean
 v0.4 the same square can be both a step target and a liftable tile). The C solver and the JS engine
 must agree on `perft` and on `replay.mjs`; run both after touching move rules.
 
-## Design system: "Aura Noir" (`assets/ga.css`, 2026-10-28)
+## Design system: "Ling Mo" 靈墨 (`assets/ga.css`, 2026-10-28)
 
-Owner's brief: 霸氣, 科技感, Aura 感. Dark void #05070c with a faint grid, glass cards, two side
-auras: mint #2ef2b5 (glow rgba(46,242,181,.45)) and coral #ff5f6d, gold accent #ffd166. Text #eef3fb
-/ body #c3ccda / muted #8d98ab (all ≥ 4.5:1 on the void). Fonts: Unbounded (wordmark, display),
-Space Grotesk (UI), Noto Sans TC 900 (Chinese titles), JetBrains Mono (labels, coordinates).
-Brand mark: a gradient hexagon (mint → gold → coral) around a gold core with a dark chevron. The
-lockup stacks 罡曜 (Noto Sans TC 900, gradient) over GAMBITAURA (Unbounded, small, wide tracking) in
-every header, in both languages; the series hero sets 罡曜 large over GAMBITAURA with a reading line
-(罡曜 · gāng yào · ㄍㄤ ㄧㄠˋ) because 罡 is a rare character. Page titles read "… · 罡曜 GambitAura".
-Board:
-obsidian tiles with corner ticks, water as a drifting dark field with faint sockets, flags as
-rotating hex sigils, pieces as glowing orbs (mint ▲, coral ▼). The board's outer glow follows the
-side to move; the selected piece gets a spinning gold ring, the anchor of a tile move a steady one.
-The result appears as an overlay on the board; a session-only scoreboard counts games ("Next game"
-swaps the first move, a reload starts over). Dark only. `[hidden]` is forced to `display: none`
-because `.ga-btn` and `.row` set a display. `html { overflow-x: clip }` keeps the hero aura from
-causing sideways scroll on phones.
+Owner's brief: 霸氣, 科技感, Aura 感 (gambitaura#2 answered it with "Aura Noir": neon gradients,
+glossy orbs, grid lines, hex sigils). The owner then found it a little cheap and asked for 通靈
+without 廉價感, so the look became "Ling Mo": restraint, light instead of neon, hairlines instead
+of boxes. Do not bring back rainbow gradients, gradient buttons, glossy orbs or sci-fi chrome.
+
+- Ground: ink #08090c with three faint lights drifting very slowly (`body::before`) and a fine SVG
+  film grain at 5.5% (`body::after`). No grid.
+- Colours: ivory text #ece6da, body #bdb7ac, muted #8e897f (5.7:1 on the ink); the sides are soft
+  luminous stones, mint = celadon jade #8fd3bf, coral = ember agate #ec9a82; champagne #d9c38f is
+  the only accent (underlines, rings, the drop target, the "和" seal). The CSS variable names stayed
+  (--mint, --coral, --gold, --ink) so page code did not change.
+- Type: Noto Serif TC (思源宋體) for Chinese display, Cormorant Garamond for Latin display, roman
+  numerals and coordinates (italic), Instrument Sans for UI. Numbers are lining figures. Chinese is
+  never set in the italic: the zh pages switch those spots to upright Noto Serif TC.
+- Brand mark: concentric champagne rings around a glowing core (an aura), also the favicon. Lockup
+  in every header: 罡曜 (Noto Serif TC 700, ivory, soft champagne glow) over GAMBITAURA (Cormorant,
+  wide tracking, AURA in champagne). The series hero centres 罡曜 large inside a breathing halo with
+  two slow rings and a few rising motes, then the reading line (gāng yào · ㄍㄤ ㄧㄠˋ).
+- Controls: primary button is an ivory pill, secondary a hairline pill; segmented choices are plain
+  words with a champagne underline; panels are sections split by hairlines, not cards.
+- Board: a dark pool with light moving under it; water squares are carved recesses; floor tiles
+  are matte stone with a faint grain; flags are a slowly turning dotted ring around a breathing
+  core; pieces are jade and agate lit from inside, with a carved direction mark in a deeper shade
+  of their own colour. The side to move is shown by mist rising from its own edge (Mint from rank
+  5, Coral from rank 1) and a soft tint on the board's outer glow. Selected piece: a steady ring
+  plus a ring of light opening outward; tile-move anchor: a steady ring. The result fades in over
+  the board in large serif type; the scoreboard is type only, the side to move underlined.
+- Kept from before: `[hidden]` forced to `display: none` (`.ga-btn`, `.row` set a display);
+  `html { overflow-x: clip }` so the hero halo never causes sideways scroll on phones.
 
 ## Working rules
 
