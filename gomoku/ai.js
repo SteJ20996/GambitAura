@@ -457,16 +457,17 @@ function think(c, cfg, gameSeed) {
 }
 
 // ---------- Swap2 ----------
-// Openings for the computer as opener: black, white, black, relative to h8. Picked because
-// the hard search scores them close to level with White to move (see tests/gomoku.cjs), so
-// whichever side the other player takes, neither starts far ahead.
+// Openings for the computer as opener: black, white, black, as (row, col) steps from h8.
+// All 75 different three-stone shapes within two points of h8 were scored by the hard search
+// with White to move. Every one leans toward Black; these six lean least, so whichever side the
+// other player takes, neither starts far ahead. Rotated and mirrored by game number.
 export const OPENINGS = [
-  [[0, 0], [-1, 1], [2, 0]],
-  [[0, 0], [1, 1], [-1, 2]],
-  [[0, 0], [0, 2], [2, 1]],
-  [[0, 0], [-2, 1], [1, 2]],
-  [[0, 0], [2, 2], [-1, 1]],
-  [[0, 0], [1, -2], [2, 1]],
+  [[0, 0], [-2, -1], [0, -2]],
+  [[0, 0], [-2, 0], [-1, -1]],
+  [[0, 0], [-1, 0], [1, -1]],
+  [[0, 0], [-2, -1], [-1, -1]],
+  [[0, 0], [-1, -1], [-1, 1]],
+  [[0, 0], [-1, -1], [2, 2]],
 ];
 // the eight symmetries of the square, applied to (dr, dc)
 const SYM = [
@@ -506,13 +507,15 @@ function chooseSwap(board, cfg, gameNo, gs) {
   return { v: tied[gameNo % tied.length], score: top, vals };
 }
 
-const quick = (cfg) => ({ ...cfg, maxDepth: Math.min(cfg.maxDepth, 3), budget: Math.min(cfg.budget, 2500), vcf: 0, guard: 0 });
+// A short search for the pair hunt. Even depth, so it ends on White to move like the full
+// search usually does and the two judge the same positions alike.
+const quick = (cfg) => ({ ...cfg, maxDepth: Math.min(cfg.maxDepth, 4), budget: Math.min(cfg.budget, 4000), vcf: 0, guard: 0 });
 
 // Two extra stones (black, then white) that leave the position as level as we can find.
 function bestPair(board, cfg, gs) {
   load(board);
   const q = quick(cfg);
-  const bs = genMoves(1, 6, false, -1);
+  const bs = genMoves(1, 5, false, -1);
   let best = null;
   for (const pb of bs) {
     const bw = board.slice(); bw[pb] = BLACK;
@@ -523,7 +526,7 @@ function bestPair(board, cfg, gs) {
 }
 function bestWhiteExtra(board, q, gs) {
   load(board);
-  const ws = genMoves(2, 6, false, -1);
+  const ws = genMoves(2, 5, false, -1);
   let best = null;
   for (const pw of ws) {
     const bw = board.slice(); bw[pw] = WHITE;

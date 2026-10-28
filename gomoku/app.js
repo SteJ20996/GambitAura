@@ -17,7 +17,7 @@ const T = {
     color: ['黑', '白'], you: '你', cpu: '電腦', p: ['玩家一', '玩家二'],
     round: (n) => `第 ${n} 局`, opens: (n) => `${n}開局`,
     stoneN: (n) => `第 ${n} 子`, endPly: (n) => `共 ${n} 手`,
-    fair: '<b>Swap2 開局。</b>五子棋如果不加限制，先下的一方只要每步都下對，一定會贏（Allis，1994）。所以先由一方擺出開局，再由另一方挑顏色。每步都下對的話，還是會有一方贏；Swap2 的作用是讓擺開局的人必須擺得均勢，因為顏色由對手來挑。',
+    fair: '<b>Swap2 開局。</b>五子棋如果不加限制，先下的一方只要每步都下對，一定會贏（Allis，1994）。所以先由一方擺出開局，再由另一方挑顏色。Swap2 沒有被證明完全公平，它的作用是讓擺開局的人必須擺得均勢，因為顏色由對手來挑。',
     youOpen: '由你擺開局', pOpen: (n) => `${n}擺開局`, aiOpen: '電腦正在擺開局',
     open3Hint: (k, c) => `放三子：兩黑一白。之後對手會挑顏色，所以擺得越均勢越好。下一子：${c}（${k}/3）。`,
     youChoose: '輪到你選', pChoose: (n) => `輪到${n}選`, aiChoose: '電腦正在選擇',
@@ -59,7 +59,7 @@ const T = {
     color: ['Black', 'White'], you: 'You', cpu: 'Computer', p: ['Player 1', 'Player 2'],
     round: (n) => `Game ${n}`, opens: (n) => (n === 'You' ? 'You open' : `${n} opens`),
     stoneN: (n) => `Stone ${n}`, endPly: (n) => `${n} moves`,
-    fair: '<b>Swap2 opening.</b> Without a rule like this, the player who moves first can always win with perfect play (Allis, 1994). So one player sets up the opening and the other picks a colour. With perfect play someone still wins. Swap2 makes the opener build a balanced position, because the opponent picks the side.',
+    fair: '<b>Swap2 opening.</b> Without a rule like this, the player who moves first can always win with perfect play (Allis, 1994). So one player sets up the opening and the other picks a colour. Nobody has proven Swap2 perfectly fair. What it does is make the opener build a balanced position, because the opponent picks the side.',
     youOpen: 'You set the opening', pOpen: (n) => `${n} sets the opening`, aiOpen: 'The computer is setting the opening',
     open3Hint: (k, c) => `Place three stones: two black, one white. Your opponent then picks a colour, so keep it even. Next: ${c.toLowerCase()} (${k} of 3).`,
     youChoose: 'Your choice', pChoose: (n) => `${n} to choose`, aiChoose: 'The computer is choosing',
@@ -183,7 +183,7 @@ function drawWinLines() {
   for (const run of state.lines) {
     const a = run[0], z = run[run.length - 1];
     const x1 = (a % N) + 0.5, y1 = Math.floor(a / N) + 0.5, x2 = (z % N) + 0.5, y2 = Math.floor(z / N) + 0.5;
-    for (const cls of ['glow', 'core']) {
+    for (const cls of ['glow', 'shade', 'core']) {
       const ln = document.createElementNS(SVGNS, 'line');
       ln.setAttribute('class', cls);
       ln.setAttribute('pathLength', '1');
@@ -326,9 +326,20 @@ function renderChoices() {
   const L = T[lang];
   const box = $('choices');
   const show = !over() && !busy && !isAiTurn() && (state.phase === 'swap' || state.phase === 'pick');
+  const appearing = show && box.hidden;
   box.hidden = !show;
   box.innerHTML = '';
   if (!show) return;
+  // the buttons sit under the board; bring them into view when a choice is due
+  if (appearing) {
+    requestAnimationFrame(() => {
+      const r = box.getBoundingClientRect();
+      if (r.bottom > window.innerHeight || r.top < 0) {
+        const smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        box.scrollIntoView({ block: 'nearest', behavior: smooth ? 'smooth' : 'auto' });
+      }
+    });
+  }
   const icon = { white: 'mini w', black: 'mini b', two: 'mini pair' };
   const opts = state.phase === 'swap' ? L.opt : L.pickOpt;
   for (const v of E.legalChoices(state)) {

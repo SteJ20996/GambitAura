@@ -58,7 +58,10 @@ solved; classics use an accepted balancing rule and each page says how fair it r
   draws, first player wins in theory (Nash's strategy-stealing argument); the swap rule.
 - 黑白棋 Reversi (`reversi/`, 8 × 8): weakly solved as a draw (Takizawa, 2023). Black alternates
   between the two players each game.
-- 五子棋 Gomoku (`gomoku/`, 15 × 15): free-style is a first-player win (Allis, 1994); Swap2 opening.
+- 五子棋 Gomoku (`gomoku/`, 15 × 15, free-style: six or more counts): free-style is a first-player
+  win (Allis, 1994); Swap2 opening (one player lays black, white, black; the other takes white,
+  takes black, or lays two more and lets the opener pick). Swap2 is not proven fair, and the page
+  says so; it makes the opener lay a balanced start.
 - 取石子 Nim (`nim/`, 3 to 5 piles of 1 to 7): every position is solved (Bouton, 1901), so fairness
   lives in the format: one player sets up the piles, the other looks and picks first or second,
   roles swap every game. A perfect chooser wins any single game; the match is what is fair. The
@@ -69,8 +72,12 @@ solved; classics use an accepted balancing rule and each page says how fair it r
 take `--n` cells per side). `assets/shell.js` holds the shared helpers and `AIClient` (module Web
 Worker, replies no sooner than 520 ms, stale replies dropped). Every computer player is
 deterministic (no `Math.random`): Reversi is alpha-beta with a node budget plus an exact endgame
-(perft matches the published 4 12 56 244 1396 8200 55092 390216); Nim is exact nim-sum play with
-weaker levels by design. 借路 keeps its own `app.js` logic. The language key `ga-jielu-lang` is
+(perft matches the published 4 12 56 244 1396 8200 55092 390216); Hex is UCT with RAVE on a fixed
+playout count, seeded from a hash of the position, and decides swaps with its hard search on every
+level (swap when its best reply wins under 52%); Gomoku is a shape table plus a win-by-fours (VCF)
+search and alpha-beta with a node budget, opening from six fixed starts it scored as the least
+lopsided (balanced in its own judgement, not proven); Nim is exact nim-sum play with weaker
+levels by design. 借路 keeps its own `app.js` logic. The language key `ga-jielu-lang` is
 shared by every page; other settings use `ga-<game>-<key>`.
 
 ## Design system: "Ling Mo" 靈墨 (`assets/ga.css`, 2026-10-28)

@@ -1,12 +1,12 @@
 // Checks for 六角連線 Hex: the rules and the computer player in Node, then the page in Chromium.
-// Serve the repo root first:  npx http-server /path/to/repo -p 8771 -c-1
+// Serve the repo root first:  npx http-server /path/to/repo -p 8765 -c-1
 // then:  node tests/hex.cjs        (UNIT_ONLY=1 skips the browser; screenshots go to tests/out/hex-*.png)
 const path = require('path');
 const fs = require('fs');
 const { pathToFileURL } = require('url');
 const OUT = path.join(__dirname, 'out');
 fs.mkdirSync(OUT, { recursive: true });
-const BASE = process.env.BASE || 'http://127.0.0.1:8771/';
+const BASE = process.env.BASE || 'http://127.0.0.1:8765/';
 const ok = (cond, msg) => { console.log((cond ? 'PASS ' : 'FAIL ') + msg); if (!cond) process.exitCode = 1; };
 
 function mulberry32(a) {

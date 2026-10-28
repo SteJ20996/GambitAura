@@ -1,13 +1,13 @@
 // Checks for 五子棋 Gomoku: rules and computer in Node, then the page in headless Chromium.
 // Run a static server at the repo root first, e.g.
-//   node /opt/node22/lib/node_modules/http-server/bin/http-server -p 8772 -c-1 -s .
+//   node /opt/node22/lib/node_modules/http-server/bin/http-server -p 8765 -c-1 -s .
 // then:  node tests/gomoku.cjs   (BASE overrides the address; screenshots go to tests/out/gomoku-*.png;
 //        UNIT_ONLY=1 skips the browser part)
 const path = require('path');
 const { pathToFileURL } = require('url');
 const OUT = path.join(__dirname, 'out');
 require('fs').mkdirSync(OUT, { recursive: true });
-const BASE = process.env.BASE || 'http://127.0.0.1:8772/';
+const BASE = process.env.BASE || 'http://127.0.0.1:8765/';
 const ok = (cond, msg) => { console.log((cond ? 'PASS ' : 'FAIL ') + msg); if (!cond) process.exitCode = 1; };
 
 async function unit() {
@@ -209,6 +209,10 @@ async function browser() {
   ok(g.gameNo === 2 && g.moves.filter((m) => m.t === 'stone' && m.player === 1).length === 3, 'game 2: the computer opens with three stones');
   ok(await page.locator('#choices button').count() === 3 && (await page.textContent('#round')).includes('電腦開局'), 'three Swap2 buttons show; the scoreboard says the computer opens');
   ok(await page.locator('#sbMint .orb.tbd').count() === 1, 'scoreboard orbs show no colour yet');
+  await page.waitForTimeout(900);   // smooth scroll to the choices, scoreboard underline fade
+  const onLeft = await page.evaluate(() => document.getElementById('sbMint').classList.contains('on') && !document.getElementById('sbCoral').classList.contains('on'));
+  const inView = await page.evaluate(() => document.getElementById('choices').getBoundingClientRect().bottom <= window.innerHeight + 1);
+  ok(onLeft && inView, 'the chooser (you) is underlined and the choices were scrolled into view');
   await page.screenshot({ path: OUT + '/gomoku-swap-choice.png' });
   await page.click('#choices button[data-v="two"]');
   g = await G();
@@ -274,7 +278,7 @@ async function browser() {
   for (const c of ['o1', 'h10', 'o2', 'h11', 'o3', 'h12']) await click(c);
   g = await G();
   ok(g.phase === 'over' && g.winner === 1, 'player 2 made five (h8 to h12)');
-  ok(await page.locator('#winline line').count() === 2 && await page.locator('#stones .stone.won').count() === 5, 'winning line drawn through five glowing stones');
+  ok(await page.locator('#winline line').count() === 3 && await page.locator('#stones .stone.won').count() === 5, 'winning line drawn through five glowing stones');
   await page.waitForTimeout(1300);
   ok(await page.locator('#overlay.show').count() === 1 && (await page.textContent('#ovBig')) === '玩家二勝', 'overlay: 玩家二勝');
   ok((await page.textContent('#ptsCoral')) === '1' && (await page.textContent('#ptsMint')) === '0', 'scoreboard counts the win for player 2');
@@ -302,6 +306,19 @@ async function browser() {
     return /[一-鿿]/.test(t) && getComputedStyle(el).fontStyle === 'italic';
   }).map((el) => el.className || el.tagName));
   ok(italicZh.length === 0, 'no Chinese text in italic' + (italicZh.length ? ': ' + italicZh.join(', ') : ''));
+
+  // --- keyboard: arrows move the focus point, Enter places ---
+  await page.click('#modeSeg button[data-v="ai"]');
+  await page.click('#modeSeg button[data-v="pvp"]');
+  await page.waitForTimeout(150);
+  await page.focus('#cells .cellbtn[tabindex="0"]');
+  const startCell = await page.evaluate(() => Number(document.activeElement.dataset.i));
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowUp');
+  const aimed = await page.evaluate(() => Number(document.activeElement.dataset.i));
+  await page.keyboard.press('Enter');
+  g = await G();
+  ok(aimed === startCell - 16 && g.stones === 1 && g.last === aimed, 'keyboard: arrows move the focus, Enter places a stone');
 
   // --- phone ---
   const phone = await br.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
@@ -332,7 +349,7 @@ async function browser() {
   // the swap choices on a phone
   await p2.evaluate(() => window.__gomoku.nextGame());
   await p2.waitForFunction(() => window.__gomoku.state.phase === 'swap' && !window.__gomoku.busy, null, { timeout: 20000 });
-  await p2.locator('#status').scrollIntoViewIfNeeded();
+  await p2.waitForTimeout(900);
   await p2.screenshot({ path: OUT + '/gomoku-phone-swap.png' });
   const sw3 = await p2.evaluate(() => document.documentElement.scrollWidth);
   ok(sw3 <= 390, 'Swap2 buttons fit the phone (' + sw3 + ')');
