@@ -5,8 +5,8 @@ Chinese name **罡曜** (gāng yào, ㄍㄤ ㄧㄠˋ; chosen by the owner 2026-1
 protective aura of martial-arts fiction, and 曜, radiance; the two syllables echo Gam- and -Aura.
 Owner: Yizhen (Stephen) Jia (also runs stephenjia.com, Quidence and Qidolab; those live in other
 repos and are not part of this one). Working name before 2026-10-28: "NeoChess". Domain
-gambitaura.com (bought 2026-10-28; GitHub Pages from `main` with a `CNAME` file since gambitaura#3,
-DNS steps in README). This file is the repo's
+gambitaura.com (bought 2026-10-28 on Cloudflare). Live as www.gambitaura.com via GitHub Pages from
+`main`; the apex redirects to www (setup and DNS in README). This file is the repo's
 persistent memory; keep it current when decisions change.
 
 ## History
@@ -76,8 +76,10 @@ causing sideways scroll on phones.
 
 - v0.5 opening adoption and the matching mechanics-doc update (§2 table, §4/§5.1 examples, §5.3 and
   §7.2 wording, §11).
-- gambitaura.com going live (gambitaura#3, 2026-10-28): owner to add the DNS records, merge the
-  CNAME PR, turn on Pages from `main`, then enforce HTTPS. Cloud sessions cannot reach
-  gambitaura.com (network policy), so the owner confirms it loads. Play-testing with people.
+- Hosting (2026-10-28): DNS records in place (DNS only), gambitaura.com verified on the account,
+  Pages built from `main` with CNAME `www.gambitaura.com`. Waiting for GitHub's certificate, then
+  tick "Enforce HTTPS". Do not add Cloudflare redirect rules or turn on the proxy (README explains
+  why). Cloud sessions cannot reach gambitaura.com, docs.github.com or developers.cloudflare.com
+  unless the environment allows them. Play-testing with people still to do.
 - 罡曜 has not been checked against trademarks (e.g. TIPO in Taiwan) or app stores yet. Other
   candidates considered on 2026-10-28: 鋼曜, 罡奧, 罡闢奧, 罡比特.
