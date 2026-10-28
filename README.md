@@ -2,7 +2,7 @@
 
 A series of small two-player strategy games: open information, no dice, no timer.
 Chinese name 罡曜 (gāng yào): 罡 as in 罡氣, an aura of power; 曜, radiance.
-Domain: gambitaura.com (not yet pointed at this repo).
+Live address: www.gambitaura.com (gambitaura.com redirects there).
 
 | # | Game | Folder | State |
 |---|------|--------|-------|
@@ -10,7 +10,7 @@ Domain: gambitaura.com (not yet pointed at this repo).
 
 ## Layout
 
-- `index.html`: series page. `assets/ga.css`: the shared "Aura Noir" theme. `favicon.svg`.
+- `index.html`: series page. `assets/ga.css`: the shared "Ling Mo" (靈墨) theme. `favicon.svg`.
 - `jielu/index.html`, `jielu/app.js`: the game page (zh-Hant / English, vs computer or two players on one device).
 - `jielu/engine.js`: the rules as pure functions, shared by the page, the Web Worker and the Node checks.
 - `jielu/ai.js`, `jielu/ai-worker.js`: the computer player (alpha-beta with a fixed node budget, so it is deterministic).
@@ -44,31 +44,25 @@ between equal players. Details and reproduction steps: `jielu/analysis/index.htm
 The solver covers every terrain with four water squares and the pieces anywhere. A change to the
 board size, the number of water squares, the flags or the move rules needs the solver updated first.
 
-## Hosting: GitHub Pages at gambitaura.com
+## Hosting: GitHub Pages at www.gambitaura.com
 
-The `CNAME` file holds `gambitaura.com`, so GitHub Pages serves this repo there instead of under
-stephenjia.com/GambitAura/. Setup, in order:
+The `CNAME` file holds `www.gambitaura.com` (set from Settings → Pages on 2026-10-28). With the
+DNS records below for both names, GitHub redirects `gambitaura.com` to `www.gambitaura.com` by
+itself; GitHub's docs recommend this www-first setup. No redirect rule is needed at Cloudflare.
 
-1. DNS for gambitaura.com (on Cloudflare: DNS → Records, every record "DNS only", grey cloud):
+DNS for gambitaura.com on Cloudflare (DNS → Records), every record "DNS only" (grey cloud):
 
-   | Type | Name | Content |
-   |------|------|---------|
-   | A | `@` | `185.199.108.153` |
-   | A | `@` | `185.199.109.153` |
-   | A | `@` | `185.199.110.153` |
-   | A | `@` | `185.199.111.153` |
-   | AAAA | `@` | `2606:50c0:8000::153` |
-   | AAAA | `@` | `2606:50c0:8001::153` |
-   | AAAA | `@` | `2606:50c0:8002::153` |
-   | AAAA | `@` | `2606:50c0:8003::153` |
-   | CNAME | `www` | `stej20996.github.io` |
+| Type | Name | Content |
+|------|------|---------|
+| A | `@` | `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153` (four records) |
+| AAAA | `@` | `2606:50c0:8000::153`, `…8001::153`, `…8002::153`, `…8003::153` (four records) |
+| CNAME | `www` | `stej20996.github.io` |
+| TXT | `_github-pages-challenge-SteJ20996` | the code from account Settings → Pages (domain verification; keep it) |
 
-   Delete any parking or forwarding records the registrar added for `@` or `www` first.
-2. Settings → Pages: Source "Deploy from a branch", branch `main`, folder `/ (root)`. The custom
-   domain field should read `gambitaura.com`; wait for "DNS check successful".
-3. Tick "Enforce HTTPS" once the certificate is ready (minutes, sometimes up to a day).
-4. Optional but recommended: account Settings → Pages → "Add a domain" to verify gambitaura.com
-   with a TXT record, so no one else can claim it on GitHub.
+Settings → Pages (in this repository's Settings, not the account's): Source "Deploy from a branch",
+`main`, `/ (root)`. "Enforce HTTPS" turns on by ticking it once GitHub has issued the certificate.
 
-The Cloudflare proxy (orange cloud) can be turned on afterwards, only with SSL/TLS mode
-"Full (strict)". All links in the site are relative, so nothing else changes with the domain.
+Keep the records "DNS only". Cloudflare's dashboard suggests proxying and a www-to-root redirect
+rule; ignore both. Redirect rules only run on proxied records, and a www-to-root rule would loop
+against GitHub's root-to-www redirect. If the proxy is ever turned on, SSL/TLS must be
+"Full (strict)" and no redirect rule may fight GitHub's.

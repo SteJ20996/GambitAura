@@ -8,36 +8,37 @@
 <link rel="icon" href="../../favicon.svg" type="image/svg+xml" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..800&family=Space+Grotesk:wght@400..700&family=JetBrains+Mono:wght@400;600&family=Noto+Sans+TC:wght@500;700;900&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Instrument+Sans:wght@400..700&family=Noto+Serif+TC:wght@500;700;900&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="../../assets/ga.css" />
-<meta name="theme-color" content="#05070c" />
+<meta name="theme-color" content="#08090c" />
 <style>
   .wrap { max-width: 840px; margin: 0 auto; }
   body { line-height: 1.75; }
   h1 { font-family: var(--cjk); font-weight: 900; font-size: clamp(1.7rem, 5vw, 2.5rem); line-height: 1.2; letter-spacing: .02em; }
-  html[lang="en"] h1 { font-family: var(--display); font-weight: 700; letter-spacing: 0; }
+  html[lang="en"] h1 { font-family: var(--display); font-weight: 600; letter-spacing: .01em; font-size: clamp(2rem, 6vw, 3rem); }
   .meta { font-family: var(--mono); font-size: .74rem; color: var(--muted); margin: 10px 0 24px; }
-  h2 { font-size: 1.18rem; margin: 38px 0 10px; padding-left: 12px; border-left: 3px solid var(--gold); }
+  h2 { font-family: var(--cjk); font-weight: 700; font-size: 1.2rem; letter-spacing: .06em; margin: 42px 0 12px; padding-left: 14px; border-left: 1px solid var(--gold); }
+  html[lang="en"] h2 { font-family: var(--display); font-size: 1.45rem; letter-spacing: .02em; }
   h3 { font-size: 1rem; margin: 20px 0 6px; color: var(--ink); }
   p, li { color: var(--body); }
   p + p { margin-top: 10px; }
   ul, ol { margin: 8px 0 8px 1.3em; }
   li { margin: 5px 0; }
   b, strong { color: var(--ink); }
-  .summary { padding: 16px 20px; border-left: 3px solid var(--gold); }
+  .summary { padding: 18px 22px; border-left: 1px solid var(--gold); }
   .summary li { margin: 9px 0; }
   .tablewrap { overflow-x: auto; margin: 10px 0; border-radius: 12px; border: 1px solid var(--edge); }
-  table { border-collapse: collapse; width: 100%; font-size: .9rem; background: rgba(12, 17, 27, .7); }
+  table { border-collapse: collapse; width: 100%; font-size: .9rem; background: rgba(16, 18, 24, .6); }
   th, td { padding: 8px 11px; border-bottom: 1px solid var(--edge); text-align: left; vertical-align: top; }
   tr:last-child td { border-bottom: 0; }
   th { font-weight: 600; color: var(--muted); font-size: .78rem; font-family: var(--mono); letter-spacing: .04em; }
   td.num { font-family: var(--mono); white-space: nowrap; }
-  tr.pick td { background: rgba(255, 209, 102, .08); color: var(--ink); }
+  tr.pick td { background: rgba(217, 195, 143, .08); color: var(--ink); }
   tr.pick td:first-child { box-shadow: inset 3px 0 0 var(--gold); }
   code { font-family: var(--mono); font-size: .86em; color: var(--ink); background: rgba(255, 255, 255, .06); padding: 1px 5px; border-radius: 5px; }
   pre { font-family: var(--mono); font-size: .8rem; background: rgba(8, 11, 18, .85); border: 1px solid var(--edge); border-radius: 12px; padding: 13px 15px; overflow-x: auto; line-height: 1.6; color: var(--body); }
   .line { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3px 18px; font-family: var(--mono); font-size: .8rem; background: rgba(8, 11, 18, .85); border: 1px solid var(--edge); border-radius: 12px; padding: 12px 15px; }
-  .line span.m { color: var(--mint); } .line span.c { color: #ff8e98; }
+  .line span.m { color: var(--mint); } .line span.c { color: var(--coral); }
   @media (max-width: 560px) { .line { grid-template-columns: 1fr; } }
   .note { font-size: .88rem; color: var(--muted); }
   [data-l] { display: none; }
@@ -48,7 +49,7 @@
 <div class="wrap">
   <header class="ga-top">
     <a class="ga-brand" href="../../" aria-label="罡曜 GambitAura">
-      <svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="hx" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#2ef2b5"/><stop offset=".5" stop-color="#ffd166"/><stop offset="1" stop-color="#ff5f6d"/></linearGradient></defs><path d="M32 6 L56 20 V44 L32 58 L8 44 V20 Z" fill="none" stroke="url(#hx)" stroke-width="4" stroke-linejoin="round"/><circle cx="32" cy="32" r="10" fill="#ffd166"/><path d="M32 25 L38 35.5 H26 Z" fill="#070a11"/></svg>
+      <svg viewBox="0 0 64 64" aria-hidden="true"><defs><radialGradient id="gaCore" cx=".5" cy=".45" r=".55"><stop offset="0" stop-color="#fffaf0"/><stop offset=".55" stop-color="#ecdcb4"/><stop offset="1" stop-color="#c9ad74"/></radialGradient><radialGradient id="gaHalo" cx=".5" cy=".5" r=".5"><stop offset=".3" stop-color="#d9c38f" stop-opacity=".28"/><stop offset="1" stop-color="#d9c38f" stop-opacity="0"/></radialGradient></defs><circle cx="32" cy="32" r="30" fill="url(#gaHalo)"/><circle cx="32" cy="32" r="22" fill="none" stroke="#d9c38f" stroke-width="1.4" opacity=".7"/><circle cx="32" cy="32" r="15" fill="none" stroke="#d9c38f" stroke-width="1" stroke-dasharray="1.5 3.5" opacity=".6"/><circle cx="32" cy="32" r="7" fill="url(#gaCore)"/></svg>
       <span class="ga-lock" aria-hidden="true"><span class="ga-zh">罡曜</span><span class="ga-word">Gambit<b>Aura</b></span></span>
     </a>
     <div class="ga-langs" role="group" aria-label="Language">

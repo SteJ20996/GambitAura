@@ -124,14 +124,15 @@ function place(el, c) { const [r, k] = rc(c); el.style.setProperty('--r', r); el
 
 const SIGIL = `<svg class="sigil" viewBox="0 0 40 40" aria-hidden="true">
   <g fill="none" stroke="currentColor">
-    <g class="spin"><path d="M20 3.5 L34.3 11.75 V28.25 L20 36.5 L5.7 28.25 V11.75 Z" stroke-width="1.2" stroke-dasharray="3 2.4" opacity=".7"/></g>
-    <path d="M20 10 L28.7 15 V25 L20 30 L11.3 25 V15 Z" stroke-width="1.8"/>
+    <g class="spin"><circle cx="20" cy="20" r="16.5" stroke-width=".8" stroke-dasharray="1 4.2" opacity=".75"/></g>
+    <circle cx="20" cy="20" r="11.5" stroke-width="1" opacity=".85"/>
   </g>
-  <path d="M20 15.5 L24.5 20 L20 24.5 L15.5 20 Z" fill="currentColor"/>
+  <circle class="core" cx="20" cy="20" r="3.4" fill="currentColor"/>
 </svg>`;
+// The direction mark is carved into the stone in a deeper shade of its own colour.
 const glyph = (side) => side === MINT
-  ? `<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3.5 L16.5 14.5 H3.5 Z" fill="#04130d" fill-opacity=".82"/></svg>`
-  : `<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 16.5 L3.5 5.5 H16.5 Z" fill="#1a0508" fill-opacity=".82"/></svg>`;
+  ? `<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 5 L15 13.5 H5 Z" fill="#1f4f43" fill-opacity=".62"/></svg>`
+  : `<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 15 L5 6.5 H15 Z" fill="#5f2518" fill-opacity=".62"/></svg>`;
 
 const cellBtns = [];
 for (let c = 0; c < 25; c++) {
