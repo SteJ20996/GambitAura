@@ -11,12 +11,13 @@
 // 24 games against the plain fill.
 import { JADE, AGATE, neighbours, winningCells } from './engine.js';
 
-// Playouts per move, tuned for a 9×9 board; other sizes scale by board area so the
-// time per move stays about the same. Easy is plain UCT on a small budget and a plain fill.
+// Playouts per move, tuned for a 9×9 board; other sizes scale with the board area to
+// the power 0.6 (the tree costs more per playout on small boards), so the time per
+// move stays about the same. Easy is plain UCT on a small budget and a plain fill.
 export const LEVELS = {
   easy: { sims: 300, rave: false, bridges: false, c: 0.9 },
   normal: { sims: 3000, rave: true, bridges: true, c: 0.2 },
-  hard: { sims: 42000, rave: true, bridges: true, c: 0.2 },
+  hard: { sims: 60000, rave: true, bridges: true, c: 0.2 },
 };
 
 // Jade's first stone when the computer opens: a3, on Agate's edge two cells from the
@@ -221,7 +222,7 @@ export function mcts(board0, n, turn0, opts, roots = null) {
 
 function budget(level, n) {
   const L = LEVELS[level] || LEVELS.normal;
-  return { ...L, sims: Math.max(100, Math.round(L.sims * 81 / (n * n))) };
+  return { ...L, sims: Math.max(100, Math.round(L.sims * Math.pow(81 / (n * n), 0.6))) };
 }
 
 // The move for the side to move. pos: { board (array or Int8Array), n, turn, swap }.

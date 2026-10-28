@@ -79,10 +79,11 @@
   .stone.won.s0 b { box-shadow: inset 0 calc(var(--sd) * -.07) calc(var(--sd) * .14) rgba(10, 40, 32, .35), 0 0 calc(var(--sd) * .55) calc(var(--sd) * .06) var(--gold-glow), 0 0 calc(var(--sd) * .9) calc(var(--sd) * .1) rgba(143, 211, 191, .22); }
   .stone.won.s1 b { box-shadow: inset 0 calc(var(--sd) * -.07) calc(var(--sd) * .14) rgba(50, 15, 8, .35), 0 0 calc(var(--sd) * .55) calc(var(--sd) * .06) var(--gold-glow), 0 0 calc(var(--sd) * .9) calc(var(--sd) * .1) rgba(236, 154, 130, .22); }
   .thread polyline { fill: none; stroke: var(--gold); stroke-linecap: round; stroke-linejoin: round; }
-  .thread .t1 { stroke-width: 3; opacity: .8; stroke-dasharray: var(--len); stroke-dashoffset: var(--len); animation: thread 1.6s .5s ease forwards; }
-  .thread .t2 { stroke-width: 14; opacity: 0; filter: url(#hxBlur2); animation: threadglow 1.2s 1.4s ease forwards; }
-  @keyframes thread { to { stroke-dashoffset: 0; } }
-  @keyframes threadglow { to { opacity: .28; } }
+  /* the drawn state is the default, so the thread still shows with reduced motion */
+  .thread .t1 { stroke-width: 3; opacity: .8; stroke-dasharray: var(--len); stroke-dashoffset: 0; animation: thread 1.6s .5s ease backwards; }
+  .thread .t2 { stroke-width: 14; opacity: .28; filter: url(#hxBlur2); animation: threadglow 1.2s 1.4s ease backwards; }
+  @keyframes thread { from { stroke-dashoffset: var(--len); } }
+  @keyframes threadglow { from { opacity: 0; } }
 
   /* hit areas: one hexagon each; a legal cell shows a ghost of the stone you would place */
   .hexcell { position: absolute; padding: 0; border: 0; background: transparent; cursor: default;
@@ -113,6 +114,12 @@
   .edge-key { display: inline-block; width: 1.1em; height: 2px; border-radius: 2px; vertical-align: middle; margin: 0 .3em .15em 0; }
   .edge-key.s0 { background: var(--mint); box-shadow: 0 0 6px var(--mint-glow); }
   .edge-key.s1 { background: var(--coral); box-shadow: 0 0 6px var(--coral-glow); }
+  /* the result: the board has no frame, so the veil fades out at its edges instead of ending in a box */
+  .board.hexboard .overlay {
+    background: radial-gradient(closest-side, rgba(8, 9, 12, .9) 0%, rgba(8, 9, 12, .8) 55%, rgba(8, 9, 12, 0) 100%);
+    backdrop-filter: none; -webkit-backdrop-filter: none;
+  }
+  .board.hexboard .overlay .ga-btn:not(.primary) { background: rgba(8, 9, 12, .72); }
   @media (max-width: 520px) {
     .coord { font-size: 34px; }
     .board.hexboard .overlay .big { font-size: clamp(2rem, 9vw, 2.6rem); }
