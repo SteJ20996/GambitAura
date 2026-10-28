@@ -10,7 +10,7 @@ Live address: www.gambitaura.com (gambitaura.com redirects there).
 
 ## Layout
 
-- `index.html`: series page. `assets/ga.css`: the shared "Aura Noir" theme. `favicon.svg`.
+- `index.html`: series page. `assets/ga.css`: the shared "Ling Mo" (靈墨) theme. `favicon.svg`.
 - `jielu/index.html`, `jielu/app.js`: the game page (zh-Hant / English, vs computer or two players on one device).
 - `jielu/engine.js`: the rules as pure functions, shared by the page, the Web Worker and the Node checks.
 - `jielu/ai.js`, `jielu/ai-worker.js`: the computer player (alpha-beta with a fixed node budget, so it is deterministic).
