@@ -1,6 +1,8 @@
 # GambitAura
 
 The owner's series of small two-player strategy games: open information, no dice, no timer.
+Chinese name **罡曜** (gāng yào, ㄍㄤ ㄧㄠˋ; chosen by the owner 2026-10-28): 罡 as in 罡氣, the
+protective aura of martial-arts fiction, and 曜, radiance; the two syllables echo Gam- and -Aura.
 Owner: Yizhen (Stephen) Jia (also runs stephenjia.com, Quidence and Qidolab; those live in other
 repos and are not part of this one). Working name before 2026-10-28: "NeoChess". Domain
 gambitaura.com (bought 2026-10-28; DNS and hosting not set up). This file is the repo's
@@ -45,7 +47,11 @@ Owner's brief: 霸氣, 科技感, Aura 感. Dark void #05070c with a faint grid,
 auras: mint #2ef2b5 (glow rgba(46,242,181,.45)) and coral #ff5f6d, gold accent #ffd166. Text #eef3fb
 / body #c3ccda / muted #8d98ab (all ≥ 4.5:1 on the void). Fonts: Unbounded (wordmark, display),
 Space Grotesk (UI), Noto Sans TC 900 (Chinese titles), JetBrains Mono (labels, coordinates).
-Brand mark: a gradient hexagon (mint → gold → coral) around a gold core with a dark chevron. Board:
+Brand mark: a gradient hexagon (mint → gold → coral) around a gold core with a dark chevron. The
+lockup stacks 罡曜 (Noto Sans TC 900, gradient) over GAMBITAURA (Unbounded, small, wide tracking) in
+every header, in both languages; the series hero sets 罡曜 large over GAMBITAURA with a reading line
+(罡曜 · gāng yào · ㄍㄤ ㄧㄠˋ) because 罡 is a rare character. Page titles read "… · 罡曜 GambitAura".
+Board:
 obsidian tiles with corner ticks, water as a drifting dark field with faint sockets, flags as
 rotating hex sigils, pieces as glowing orbs (mint ▲, coral ▼). The board's outer glow follows the
 side to move; the selected piece gets a spinning gold ring, the anchor of a tile move a steady one.
@@ -67,10 +73,8 @@ causing sideways scroll on phones.
 
 ## Open threads
 
-- Chinese name for GambitAura: candidates proposed 2026-10-28, owner to choose: 罡曜 gāng yào
-  (recommended: 罡 = 罡氣, a martial-arts aura; 曜 = radiance, used by tech brands), 鋼曜 (same sound,
-  easier character), 罡奧 gāng ào, 罡闢奧 gāng pì ào, 罡比特 gāng bǐ tè. Not yet checked against
-  trademarks or app stores. The UI shows only the English wordmark until a name is chosen.
 - v0.5 opening adoption and the matching mechanics-doc update (§2 table, §4/§5.1 examples, §5.3 and
   §7.2 wording, §11).
 - Hosting and gambitaura.com DNS (see README); play-testing with people.
+- 罡曜 has not been checked against trademarks (e.g. TIPO in Taiwan) or app stores yet. Other
+  candidates considered on 2026-10-28: 鋼曜, 罡奧, 罡闢奧, 罡比特.

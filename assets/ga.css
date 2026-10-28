@@ -68,9 +68,17 @@ button { font: inherit; color: inherit; }
 /* Header */
 .ga-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 4px 0 18px; }
 .ga-brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; }
-.ga-brand svg { width: 30px; height: 30px; flex: none; }
+.ga-brand svg { width: 34px; height: 34px; flex: none; }
+/* Lockup: 罡曜 over GAMBITAURA (Chinese name chosen by the owner, 2026-10-28). */
+.ga-lock { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 4px; line-height: 1; }
+.ga-zh {
+  font-family: var(--cjk); font-weight: 900; font-size: 1.32rem; letter-spacing: .12em; white-space: nowrap;
+  background: linear-gradient(95deg, var(--mint) 0%, var(--gold) 50%, var(--coral) 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 0 10px rgba(255, 209, 102, .3));
+}
 .ga-word {
-  font-family: var(--display); font-weight: 700; font-size: 1.02rem; letter-spacing: .14em;
+  font-family: var(--display); font-weight: 700; font-size: .58rem; letter-spacing: .32em;
   text-transform: uppercase; white-space: nowrap;
 }
 .ga-word b {
@@ -89,8 +97,9 @@ button { font: inherit; color: inherit; }
 .ga-chip { white-space: nowrap; }
 @media (max-width: 520px) {
   .ga-crumb { display: none; }
-  .ga-word { font-size: .9rem; letter-spacing: .1em; }
-  .ga-brand svg { width: 26px; height: 26px; }
+  .ga-zh { font-size: 1.18rem; }
+  .ga-word { font-size: .52rem; letter-spacing: .28em; }
+  .ga-brand svg { width: 28px; height: 28px; }
 }
 
 /* Surfaces */

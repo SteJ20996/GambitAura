@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<meta name="description" content="GambitAura：小棋盤、不靠運氣的雙人策略棋系列。第一款：借路 Jielu。" />
+<meta name="description" content="罡曜 GambitAura：小棋盤、不靠運氣的雙人策略棋系列。第一款：借路 Jielu。" />
 <meta name="theme-color" content="#05070c" />
-<title>GambitAura</title>
+<title>罡曜 GambitAura</title>
 <link rel="icon" href="favicon.svg" type="image/svg+xml" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -27,17 +27,25 @@
   @keyframes spin { to { transform: rotate(360deg); } }
   @media (max-width: 720px) { .aura { right: -30%; opacity: .35; } .hex { right: -30%; top: 34%; width: 58vw; opacity: .22; } }
   .kicker { margin-bottom: 14px; }
-  .word {
-    font-family: var(--display); font-weight: 800; text-transform: uppercase;
-    font-size: clamp(2.6rem, 10.5vw, 6.4rem); line-height: .92; letter-spacing: .02em;
-  }
-  .word span { display: block; }
-  .word .a { display: inline-block; }
-  .word .a {
+  .word { line-height: 1; }
+  .word .zh {
+    display: inline-block;
+    font-family: var(--cjk); font-weight: 900; font-size: clamp(4.4rem, 19vw, 9.6rem); letter-spacing: .06em;
     background: linear-gradient(95deg, var(--mint) 0%, var(--gold) 50%, var(--coral) 100%);
     -webkit-background-clip: text; background-clip: text; color: transparent;
-    filter: drop-shadow(0 0 22px rgba(255, 209, 102, .28));
+    filter: drop-shadow(0 0 26px rgba(255, 209, 102, .3));
   }
+  .word .en {
+    display: block; margin-top: 10px;
+    font-family: var(--display); font-weight: 800; text-transform: uppercase;
+    font-size: clamp(1.45rem, 5.4vw, 3.1rem); letter-spacing: .14em;
+  }
+  .word .en b {
+    font-weight: 800;
+    background: linear-gradient(95deg, var(--mint) 0%, var(--gold) 50%, var(--coral) 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .reading { font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: .8rem; letter-spacing: .12em; color: var(--muted); margin-top: 12px; }
   .tag { font-size: clamp(1.02rem, 2.4vw, 1.25rem); color: var(--body); max-width: 32rem; margin-top: 18px; }
   .cta { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 26px; }
 
@@ -66,9 +74,9 @@
 <body>
 <div class="wrap">
   <header class="ga-top">
-    <a class="ga-brand" href="./">
+    <a class="ga-brand" href="./" aria-label="罡曜 GambitAura">
       <svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="hx" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#2ef2b5"/><stop offset=".5" stop-color="#ffd166"/><stop offset="1" stop-color="#ff5f6d"/></linearGradient></defs><path d="M32 6 L56 20 V44 L32 58 L8 44 V20 Z" fill="none" stroke="url(#hx)" stroke-width="4" stroke-linejoin="round"/><circle cx="32" cy="32" r="10" fill="#ffd166"/><path d="M32 25 L38 35.5 H26 Z" fill="#070a11"/></svg>
-      <span class="ga-word">Gambit<b>Aura</b></span>
+      <span class="ga-lock" aria-hidden="true"><span class="ga-zh">罡曜</span><span class="ga-word">Gambit<b>Aura</b></span></span>
     </a>
     <div class="ga-langs" role="group" aria-label="Language">
       <button class="ga-chip" data-lang="zh" aria-pressed="true">中文</button>
@@ -86,7 +94,8 @@
       <path d="M100 84 L114 108 H86 Z" fill="#070a11"/>
     </svg>
     <div class="ga-label kicker" data-t="kicker">A strategy game series</div>
-    <h1 class="word"><span>Gambit</span><span class="a">Aura</span></h1>
+    <h1 class="word"><span class="zh">罡曜</span><span class="en">Gambit<b>Aura</b></span></h1>
+    <div class="reading" lang="zh-Hant">罡曜 · gāng yào · ㄍㄤ ㄧㄠˋ</div>
     <p class="tag" data-t="tag">Small boards for two players. No dice, nothing hidden. Every move is yours.</p>
     <div class="cta">
       <a class="ga-btn primary" href="jielu/" data-t="play">Play Jielu</a>

@@ -1,6 +1,7 @@
-# GambitAura
+# 罡曜 GambitAura
 
 A series of small two-player strategy games: open information, no dice, no timer.
+Chinese name 罡曜 (gāng yào): 罡 as in 罡氣, an aura of power; 曜, radiance.
 Domain: gambitaura.com (not yet pointed at this repo).
 
 | # | Game | Folder | State |
