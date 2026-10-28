@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="description" content="取石子 Nim：罡曜 GambitAura 的經典博弈。輪流拿石子，拿走最後一顆的人獲勝。" />
+<meta name="theme-color" content="#08090c" />
+<title>取石子 Nim · 罡曜 GambitAura</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Instrument+Sans:wght@400..700&family=Noto+Serif+TC:wght@500;700;900&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../assets/ga.css" />
+<link rel="stylesheet" href="../assets/game.css" />
+<style>
+  /* 取石子 only. Piles are rows of softly lit stones; the board is not square. */
+  .board.nim { aspect-ratio: auto; min-height: 380px; padding: 30px clamp(14px, 4vw, 30px) 26px; display: flex; flex-direction: column; justify-content: center; gap: 6px; }
+  .nim .mist-0 { background: radial-gradient(90% 40% at 50% 108%, rgba(143, 211, 191, .16), transparent 72%); }
+  .nim .mist-1 { background: radial-gradient(90% 40% at 50% -8%, rgba(236, 154, 130, .15), transparent 72%); }
+  .piles { position: relative; z-index: 2; display: flex; flex-direction: column; gap: 4px; }
+  .pile { display: grid; grid-template-columns: 22px 1fr auto auto; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px solid rgba(236, 230, 218, .05); }
+  .pile:last-child { border-bottom: 0; }
+  .pl { font-family: var(--display); font-style: italic; font-size: 1.05rem; color: var(--muted); text-align: right; }
+  .stones { display: grid; grid-template-columns: repeat(7, 1fr); gap: clamp(4px, 1.4vw, 10px); }
+  .slot { aspect-ratio: 1; border-radius: 50%; position: relative; border: 0; background: transparent; padding: 0; }
+  .slot::before { content: ''; position: absolute; inset: 14%; border-radius: 50%; background: rgba(4, 5, 7, .55); box-shadow: inset 0 2px 6px rgba(0, 0, 0, .7), inset 0 0 0 1px rgba(236, 230, 218, .04); }
+  .slot.stone::after {
+    content: ''; position: absolute; inset: 8%; border-radius: 50%;
+    background: radial-gradient(circle at 36% 28%, rgba(255, 255, 255, .55), rgba(255, 255, 255, 0) 30%), radial-gradient(circle at 50% 60%, #f7f0de 0%, #e2d2a8 45%, #a8915e 100%);
+    box-shadow: inset 0 -3px 6px rgba(70, 50, 20, .35), 0 8px 14px -6px rgba(0, 0, 0, .85), 0 0 18px -6px rgba(217, 195, 143, .55);
+    transition: transform .35s, opacity .35s, box-shadow .3s, filter .3s;
+  }
+  .slot.stone.act { cursor: pointer; }
+  .slot.stone.take::after { box-shadow: 0 0 0 1px var(--gold), 0 0 22px 2px var(--gold-glow); filter: brightness(1.12); transform: translateY(-6%); }
+  .slot.stone.hintk::before { inset: -2%; background: transparent; border: 1px solid var(--gold); box-shadow: 0 0 14px -2px var(--gold-glow); animation: hintPulse 2.4s ease-in-out infinite; }
+  @keyframes hintPulse { 50% { opacity: .45; } }
+  @media (prefers-reduced-motion: reduce) { .slot.stone.hintk::before { animation: none; } }
+  .slot.stone.gone::after { opacity: 0; transform: translateY(-40%) scale(.6); }
+  .cnt { font-family: var(--display); font-weight: 600; font-size: 1.5rem; min-width: 1.2em; text-align: right; font-variant-numeric: lining-nums; }
+  .bin { font-family: var(--mono); font-size: .86rem; letter-spacing: .32em; color: var(--gold); min-width: 4.4em; text-align: right; }
+  .pm { display: inline-flex; gap: 6px; }
+  .pm button { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--edge-hi); background: transparent; color: var(--ink); font-family: var(--display); font-size: 1.2rem; line-height: 1; cursor: pointer; }
+  .pm button:hover { border-color: var(--gold); color: var(--gold); }
+  .pm button:disabled { opacity: .3; cursor: default; }
+  .teach { position: relative; z-index: 2; display: grid; grid-template-columns: 22px 1fr auto auto; gap: 10px; align-items: center; margin-top: 8px; padding-top: 12px; border-top: 1px solid rgba(217, 195, 143, .35); }
+  .teach .lbl { grid-column: 2; font-size: .86rem; color: var(--body); }
+  .teach .lbl b { color: var(--gold); font-weight: 600; }
+  .bar { position: relative; z-index: 2; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px; margin-top: 16px; }
+  .bar .lbl { font-size: .88rem; color: var(--muted); margin-right: 4px; }
+  #status .sub { white-space: normal; }
+  @media (max-width: 560px) { .board.nim { min-height: 300px; padding-top: 22px; padding-bottom: 20px; } .pile { gap: 8px; } .pm button { width: 28px; height: 28px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="ga-top">
+    <a class="ga-brand" href="../" aria-label="罡曜 GambitAura">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><defs><radialGradient id="gaCore" cx=".5" cy=".45" r=".55"><stop offset="0" stop-color="#fffaf0"/><stop offset=".55" stop-color="#ecdcb4"/><stop offset="1" stop-color="#c9ad74"/></radialGradient><radialGradient id="gaHalo" cx=".5" cy=".5" r=".5"><stop offset=".3" stop-color="#d9c38f" stop-opacity=".28"/><stop offset="1" stop-color="#d9c38f" stop-opacity="0"/></radialGradient></defs><circle cx="32" cy="32" r="30" fill="url(#gaHalo)"/><circle cx="32" cy="32" r="22" fill="none" stroke="#d9c38f" stroke-width="1.4" opacity=".7"/><circle cx="32" cy="32" r="15" fill="none" stroke="#d9c38f" stroke-width="1" stroke-dasharray="1.5 3.5" opacity=".6"/><circle cx="32" cy="32" r="7" fill="url(#gaCore)"/></svg>
+      <span class="ga-lock" aria-hidden="true"><span class="ga-zh">罡曜</span><span class="ga-word">Gambit<b>Aura</b></span></span>
+      <span class="ga-crumb">· Classic</span>
+    </a>
+    <div class="ga-langs" role="group" aria-label="Language">
+      <button class="ga-chip" data-lang="zh" aria-pressed="true">中文</button>
+      <button class="ga-chip" data-lang="en" aria-pressed="false">EN</button>
+    </div>
+  </header>
+
+  <main class="game">
+    <section class="stage">
+      <div class="col title-row">
+        <div class="title"><h1>取石子</h1><span class="latin">Nim</span></div>
+        <span class="opening-tag" id="tag"></span>
+      </div>
+
+      <div class="col ga-card score" id="score">
+        <div class="side-box mint" id="sbMint"><span class="orb"></span><span class="who" id="whoMint"></span><span class="pts" id="ptsMint">0</span></div>
+        <div class="round" id="round"></div>
+        <div class="side-box coral" id="sbCoral"><span class="orb"></span><span class="who" id="whoCoral"></span><span class="pts" id="ptsCoral">0</span></div>
+      </div>
+
+      <div class="col">
+        <div class="board nim" id="board">
+          <div class="mist mist-0" aria-hidden="true"></div>
+          <div class="mist mist-1" aria-hidden="true"></div>
+          <div class="piles" id="piles"></div>
+          <div class="teach" id="teach" hidden></div>
+          <div class="bar" id="setupBar" hidden>
+            <span class="lbl" data-i18n="piles">Piles</span>
+            <span class="pm"><button id="pileMinus" aria-label="−">−</button><button id="pilePlus" aria-label="+">+</button></span>
+            <button class="ga-btn primary" id="setupDone" data-i18n="setupDone">Done</button>
+          </div>
+          <div class="bar" id="chooseBar" hidden>
+            <button class="ga-btn primary" id="goFirst" data-i18n="goFirst">Go first</button>
+            <button class="ga-btn" id="goSecond" data-i18n="goSecond">Go second</button>
+          </div>
+          <div class="overlay" id="overlay" aria-live="polite">
+            <div>
+              <div class="big" id="ovBig"></div>
+              <div class="small" id="ovSmall"></div>
+              <div class="btns">
+                <button class="ga-btn primary" id="ovNext"></button>
+                <button class="ga-btn" id="ovLook"></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col ga-card status" id="status" aria-live="polite">
+        <span class="msg" id="msg"></span>
+        <span class="ply" id="ply"></span>
+        <span class="sub" id="sub"></span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <div class="ga-card">
+        <span class="ga-label" data-i18n="setup">Setup</span>
+        <div class="row"><span data-i18n="mode">Mode</span>
+          <div class="ga-seg" id="modeSeg">
+            <button data-v="ai" data-i18n="modeAi">vs computer</button>
+            <button data-v="pvp" data-i18n="modePvp">Two players</button>
+          </div>
+        </div>
+        <div class="row" id="levelRow"><span data-i18n="level">Computer</span>
+          <div class="ga-seg" id="levelSeg">
+            <button data-v="easy" data-i18n="easy">Easy</button>
+            <button data-v="normal" data-i18n="normal">Normal</button>
+            <button data-v="hard" data-i18n="hard">Hard</button>
+          </div>
+        </div>
+        <div class="row"><span data-i18n="teachRow">Teaching view</span>
+          <div class="ga-seg" id="teachSeg">
+            <button data-v="on" data-i18n="on">On</button>
+            <button data-v="off" data-i18n="off">Off</button>
+          </div>
+        </div>
+        <p class="note" id="note"></p>
+        <div class="btns">
+          <button class="ga-btn" id="restartBtn" data-i18n="restart">Restart</button>
+          <button class="ga-btn primary" id="nextBtn" data-i18n="next" hidden>Next game</button>
+        </div>
+      </div>
+
+      <div class="ga-card">
+        <span class="ga-label" data-i18n="moves">Moves</span>
+        <ol class="log" id="log"></ol>
+        <p class="empty" id="logEmpty" data-i18n="noMoves">No moves yet.</p>
+      </div>
+
+      <div class="ga-card">
+        <details class="rules" id="rules">
+          <summary data-i18n="rulesTitle">How to play</summary>
+          <div id="rulesBody"></div>
+        </details>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="ga-foot">
+    <span data-i18n="footer1">No dice, no timer, nothing hidden.</span>
+    <a href="../" data-i18n="footer2">All games</a>
+  </footer>
+</div>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>

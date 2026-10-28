@@ -4,19 +4,34 @@ A series of small two-player strategy games: open information, no dice, no timer
 Chinese name 罡曜 (gāng yào): 罡 as in 罡氣, an aura of power; 曜, radiance.
 Live address: www.gambitaura.com (gambitaura.com redirects there).
 
-| # | Game | Folder | State |
-|---|------|--------|-------|
-| 01 | 借路 Jielu | `jielu/` | Playable demo; rules v0.4, proposed v0.5 opening as the default |
+The homepage is a game hub with two shelves. **Originals** are games designed here; their
+openings are solved by computer before they go live. **Classics** are well-known games; each
+uses an accepted balancing rule and its page says plainly how fair it is.
+
+| Shelf | Game | Folder | Fairness, as the page states it |
+|-------|------|--------|---------------------------------|
+| Original 01 | 借路 Jielu | `jielu/` | Solved: the default v0.5 opening is a draw with perfect play (v0.4 selectable) |
+| Classic | 六角連線 Hex | `hex/` | No draws, so the first player has a forced win; the swap rule takes that edge away |
+| Classic | 黑白棋 Reversi | `reversi/` | 8 × 8 was weakly solved in 2023 (Takizawa): a draw with perfect play |
+| Classic | 五子棋 Gomoku | `gomoku/` | Free-style is a first-player win (Allis 1994); the Swap2 opening splits the choice |
+| Classic | 取石子 Nim | `nim/` | Every position is solved (Bouton 1901); fairness comes from the format: one sets up, the other picks the order, roles swap |
 
 ## Layout
 
-- `index.html`: series page. `assets/ga.css`: the shared "Ling Mo" (靈墨) theme. `favicon.svg`.
+- `index.html`: the game hub. `assets/ga.css`: the shared "Ling Mo" (靈墨) theme. `favicon.svg`.
+- `assets/game.css`: the shared game page (scoreboard, board frame, mist, result overlay, status,
+  side panel, move list). `assets/shell.js`: the shared page helpers (language, settings store,
+  scoreboard, status, move list, overlay, and `AIClient`, which runs a computer player in a module
+  Web Worker). The classics use both; 借路 uses `game.css` and keeps its own page logic.
+- Each classic folder has `engine.js` (rules as pure functions), `ai.js` (deterministic computer
+  player), `index.html` and `app.js`; Reversi, Hex and Gomoku run their AI in `ai-worker.js`.
 - `jielu/index.html`, `jielu/app.js`: the game page (zh-Hant / English, vs computer or two players on one device).
 - `jielu/engine.js`: the rules as pure functions, shared by the page, the Web Worker and the Node checks.
 - `jielu/ai.js`, `jielu/ai-worker.js`: the computer player (alpha-beta with a fixed node budget, so it is deterministic).
 - `jielu/docs/mechanics-v0.4.md`: the mechanics document as supplied.
 - `jielu/analysis/`: the rules review (`index.html`) and the solver behind it (`solver.c` plus Node cross-checks).
-- `tests/e2e.cjs`: browser test of all three pages (Playwright).
+- `tests/e2e.cjs`: browser test of the hub, 借路 and its fairness page. `tests/hex.cjs`,
+  `tests/reversi.cjs`, `tests/gomoku.cjs`, `tests/nim.cjs`: one browser test per classic.
 
 No build step: every page is static HTML, CSS and ES modules.
 
@@ -26,6 +41,7 @@ No build step: every page is static HTML, CSS and ES modules.
 npx http-server -p 8765 -c-1 .
 open http://127.0.0.1:8765/
 node tests/e2e.cjs          # with the server running; screenshots land in tests/out/
+for t in hex reversi gomoku nim; do node tests/$t.cjs; done
 ```
 
 ## Key result

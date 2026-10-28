@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="description" content="黑白棋 Reversi：罡曜 GambitAura 的經典棋。夾住對手的棋子，把它們翻成你的顏色。" />
+<meta name="theme-color" content="#08090c" />
+<title>黑白棋 Reversi · 罡曜 GambitAura</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Instrument+Sans:wght@400..700&family=Noto+Serif+TC:wght@500;700;900&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../assets/ga.css" />
+<link rel="stylesheet" href="../assets/game.css" />
+<style>
+  /* 黑白棋 only. Discs are obsidian and pearl; the players' turn shows as a pale mist. */
+  .board.rv { --aura: rgba(236, 230, 218, .2); }
+  .board.rv.turn-1 { --aura: rgba(236, 230, 218, .2); }
+  .rv .mist-0 { background: radial-gradient(90% 46% at 50% 108%, rgba(236, 230, 218, .11), transparent 72%); }
+  .rv .mist-1 { background: radial-gradient(90% 46% at 50% -8%, rgba(236, 230, 218, .11), transparent 72%); }
+  .rv .lines { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; }
+  #marks { z-index: 5; } #discs { z-index: 4; } #cells { z-index: 6; }
+  /* a board full of pearl discs needs a darker veil for the result to read */
+  .rv .overlay { background: radial-gradient(circle at 50% 50%, rgba(8, 9, 12, .78), rgba(8, 9, 12, .9)); }
+  .cell-floor { position: absolute; inset: 0; z-index: 1; }
+
+  .disc { pointer-events: none; perspective: 600px; }
+  .disc .flip { position: absolute; inset: 11%; transform-style: preserve-3d; transition: transform .55s cubic-bezier(.3, .7, .2, 1); }
+  .disc.white .flip { transform: rotateY(180deg); }
+  .disc.new .flip { animation: drop .45s cubic-bezier(.2, .8, .2, 1); }
+  @keyframes drop { from { transform: scale(.6) translateY(-6%); opacity: 0; } }
+  .disc .f { position: absolute; inset: 0; border-radius: 50%; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+  .disc .f::after { content: ''; position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle at 34% 26%, rgba(255, 255, 255, .42), rgba(255, 255, 255, 0) 30%); }
+  .disc .k {
+    background: radial-gradient(circle at 50% 62%, #30333b 0%, #1a1c21 52%, #0b0c0f 100%);
+    box-shadow: inset 0 -4px 8px rgba(0, 0, 0, .6), inset 0 1px 1px rgba(255, 255, 255, .18), 0 10px 16px -8px rgba(0, 0, 0, .9);
+  }
+  .disc .k::after { background: radial-gradient(circle at 34% 26%, rgba(255, 255, 255, .22), rgba(255, 255, 255, 0) 32%); }
+  .disc .w {
+    transform: rotateY(180deg);
+    background: radial-gradient(circle at 50% 60%, #fffcf4 0%, #ece4d2 48%, #bfb39a 100%);
+    box-shadow: inset 0 -4px 8px rgba(80, 60, 30, .3), inset 0 1px 1px rgba(255, 255, 255, .6), 0 10px 16px -8px rgba(0, 0, 0, .85), 0 0 18px -6px rgba(236, 230, 218, .5);
+  }
+  .mark.legal::before { content: ''; position: absolute; width: 14%; height: 14%; border-radius: 50%; background: rgba(217, 195, 143, .6); box-shadow: 0 0 10px rgba(217, 195, 143, .45); }
+  .mark.last::after { content: ''; position: absolute; width: 18%; height: 18%; border-radius: 50%; border: 1px solid var(--gold); box-shadow: 0 0 10px var(--gold-glow); }
+
+  /* scoreboard, status and log dots show the colour each player holds */
+  .orb.black { background: #1a1c21 !important; box-shadow: 0 0 0 1px rgba(236, 230, 218, .45) !important; }
+  .orb.white { background: #ece6da !important; box-shadow: 0 0 10px rgba(236, 230, 218, .45) !important; }
+  .rv-page .side-box.on.mint, .rv-page .side-box.on.coral { border-bottom-color: rgba(236, 230, 218, .6); box-shadow: 0 10px 18px -14px rgba(236, 230, 218, .5); }
+  .rv-page .status.s0::before, .rv-page ol.log .d.mint { background: #1a1c21; box-shadow: 0 0 0 1px rgba(236, 230, 218, .5); }
+  .rv-page .status.s1::before, .rv-page ol.log .d.coral { background: #ece6da; box-shadow: 0 0 10px rgba(236, 230, 218, .5); }
+</style>
+</head>
+<body class="rv-page">
+<div class="wrap">
+  <header class="ga-top">
+    <a class="ga-brand" href="../" aria-label="罡曜 GambitAura">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><defs><radialGradient id="gaCore" cx=".5" cy=".45" r=".55"><stop offset="0" stop-color="#fffaf0"/><stop offset=".55" stop-color="#ecdcb4"/><stop offset="1" stop-color="#c9ad74"/></radialGradient><radialGradient id="gaHalo" cx=".5" cy=".5" r=".5"><stop offset=".3" stop-color="#d9c38f" stop-opacity=".28"/><stop offset="1" stop-color="#d9c38f" stop-opacity="0"/></radialGradient></defs><circle cx="32" cy="32" r="30" fill="url(#gaHalo)"/><circle cx="32" cy="32" r="22" fill="none" stroke="#d9c38f" stroke-width="1.4" opacity=".7"/><circle cx="32" cy="32" r="15" fill="none" stroke="#d9c38f" stroke-width="1" stroke-dasharray="1.5 3.5" opacity=".6"/><circle cx="32" cy="32" r="7" fill="url(#gaCore)"/></svg>
+      <span class="ga-lock" aria-hidden="true"><span class="ga-zh">罡曜</span><span class="ga-word">Gambit<b>Aura</b></span></span>
+      <span class="ga-crumb">· Classic</span>
+    </a>
+    <div class="ga-langs" role="group" aria-label="Language">
+      <button class="ga-chip" data-lang="zh" aria-pressed="true">中文</button>
+      <button class="ga-chip" data-lang="en" aria-pressed="false">EN</button>
+    </div>
+  </header>
+
+  <main class="game">
+    <section class="stage">
+      <div class="col title-row">
+        <div class="title"><h1>黑白棋</h1><span class="latin">Reversi</span></div>
+        <span class="opening-tag">8 × 8</span>
+      </div>
+
+      <div class="col ga-card score" id="score">
+        <div class="side-box mint" id="sbMint"><span class="orb"></span><span class="who" id="whoMint"></span><span class="pts" id="ptsMint">0</span></div>
+        <div class="round" id="round"></div>
+        <div class="side-box coral" id="sbCoral"><span class="orb"></span><span class="who" id="whoCoral"></span><span class="pts" id="ptsCoral">0</span></div>
+      </div>
+
+      <div class="col boardframe" style="--n: 8">
+        <div class="files" aria-hidden="true"><span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span></div>
+        <div class="ranks" aria-hidden="true"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span></div>
+        <div class="board rv" id="board">
+          <svg class="lines" viewBox="0 0 8 8" preserveAspectRatio="none" aria-hidden="true">
+            <g stroke="rgba(236,230,218,.075)" stroke-width=".018">
+              <path d="M1 0V8M2 0V8M3 0V8M4 0V8M5 0V8M6 0V8M7 0V8M0 1H8M0 2H8M0 3H8M0 4H8M0 5H8M0 6H8M0 7H8"/>
+            </g>
+            <g fill="rgba(217,195,143,.55)"><circle cx="2" cy="2" r=".055"/><circle cx="6" cy="2" r=".055"/><circle cx="2" cy="6" r=".055"/><circle cx="6" cy="6" r=".055"/></g>
+          </svg>
+          <div class="mist mist-0" aria-hidden="true"></div>
+          <div class="mist mist-1" aria-hidden="true"></div>
+          <div class="layer" id="discs" aria-hidden="true"></div>
+          <div class="layer" id="marks" aria-hidden="true"></div>
+          <div class="layer" id="cells" role="grid" aria-label="board"></div>
+          <div class="overlay" id="overlay" aria-live="polite">
+            <div>
+              <div class="big" id="ovBig"></div>
+              <div class="small" id="ovSmall"></div>
+              <div class="btns">
+                <button class="ga-btn primary" id="ovNext"></button>
+                <button class="ga-btn" id="ovLook"></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col ga-card status" id="status" aria-live="polite">
+        <span class="msg" id="msg"></span>
+        <span class="ply" id="ply"></span>
+        <span class="sub" id="sub"></span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <div class="ga-card">
+        <span class="ga-label" data-i18n="setup">Setup</span>
+        <div class="row"><span data-i18n="mode">Mode</span>
+          <div class="ga-seg" id="modeSeg">
+            <button data-v="ai" data-i18n="modeAi">vs computer</button>
+            <button data-v="pvp" data-i18n="modePvp">Two players</button>
+          </div>
+        </div>
+        <div class="row" id="levelRow"><span data-i18n="level">Computer</span>
+          <div class="ga-seg" id="levelSeg">
+            <button data-v="easy" data-i18n="easy">Easy</button>
+            <button data-v="normal" data-i18n="normal">Normal</button>
+            <button data-v="hard" data-i18n="hard">Hard</button>
+          </div>
+        </div>
+        <div class="row"><span data-i18n="hints">Hints</span>
+          <div class="ga-seg" id="hintSeg">
+            <button data-v="on" data-i18n="on">On</button>
+            <button data-v="off" data-i18n="off">Off</button>
+          </div>
+        </div>
+        <p class="note" id="note"></p>
+        <div class="btns">
+          <button class="ga-btn" id="restartBtn" data-i18n="restart">Restart</button>
+          <button class="ga-btn primary" id="nextBtn" data-i18n="next" hidden>Next game</button>
+        </div>
+      </div>
+
+      <div class="ga-card">
+        <span class="ga-label" data-i18n="moves">Moves</span>
+        <ol class="log" id="log"></ol>
+        <p class="empty" id="logEmpty" data-i18n="noMoves">No moves yet.</p>
+      </div>
+
+      <div class="ga-card">
+        <details class="rules" id="rules">
+          <summary data-i18n="rulesTitle">How to play</summary>
+          <div id="rulesBody"></div>
+        </details>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="ga-foot">
+    <span data-i18n="footer1">No dice, no timer, nothing hidden.</span>
+    <a href="../" data-i18n="footer2">All games</a>
+  </footer>
+</div>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>

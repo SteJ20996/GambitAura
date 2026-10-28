@@ -19,6 +19,11 @@ const cell = (n) => (n.charCodeAt(1) - 49) * 5 + (n.charCodeAt(0) - 65);
   await page.waitForTimeout(400);
   await page.screenshot({ path: OUT + '/landing-desktop.png', fullPage: true });
   ok(await page.locator('a[href="jielu/"]').count() >= 1, 'landing play link');
+  for (const g of ['hex/', 'reversi/', 'gomoku/', 'nim/']) {
+    ok(await page.locator(`a.classic[href="${g}"]`).count() === 1, 'hub card for ' + g);
+    const r = await page.request.get(BASE + g);
+    ok(r.ok(), g + ' page is served');
+  }
 
   // game, vs computer, v0.5
   await page.goto(BASE + 'jielu/');

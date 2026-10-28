@@ -42,6 +42,37 @@ deterministic. `app.js` is the UI: a piece first means a step, a tile first mean
 v0.4 the same square can be both a step target and a liftable tile). The C solver and the JS engine
 must agree on `perft` and on `replay.mjs`; run both after touching move rules.
 
+## The hub and the classics (gambitaura#5, 2026-10-28)
+
+Owner, 2026-10-28: put several board and strategy games on one site, the homepage as a game hub
+with each game at its own address; the four classics Hex, Reversi, Gomoku and Nim, "然後主要是我們
+自己構思創作平衡的棋類" (the main line stays our own originally designed, balanced games). So the
+hub has two shelves: **原創 Originals** (借路, then a Game 02 slot "in the works") above **經典
+Classics** (four cards with mini boards drawn in the site's style).
+
+Fairness copy must stay honest. A game with no draws always has a forced winner under perfect
+play, so "solved so that neither side has a forced win" is only true of the originals we solve.
+The hub's principle III is "公平，說清楚 / Fairness, stated plainly": originals have their openings
+solved; classics use an accepted balancing rule and each page says how fair it really is:
+- 六角連線 Hex (`hex/`, boards 7 · 9 · 11, Jade joins top and bottom, Agate left and right): no
+  draws, first player wins in theory (Nash's strategy-stealing argument); the swap rule.
+- 黑白棋 Reversi (`reversi/`, 8 × 8): weakly solved as a draw (Takizawa, 2023). Black alternates
+  between the two players each game.
+- 五子棋 Gomoku (`gomoku/`, 15 × 15): free-style is a first-player win (Allis, 1994); Swap2 opening.
+- 取石子 Nim (`nim/`, 3 to 5 piles of 1 to 7): every position is solved (Bouton, 1901), so fairness
+  lives in the format: one player sets up the piles, the other looks and picks first or second,
+  roles swap every game. A perfect chooser wins any single game; the match is what is fair. The
+  hard computer sets traps (nim-sum 0) and always reads the position right; the teaching view
+  shows each pile in binary, the nim-sum and one winning move.
+
+**Code.** `assets/game.css` holds the shared game page (extracted from 借路; `.boardframe` and `.at`
+take `--n` cells per side). `assets/shell.js` holds the shared helpers and `AIClient` (module Web
+Worker, replies no sooner than 520 ms, stale replies dropped). Every computer player is
+deterministic (no `Math.random`): Reversi is alpha-beta with a node budget plus an exact endgame
+(perft matches the published 4 12 56 244 1396 8200 55092 390216); Nim is exact nim-sum play with
+weaker levels by design. 借路 keeps its own `app.js` logic. The language key `ga-jielu-lang` is
+shared by every page; other settings use `ga-<game>-<key>`.
+
 ## Design system: "Ling Mo" 靈墨 (`assets/ga.css`, 2026-10-28)
 
 Owner's brief: 霸氣, 科技感, Aura 感 (gambitaura#2 answered it with "Aura Noir": neon gradients,
@@ -79,8 +110,9 @@ of boxes. Do not bring back rainbow gradients, gradient buttons, glossy orbs or 
 - Copy rules (the owner's, shared with their other sites): plain language for a general reader, no
   em dashes in site copy, short sentences. zh-Hant and English for every string.
 - Test every UI change in headless Chromium: start a static server and run `node tests/e2e.cjs`
-  (31 checks: moves, tile moves, draw dialog and overlay, scoreboard, language, phone widths, no
-  console errors). Look at the screenshots in `tests/out/`.
+  (39 checks: the hub's game cards, 借路 moves, tile moves, draw dialog and overlay, scoreboard,
+  language, phone widths, no console errors) and the test of any classic you touched
+  (`tests/<game>.cjs`). Look at the screenshots in `tests/out/`.
 - Owner merges PRs; work on feature branches. Work references are `gambitaura#n` (continuing from
   the portfolio repo), used as the PR title prefix `[gambitaura#n]`.
 - Commit messages explain the reasoning (design or rules rationale), not just the diff.
@@ -94,5 +126,7 @@ of boxes. Do not bring back rainbow gradients, gradient buttons, glossy orbs or 
   tick "Enforce HTTPS". Do not add Cloudflare redirect rules or turn on the proxy (README explains
   why). Cloud sessions cannot reach gambitaura.com, docs.github.com or developers.cloudflare.com
   unless the environment allows them. Play-testing with people still to do.
+- Game 02 (an original) is the main line now: concepts to be proposed, then solved like 借路 before
+  it ships.
 - 罡曜 has not been checked against trademarks (e.g. TIPO in Taiwan) or app stores yet. Other
   candidates considered on 2026-10-28: 鋼曜, 罡奧, 罡闢奧, 罡比特.
