@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="description" content="六角連線 Hex：罡曜 GambitAura 的經典棋。輪流放子，青玉連起上下兩邊，瑪瑙連起左右兩邊。附交換規則。" />
+<meta name="theme-color" content="#08090c" />
+<title>六角連線 Hex · 罡曜 GambitAura</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Instrument+Sans:wght@400..700&family=Noto+Serif+TC:wght@500;700;900&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../assets/ga.css" />
+<link rel="stylesheet" href="../assets/game.css" />
+<style>
+  /* 六角連線 only: the rhombus of hexagons, its coloured edges, jade and agate stones.
+     Shared parts: ../assets/game.css. Board geometry comes from app.js: one SVG unit
+     system (--W × --H) for the board art, the stones and the hexagonal hit areas. */
+  .board.hexboard {
+    aspect-ratio: var(--W) / var(--H);
+    background: none; box-shadow: none; border-radius: 0; overflow: visible;
+    container-type: inline-size;
+    --u: calc(100cqw / var(--W));          /* one board unit in px */
+    --sd: calc(var(--u) * var(--D));       /* stone diameter in px */
+  }
+  .board.hexboard::before { display: none; }
+  .hexsvg, .thread { position: absolute; inset: 0; width: 100%; height: 100%; display: block; overflow: visible; }
+  .hexsvg { z-index: 0; }
+  #stones { z-index: 3; pointer-events: none; }
+  .thread { z-index: 4; pointer-events: none; }
+  #cells { z-index: 6; }
+
+  /* the pool: a dark basin under the stones, with light moving slowly under the surface */
+  .pool { fill: url(#hxPool); stroke: #0b0c10; stroke-width: 18; stroke-linejoin: round; }
+  .aura { fill: var(--side); opacity: .16; transition: fill 1.2s ease, opacity 1.2s ease; }
+  .board.over .aura { fill: var(--gold); opacity: .14; }
+  .drift { animation: hxdrift 28s ease-in-out infinite alternate; transform-box: view-box; }
+  .drift.b { animation-duration: 36s; animation-direction: alternate-reverse; }
+  @keyframes hxdrift { to { transform: translate(56px, -34px); } }
+
+  /* each side's two edges: a fine rim in its own colour, brighter while it is to move */
+  .rim { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  .rim.line { stroke-width: 6; opacity: .5; transition: opacity 1.2s ease; }
+  .rim.glow { stroke-width: 26; opacity: .06; filter: url(#hxBlur); transition: opacity 1.2s ease; }
+  .rim.s0 { stroke: var(--mint); }
+  .rim.s1 { stroke: var(--coral); }
+  .rim.neutral { stroke: rgba(236, 230, 218, .18); }
+  .board.turn-0:not(.over) .rim.s0.line, .board.turn-1:not(.over) .rim.s1.line { opacity: .82; }
+  .board.turn-0:not(.over) .rim.s0.glow, .board.turn-1:not(.over) .rim.s1.glow { opacity: .3; }
+
+  /* cells: matte carved stone with a hairline edge and a faint top light */
+  .cell { fill: url(#hxStone); stroke: rgba(236, 230, 218, .075); stroke-width: 1.3; transition: fill .3s; }
+  .bevel { fill: none; stroke: rgba(255, 255, 255, .05); stroke-width: 1.6; stroke-linecap: round; }
+  .coord { font-family: var(--display); font-style: italic; font-weight: 500; font-size: 25px; fill: var(--muted); text-anchor: middle; dominant-baseline: central; }
+
+  /* stones: jade and agate lit from inside (as the 借路 pieces), sized from the board unit */
+  .stone { position: absolute; width: calc(var(--D) / var(--W) * 100%); aspect-ratio: 1;
+    left: calc(var(--x) / var(--W) * 100%); top: calc(var(--y) / var(--H) * 100%); transform: translate(-50%, -50%); }
+  .stone b { position: absolute; inset: 0; border-radius: 50%; transition: filter .8s ease, box-shadow .8s ease; animation: drop .5s cubic-bezier(.2, .7, .2, 1) both; }
+  .stone b::before { content: ''; position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle at 34% 26%, rgba(255, 255, 255, .55), rgba(255, 255, 255, 0) 30%); }
+  .stone.s0 b {
+    background: radial-gradient(circle at 50% 60%, #d4f1e7 0%, #9bd9c5 30%, #5fae98 68%, #2f6a5b 100%);
+    box-shadow: inset 0 calc(var(--sd) * -.07) calc(var(--sd) * .14) rgba(10, 40, 32, .45), inset 0 calc(var(--sd) * .03) calc(var(--sd) * .03) rgba(255, 255, 255, .3),
+      0 calc(var(--sd) * .15) calc(var(--sd) * .25) calc(var(--sd) * -.1) rgba(0, 0, 0, .85), 0 0 calc(var(--sd) * .36) calc(var(--sd) * -.08) var(--mint-glow);
+  }
+  .stone.s1 b {
+    background: radial-gradient(circle at 50% 60%, #f8dbd0 0%, #efab95 30%, #c46d55 68%, #79382a 100%);
+    box-shadow: inset 0 calc(var(--sd) * -.07) calc(var(--sd) * .14) rgba(50, 15, 8, .45), inset 0 calc(var(--sd) * .03) calc(var(--sd) * .03) rgba(255, 255, 255, .3),
+      0 calc(var(--sd) * .15) calc(var(--sd) * .25) calc(var(--sd) * -.1) rgba(0, 0, 0, .85), 0 0 calc(var(--sd) * .36) calc(var(--sd) * -.08) var(--coral-glow);
+  }
+  @keyframes drop { from { transform: scale(.55); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .stone.gone b { animation: fade .45s ease forwards; }
+  @keyframes fade { to { transform: scale(.7); opacity: 0; } }
+  /* the last move: a thin champagne ring */
+  .stone.last::after { content: ''; position: absolute; inset: -11%; border-radius: 50%; border: 1px solid rgba(217, 195, 143, .85); box-shadow: 0 0 calc(var(--sd) * .3) var(--gold-glow); animation: drop .5s ease both; }
+  /* the end: the winning chain glows, every other stone sinks back */
+  .board.over .stone:not(.won) b { filter: brightness(.5) saturate(.55); }
+  .stone.won b { filter: brightness(1.12); }
+  .stone.won.s0 b { box-shadow: inset 0 calc(var(--sd) * -.07) calc(var(--sd) * .14) rgba(10, 40, 32, .35), 0 0 calc(var(--sd) * .55) calc(var(--sd) * .06) var(--gold-glow), 0 0 calc(var(--sd) * .9) calc(var(--sd) * .1) rgba(143, 211, 191, .22); }
+  .stone.won.s1 b { box-shadow: inset 0 calc(var(--sd) * -.07) calc(var(--sd) * .14) rgba(50, 15, 8, .35), 0 0 calc(var(--sd) * .55) calc(var(--sd) * .06) var(--gold-glow), 0 0 calc(var(--sd) * .9) calc(var(--sd) * .1) rgba(236, 154, 130, .22); }
+  .thread polyline { fill: none; stroke: var(--gold); stroke-linecap: round; stroke-linejoin: round; }
+  .thread .t1 { stroke-width: 3; opacity: .8; stroke-dasharray: var(--len); stroke-dashoffset: var(--len); animation: thread 1.6s .5s ease forwards; }
+  .thread .t2 { stroke-width: 14; opacity: 0; filter: url(#hxBlur2); animation: threadglow 1.2s 1.4s ease forwards; }
+  @keyframes thread { to { stroke-dashoffset: 0; } }
+  @keyframes threadglow { to { opacity: .28; } }
+
+  /* hit areas: one hexagon each; a legal cell shows a ghost of the stone you would place */
+  .hexcell { position: absolute; padding: 0; border: 0; background: transparent; cursor: default;
+    width: calc(var(--cw) / var(--W) * 100%); height: calc(var(--ch) / var(--H) * 100%);
+    left: calc(var(--x) / var(--W) * 100%); top: calc(var(--y) / var(--H) * 100%); transform: translate(-50%, -50%);
+    clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%); -webkit-tap-highlight-color: transparent; }
+  .hexcell:focus-visible { outline: none; }
+  .hexcell.act { cursor: pointer; }
+  .hexcell::before, .hexcell::after { content: ''; position: absolute; left: 50%; top: 50%; width: 76%; aspect-ratio: 1; border-radius: 50%; transform: translate(-50%, -50%); opacity: 0; transition: opacity .25s; pointer-events: none; }
+  .hexcell::before { background: radial-gradient(circle at 50% 60%, var(--side), transparent 75%); }
+  .hexcell::after { width: 82%; border: 1px solid var(--focus); }
+  @media (hover: hover) { .hexcell.act:hover::before { opacity: .22; } }
+  .hexcell.act:focus-visible::before { opacity: .22; }
+  .hexcell:focus-visible::after { opacity: .9; }
+  .hexcell.peek::after { opacity: .75; border-style: dashed; border-color: var(--coral); }
+
+  /* the rhombus is wide and short, so this page lets its column run a little wider */
+  .stage .col { max-width: 680px; }
+  .opening-tag { font-variant-numeric: lining-nums; }
+  /* the scoreboard follows the player, so its dot and underline take the colour held this game */
+  .side-box .orb.mint { background: var(--mint); box-shadow: 0 0 10px var(--mint-glow); }
+  .side-box .orb.coral { background: var(--coral); box-shadow: 0 0 10px var(--coral-glow); }
+  .side-box.on.hold-mint { border-bottom-color: rgba(143, 211, 191, .7); box-shadow: 0 10px 18px -14px var(--mint-glow); }
+  .side-box.on.hold-coral { border-bottom-color: rgba(236, 154, 130, .7); box-shadow: 0 10px 18px -14px var(--coral-glow); }
+  .ga-btn.pass:hover { background: rgba(217, 195, 143, .08); }
+  details.rules p { margin-top: 14px; font-size: .88rem; color: var(--body); line-height: 1.7; }
+  details.rules p b { color: var(--ink); font-weight: 600; }
+  .edge-key { display: inline-block; width: 1.1em; height: 2px; border-radius: 2px; vertical-align: middle; margin: 0 .3em .15em 0; }
+  .edge-key.s0 { background: var(--mint); box-shadow: 0 0 6px var(--mint-glow); }
+  .edge-key.s1 { background: var(--coral); box-shadow: 0 0 6px var(--coral-glow); }
+  @media (max-width: 520px) {
+    .coord { font-size: 34px; }
+    .board.hexboard .overlay .big { font-size: clamp(2rem, 9vw, 2.6rem); }
+    .board.hexboard .overlay .small { margin: 6px 0 14px; }
+    .board.hexboard .overlay .ga-btn { padding: 8px 16px; font-size: .84rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="ga-top">
+    <a class="ga-brand" href="../" aria-label="罡曜 GambitAura">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><defs><radialGradient id="gaCore" cx=".5" cy=".45" r=".55"><stop offset="0" stop-color="#fffaf0"/><stop offset=".55" stop-color="#ecdcb4"/><stop offset="1" stop-color="#c9ad74"/></radialGradient><radialGradient id="gaHalo" cx=".5" cy=".5" r=".5"><stop offset=".3" stop-color="#d9c38f" stop-opacity=".28"/><stop offset="1" stop-color="#d9c38f" stop-opacity="0"/></radialGradient></defs><circle cx="32" cy="32" r="30" fill="url(#gaHalo)"/><circle cx="32" cy="32" r="22" fill="none" stroke="#d9c38f" stroke-width="1.4" opacity=".7"/><circle cx="32" cy="32" r="15" fill="none" stroke="#d9c38f" stroke-width="1" stroke-dasharray="1.5 3.5" opacity=".6"/><circle cx="32" cy="32" r="7" fill="url(#gaCore)"/></svg>
+      <span class="ga-lock" aria-hidden="true"><span class="ga-zh">罡曜</span><span class="ga-word">Gambit<b>Aura</b></span></span>
+      <span class="ga-crumb">· Classic</span>
+    </a>
+    <div class="ga-langs" role="group" aria-label="Language">
+      <button class="ga-chip" data-lang="zh" aria-pressed="true">中文</button>
+      <button class="ga-chip" data-lang="en" aria-pressed="false">EN</button>
+    </div>
+  </header>
+
+  <main class="game">
+    <section class="stage">
+      <div class="col title-row">
+        <div class="title"><h1>六角連線</h1><span class="latin">Hex</span></div>
+        <span class="opening-tag" id="ver"></span>
+      </div>
+
+      <div class="col ga-card score" id="score">
+        <div class="side-box mint" id="sbMint"><span class="orb"></span><span class="who" id="whoMint"></span><span class="pts" id="ptsMint">0</span></div>
+        <div class="round" id="round"></div>
+        <div class="side-box coral" id="sbCoral"><span class="orb"></span><span class="who" id="whoCoral"></span><span class="pts" id="ptsCoral">0</span></div>
+      </div>
+
+      <div class="col">
+        <div class="board hexboard" id="board">
+          <svg class="hexsvg" id="art" aria-hidden="true"></svg>
+          <div class="layer" id="stones" aria-hidden="true"></div>
+          <svg class="thread" id="thread" aria-hidden="true"></svg>
+          <div class="layer" id="cells" role="grid" aria-label="board"></div>
+          <div class="overlay" id="overlay" aria-live="polite">
+            <div>
+              <div class="big" id="ovBig"></div>
+              <div class="small" id="ovSmall"></div>
+              <div class="btns">
+                <button class="ga-btn primary" id="ovNext"></button>
+                <button class="ga-btn" id="ovLook"></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col ga-card status" id="status" aria-live="polite">
+        <span class="msg" id="msg"></span>
+        <span class="ply" id="ply"></span>
+        <button class="ga-btn pass" id="passBtn" hidden></button>
+        <span class="sub" id="sub"></span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <div class="ga-card">
+        <span class="ga-label" data-i18n="setup">Setup</span>
+        <div class="row"><span data-i18n="mode">Mode</span>
+          <div class="ga-seg" id="modeSeg">
+            <button data-v="ai" data-i18n="modeAi">vs computer</button>
+            <button data-v="pvp" data-i18n="modePvp">Two players</button>
+          </div>
+        </div>
+        <div class="row" id="levelRow"><span data-i18n="level">Computer</span>
+          <div class="ga-seg" id="levelSeg">
+            <button data-v="easy" data-i18n="easy">Easy</button>
+            <button data-v="normal" data-i18n="normal">Normal</button>
+            <button data-v="hard" data-i18n="hard">Hard</button>
+          </div>
+        </div>
+        <div class="row"><span data-i18n="size">Board</span>
+          <div class="ga-seg" id="sizeSeg">
+            <button data-v="7">7 × 7</button>
+            <button data-v="9">9 × 9</button>
+            <button data-v="11">11 × 11</button>
+          </div>
+        </div>
+        <p class="note" id="swapNote"></p>
+        <div class="btns">
+          <button class="ga-btn" id="restartBtn" data-i18n="restart">Restart</button>
+          <button class="ga-btn primary" id="nextBtn" data-i18n="next" hidden>Next game</button>
+        </div>
+      </div>
+
+      <div class="ga-card">
+        <span class="ga-label" data-i18n="moves">Moves</span>
+        <ol class="log" id="log"></ol>
+        <p class="empty" id="logEmpty" data-i18n="noMoves">No moves yet.</p>
+      </div>
+
+      <div class="ga-card">
+        <details class="rules" id="rules">
+          <summary data-i18n="rulesTitle">How to play</summary>
+          <div id="rulesBody"></div>
+        </details>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="ga-foot">
+    <span data-i18n="footer1">No dice, no timer, nothing hidden.</span>
+    <a href="../" data-i18n="footer2">All games</a>
+  </footer>
+</div>
+
+<dialog id="drawDlg">
+  <p id="drawText"></p>
+  <div class="btns">
+    <button class="ga-btn" id="drawCancel"></button>
+    <button class="ga-btn primary" id="drawOk"></button>
+  </div>
+</dialog>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
