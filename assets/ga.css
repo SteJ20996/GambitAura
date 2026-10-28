@@ -1,0 +1,143 @@
+/* GambitAura shared theme: "Aura Noir".
+   Dark void, obsidian surfaces, two side auras (mint, coral) and a gold accent. */
+:root {
+  color-scheme: dark;
+  --void: #05070c;
+  --void-2: #0a0e16;
+  --glass: rgba(20, 27, 40, .62);
+  --glass-hi: rgba(32, 42, 60, .72);
+  --edge: rgba(160, 190, 230, .14);
+  --edge-hi: rgba(190, 215, 255, .28);
+  --ink: #eef3fb;
+  --body: #c3ccda;
+  --muted: #8d98ab;
+  --mint: #2ef2b5;
+  --mint-deep: #0fae7f;
+  --mint-glow: rgba(46, 242, 181, .45);
+  --coral: #ff5f6d;
+  --coral-deep: #d9394a;
+  --coral-glow: rgba(255, 95, 109, .45);
+  --gold: #ffd166;
+  --gold-glow: rgba(255, 209, 102, .5);
+  --focus: #8fb6ff;
+  --display: 'Unbounded', 'Noto Sans TC', system-ui, sans-serif;
+  --sans: 'Space Grotesk', 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', system-ui, sans-serif;
+  --cjk: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+  --radius: 18px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; overflow-x: clip; }
+body {
+  font-family: var(--sans);
+  color: var(--ink);
+  background: var(--void);
+  line-height: 1.55;
+  min-height: 100dvh;
+  padding: max(14px, env(safe-area-inset-top)) 16px 32px;
+  position: relative;
+  overflow-x: hidden;
+}
+/* The two auras live in a fixed layer behind everything. */
+body::before {
+  content: '';
+  position: fixed; inset: -20vmax;
+  z-index: -2;
+  background:
+    radial-gradient(38vmax 30vmax at 18% 88%, rgba(46, 242, 181, .16), transparent 70%),
+    radial-gradient(38vmax 30vmax at 84% 10%, rgba(255, 95, 109, .15), transparent 70%),
+    radial-gradient(60vmax 40vmax at 50% 40%, rgba(70, 90, 160, .14), transparent 70%),
+    var(--void);
+}
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(150, 180, 230, .045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(150, 180, 230, .045) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse at 50% 30%, #000 30%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse at 50% 30%, #000 30%, transparent 80%);
+}
+a { color: inherit; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; border-radius: 6px; }
+
+/* Header */
+.ga-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 4px 0 18px; }
+.ga-brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; }
+.ga-brand svg { width: 34px; height: 34px; flex: none; }
+/* Lockup: 罡曜 over GAMBITAURA (Chinese name chosen by the owner, 2026-10-28). */
+.ga-lock { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 4px; line-height: 1; }
+.ga-zh {
+  font-family: var(--cjk); font-weight: 900; font-size: 1.32rem; letter-spacing: .12em; white-space: nowrap;
+  background: linear-gradient(95deg, var(--mint) 0%, var(--gold) 50%, var(--coral) 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 0 10px rgba(255, 209, 102, .3));
+}
+.ga-word {
+  font-family: var(--display); font-weight: 700; font-size: .58rem; letter-spacing: .32em;
+  text-transform: uppercase; white-space: nowrap;
+}
+.ga-word b {
+  font-weight: 700;
+  background: linear-gradient(95deg, var(--mint) 0%, var(--gold) 50%, var(--coral) 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 0 10px rgba(255, 209, 102, .25));
+}
+.ga-crumb { font-family: var(--mono); font-size: .7rem; letter-spacing: .16em; color: var(--muted); text-transform: uppercase; }
+.ga-langs { display: flex; gap: 4px; padding: 3px; border: 1px solid var(--edge); border-radius: 999px; background: var(--glass); }
+.ga-chip {
+  border: 0; background: transparent; border-radius: 999px; padding: 4px 11px;
+  font-size: .78rem; font-weight: 600; letter-spacing: .04em; color: var(--muted); cursor: pointer;
+}
+.ga-chip[aria-pressed="true"] { background: var(--ink); color: var(--void); }
+.ga-chip { white-space: nowrap; }
+@media (max-width: 520px) {
+  .ga-crumb { display: none; }
+  .ga-zh { font-size: 1.18rem; }
+  .ga-word { font-size: .52rem; letter-spacing: .28em; }
+  .ga-brand svg { width: 28px; height: 28px; }
+}
+
+/* Surfaces */
+.ga-card {
+  background: linear-gradient(180deg, var(--glass-hi), var(--glass));
+  border: 1px solid var(--edge);
+  border-radius: var(--radius);
+  backdrop-filter: blur(14px) saturate(1.1);
+  -webkit-backdrop-filter: blur(14px) saturate(1.1);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .05);
+}
+.ga-label {
+  font-family: var(--mono); font-size: .68rem; font-weight: 600; letter-spacing: .18em;
+  text-transform: uppercase; color: var(--muted);
+}
+.ga-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  border: 1px solid var(--edge-hi); background: rgba(255, 255, 255, .04);
+  border-radius: 12px; padding: 9px 16px; font-weight: 700; font-size: .9rem; letter-spacing: .02em;
+  cursor: pointer; text-decoration: none; transition: background .2s, box-shadow .2s, transform .1s;
+}
+.ga-btn:hover { background: rgba(255, 255, 255, .09); }
+.ga-btn:active { transform: translateY(1px); }
+.ga-btn.primary {
+  border-color: transparent; color: #071016;
+  background: linear-gradient(95deg, var(--mint), var(--gold) 55%, var(--coral));
+  box-shadow: 0 0 24px rgba(255, 209, 102, .25);
+}
+.ga-btn.primary:hover { box-shadow: 0 0 34px rgba(255, 209, 102, .45); }
+.ga-btn:disabled { opacity: .4; cursor: default; }
+.ga-seg { display: inline-flex; flex-wrap: wrap; gap: 3px; padding: 3px; border: 1px solid var(--edge); border-radius: 12px; background: rgba(0, 0, 0, .25); }
+.ga-seg button {
+  border: 0; background: transparent; border-radius: 9px; padding: 6px 11px;
+  font-size: .84rem; font-weight: 600; color: var(--muted); cursor: pointer;
+}
+.ga-seg button:hover { color: var(--ink); }
+.ga-seg button[aria-pressed="true"] { background: rgba(255, 255, 255, .1); color: var(--ink); box-shadow: inset 0 0 0 1px var(--edge-hi); }
+.ga-foot { margin-top: 34px; font-size: .8rem; color: var(--muted); display: flex; gap: 16px; flex-wrap: wrap; }
+[hidden] { display: none !important; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
