@@ -67,8 +67,10 @@ causing sideways scroll on phones.
 
 ## Open threads
 
-- Chinese name for GambitAura: candidates proposed 2026-10-28 (罡曜, 罡奧, 罡闢奧, 罡比特), owner to
-  choose; the UI shows only the English wordmark until then.
+- Chinese name for GambitAura: candidates proposed 2026-10-28, owner to choose: 罡曜 gāng yào
+  (recommended: 罡 = 罡氣, a martial-arts aura; 曜 = radiance, used by tech brands), 鋼曜 (same sound,
+  easier character), 罡奧 gāng ào, 罡闢奧 gāng pì ào, 罡比特 gāng bǐ tè. Not yet checked against
+  trademarks or app stores. The UI shows only the English wordmark until a name is chosen.
 - v0.5 opening adoption and the matching mechanics-doc update (§2 table, §4/§5.1 examples, §5.3 and
   §7.2 wording, §11).
 - Hosting and gambitaura.com DNS (see README); play-testing with people.
