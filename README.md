@@ -44,8 +44,31 @@ between equal players. Details and reproduction steps: `jielu/analysis/index.htm
 The solver covers every terrain with four water squares and the pieces anywhere. A change to the
 board size, the number of water squares, the flags or the move rules needs the solver updated first.
 
-## Hosting (not set up yet)
+## Hosting: GitHub Pages at gambitaura.com
 
-GitHub Pages from `main` works as is (all links are relative). For gambitaura.com: add the DNS
-records at the registrar first, then add a `CNAME` file containing `gambitaura.com`, then turn on
-"Enforce HTTPS" in Settings → Pages. Adding `CNAME` before DNS resolves would break the site.
+The `CNAME` file holds `gambitaura.com`, so GitHub Pages serves this repo there instead of under
+stephenjia.com/GambitAura/. Setup, in order:
+
+1. DNS for gambitaura.com (on Cloudflare: DNS → Records, every record "DNS only", grey cloud):
+
+   | Type | Name | Content |
+   |------|------|---------|
+   | A | `@` | `185.199.108.153` |
+   | A | `@` | `185.199.109.153` |
+   | A | `@` | `185.199.110.153` |
+   | A | `@` | `185.199.111.153` |
+   | AAAA | `@` | `2606:50c0:8000::153` |
+   | AAAA | `@` | `2606:50c0:8001::153` |
+   | AAAA | `@` | `2606:50c0:8002::153` |
+   | AAAA | `@` | `2606:50c0:8003::153` |
+   | CNAME | `www` | `stej20996.github.io` |
+
+   Delete any parking or forwarding records the registrar added for `@` or `www` first.
+2. Settings → Pages: Source "Deploy from a branch", branch `main`, folder `/ (root)`. The custom
+   domain field should read `gambitaura.com`; wait for "DNS check successful".
+3. Tick "Enforce HTTPS" once the certificate is ready (minutes, sometimes up to a day).
+4. Optional but recommended: account Settings → Pages → "Add a domain" to verify gambitaura.com
+   with a TXT record, so no one else can claim it on GitHub.
+
+The Cloudflare proxy (orange cloud) can be turned on afterwards, only with SSL/TLS mode
+"Full (strict)". All links in the site are relative, so nothing else changes with the domain.
