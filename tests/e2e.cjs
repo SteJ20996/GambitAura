@@ -19,6 +19,8 @@ const cell = (n) => (n.charCodeAt(1) - 49) * 5 + (n.charCodeAt(0) - 65);
   await page.waitForTimeout(400);
   await page.screenshot({ path: OUT + '/landing-desktop.png', fullPage: true });
   ok(await page.locator('a[href="jielu/"]').count() >= 1, 'landing play link');
+  ok(await page.locator('a[href="zhuanhuan/"]').count() >= 1, 'hub links Game 02, 轉環');
+  ok((await page.request.get(BASE + 'zhuanhuan/')).ok() && (await page.request.get(BASE + 'zhuanhuan/analysis/')).ok(), '轉環 and its fairness page are served');
   for (const g of ['hex/', 'reversi/', 'gomoku/', 'nim/']) {
     ok(await page.locator(`a.classic[href="${g}"]`).count() === 1, 'hub card for ' + g);
     const r = await page.request.get(BASE + g);

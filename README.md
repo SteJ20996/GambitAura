@@ -11,6 +11,7 @@ uses an accepted balancing rule and its page says plainly how fair it is.
 | Shelf | Game | Folder | Fairness, as the page states it |
 |-------|------|--------|---------------------------------|
 | Original 01 | 借路 Jielu | `jielu/` | Solved: the default v0.5 opening is a draw with perfect play (v0.4 selectable) |
+| Original 02 | 轉環 Zhuanhuan | `zhuanhuan/` | Solved: the spiral opening is a draw with perfect play; 12 of the 16 first moves hold |
 | Classic | 六角連線 Hex | `hex/` | No draws, so the first player has a forced win; the swap rule takes that edge away |
 | Classic | 黑白棋 Reversi | `reversi/` | 8 × 8 was weakly solved in 2023 (Takizawa): a draw with perfect play |
 | Classic | 五子棋 Gomoku | `gomoku/` | Free-style is a first-player win (Allis 1994); the Swap2 opening splits the choice |
@@ -30,8 +31,11 @@ uses an accepted balancing rule and its page says plainly how fair it is.
 - `jielu/ai.js`, `jielu/ai-worker.js`: the computer player (alpha-beta with a fixed node budget, so it is deterministic).
 - `jielu/docs/mechanics-v0.4.md`: the mechanics document as supplied.
 - `jielu/analysis/`: the rules review (`index.html`) and the solver behind it (`solver.c` plus Node cross-checks).
-- `tests/e2e.cjs`: browser test of the hub, 借路 and its fairness page. `tests/hex.cjs`,
-  `tests/reversi.cjs`, `tests/gomoku.cjs`, `tests/nim.cjs`: one browser test per classic.
+- `zhuanhuan/`: Game 02 (`index.html`, `app.js`, `engine.js`, `ai.js`, `ai-worker.js`).
+  `zhuanhuan/analysis/`: how its rules and opening were chosen (`index.html`), the solver (`solver.c`)
+  and the Node cross-checks (`check_table.mjs`, `probe_ai.mjs`, `table.mjs`).
+- `tests/e2e.cjs`: browser test of the hub, 借路 and its fairness page. `tests/zhuanhuan.cjs`: 轉環.
+  `tests/hex.cjs`, `tests/reversi.cjs`, `tests/gomoku.cjs`, `tests/nim.cjs`: one browser test per classic.
 
 No build step: every page is static HTML, CSS and ES modules.
 
@@ -41,7 +45,7 @@ No build step: every page is static HTML, CSS and ES modules.
 npx http-server -p 8765 -c-1 .
 open http://127.0.0.1:8765/
 node tests/e2e.cjs          # with the server running; screenshots land in tests/out/
-for t in hex reversi gomoku nim; do node tests/$t.cjs; done
+for t in zhuanhuan hex reversi gomoku nim; do node tests/$t.cjs; done
 ```
 
 ## Key result
@@ -50,6 +54,11 @@ The v0.4 opening (water on B2 D2 B4 D4) is a forced win for the second player wi
 The proposed v0.5 opening (water on A2 E2 A4 E4) is a theoretical draw and plays close to 50/50
 between equal players. Details and reproduction steps: `jielu/analysis/index.html`.
 
+轉環 Zhuanhuan (Game 02): every one of its 18,843,440 positions is solved. From the spiral opening
+(Mint d1 e2 f3, Coral h1 a2 b3) neither side can force a win; 4 of the first player's 16 first moves
+lose. The first draft (only three on a spoke wins) had no forced wins at all, because turning a ring
+always defends; adding three side by side on a ring fixed that. Details: `zhuanhuan/analysis/index.html`.
+
 ## Before changing the rules or the opening
 
 1. `gcc -O3 -march=native -fopenmp -o solver jielu/analysis/solver.c`
@@ -57,7 +66,12 @@ between equal players. Details and reproduction steps: `jielu/analysis/index.htm
 3. `./solver solve table.bin && ./solver analyze table.bin` (about 4 minutes, 4 GB RAM, 3.7 GB file)
 4. `./solver dump 3000 300 > games.txt && node jielu/analysis/replay.mjs games.txt ./jielu/engine.js`
 
-The solver covers every terrain with four water squares and the pieces anywhere. A change to the
+For 轉環: `cd zhuanhuan/analysis && gcc -O3 -march=native -fopenmp -o solver solver.c`, then
+`./solver --perft d1,e2,f3 h1,a2,b3 6` (must match `perft()` in `zhuanhuan/engine.js`),
+`./solver --show d1,e2,f3 h1,a2,b3 --dump table.bin` (about 10 seconds) and
+`node check_table.mjs table.bin 3000`.
+
+The 借路 solver covers every terrain with four water squares and the pieces anywhere. A change to the
 board size, the number of water squares, the flags or the move rules needs the solver updated first.
 
 ## Hosting: GitHub Pages at www.gambitaura.com
