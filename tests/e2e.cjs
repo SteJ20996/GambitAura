@@ -21,6 +21,9 @@ const cell = (n) => (n.charCodeAt(1) - 49) * 5 + (n.charCodeAt(0) - 65);
   ok(await page.locator('a[href="jielu/"]').count() >= 1, 'landing play link');
   ok(await page.locator('a[href="zhuanhuan/"]').count() >= 1, 'hub links Game 02, 轉環');
   ok((await page.request.get(BASE + 'zhuanhuan/')).ok() && (await page.request.get(BASE + 'zhuanhuan/analysis/')).ok(), '轉環 and its fairness page are served');
+  ok(await page.locator('a[href="guanglu/"]').count() >= 1, 'hub links Game 03, 光路');
+  ok(await page.locator('#mGl path').count() === 20, '光路 mini board drawn from its engine (20 mirrors)');
+  ok((await page.request.get(BASE + 'guanglu/')).ok() && (await page.request.get(BASE + 'guanglu/analysis/')).ok(), '光路 and its fairness page are served');
   for (const g of ['hex/', 'reversi/', 'gomoku/', 'nim/']) {
     ok(await page.locator(`a.classic[href="${g}"]`).count() === 1, 'hub card for ' + g);
     const r = await page.request.get(BASE + g);
