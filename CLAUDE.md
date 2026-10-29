@@ -47,8 +47,8 @@ must agree on `perft` and on `replay.mjs`; run both after touching move rules.
 Owner, 2026-10-29: of the two Game 02 concepts (concentric rings; light paths), "兩個都可以保留，先做
 concentric rings". So 轉環 is Game 02 and **light paths** (25 two-sided mirror tiles; a turn flips one
 mirror, not the one just flipped; first to steer your own beam to your target wins; every flip
-changes both beams) is kept as the Game 03 candidate. The name 轉環 Zhuanhuan is a working name the
-owner has not confirmed yet (alternatives offered: 星軌, 連星).
+changes both beams) is kept as the Game 03 candidate. Name 轉環 Zhuanhuan confirmed by the owner
+on 2026-10-29 ("就用轉環"; 星軌 and 連星 were the alternatives offered).
 
 Rules: 3 rings (1 inner, 2 middle, 3 outer) × 8 spokes (a at the top, clockwise), spot = ring*8+ray
 in code, named like `e2`. Three pieces each. A turn: turn a ring that carries at least one of your
@@ -171,7 +171,7 @@ of boxes. Do not bring back rainbow gradients, gradient buttons, glossy orbs or 
   tick "Enforce HTTPS". Do not add Cloudflare redirect rules or turn on the proxy (README explains
   why). Cloud sessions cannot reach gambitaura.com, docs.github.com or developers.cloudflare.com
   unless the environment allows them. Play-testing with people still to do.
-- Originals are the main line. 轉環 is Game 02 (name to be confirmed by the owner); light paths is
-  the Game 03 candidate, to be solved like the others before it ships.
+- Originals are the main line. 轉環 is Game 02; light paths is the Game 03 candidate, to be solved
+  like the others before it ships. Play-testing 轉環 with people is still to do.
 - 罡曜 has not been checked against trademarks (e.g. TIPO in Taiwan) or app stores yet. Other
   candidates considered on 2026-10-28: 鋼曜, 罡奧, 罡闢奧, 罡比特.
