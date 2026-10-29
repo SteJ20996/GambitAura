@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<meta name="description" content="罡曜 GambitAura：小棋盤、不靠運氣的雙人策略棋。原創的借路、轉環與光路，以及六角連線、黑白棋、五子棋、取石子。" />
+<meta name="description" content="罡曜 GambitAura：小棋盤、不靠運氣的雙人策略棋。原創的借路、轉環、光路與日影，以及六角連線、黑白棋、五子棋、取石子。" />
 <meta name="theme-color" content="#08090c" />
 <title>罡曜 GambitAura</title>
 <link rel="icon" href="favicon.svg" type="image/svg+xml" />
@@ -223,7 +223,24 @@
         </div>
       </div>
     </div>
-    <div class="soon"><em>Game 04</em><b data-t="g2">In the works</b><span data-t="g2s">The next original game is being designed. Once its rules are final, it is solved before it goes live.</span></div>
+    <div class="ga-card game second">
+      <div class="mini">
+        <svg viewBox="0 0 250 250" role="img" aria-label="日影 Riying"><rect width="250" height="250" fill="url(#bg)"/><g id="mRy"></g></svg>
+      </div>
+      <div>
+        <div class="num">Game 04</div>
+        <h2>日影<small>Riying</small></h2>
+        <p data-t="ry1">A sun walks round the board and the towers' shade turns with it. On your turn, move one tower one square; a tower standing in shade cannot move, whoever's shade it is. First to bring a tower to the middle of the far edge wins.</p>
+        <div class="meta">
+          <span data-t="ryc1">5 × 5 · 8 sun places</span><span data-t="c2">2 players</span><span data-t="ryc3">2 towers each</span><span class="ok" data-t="c4">Solved: no forced win</span>
+        </div>
+        <div class="links">
+          <a class="ga-btn primary" href="riying/" data-t="ryplay">Play Riying</a>
+          <a class="ga-btn" href="riying/analysis/" data-t="check">How we check fairness</a>
+        </div>
+      </div>
+    </div>
+    <div class="soon"><em>Game 05</em><b data-t="g2">In the works</b><span data-t="g2s">The next original game is being designed. Once its rules are final, it is solved before it goes live.</span></div>
   </section>
 
   <section class="shelf" id="classics">
@@ -405,6 +422,8 @@
       zc1: '3 環 × 8 輻', zc3: '每方三枚棋子', zplay: '開始玩轉環',
       gl1: '一片雙面鏡，兩道光。輪到你時，翻轉一面光正經過的鏡子。每翻一面，兩道光都可能改道。先把自己的光送到目標的人獲勝。',
       glc1: '4 × 5 鏡陣', glplay: '開始玩光路',
+      ry1: '太陽繞著棋盤走，塔的影子跟著轉。輪到你時，走一座塔一格；站在影子裡的塔不能動，不論是誰的影子。先把一座塔送到對面邊正中格的人獲勝。',
+      ryc1: '5 × 5 · 太陽 8 個位置', ryc3: '每方兩座塔', ryplay: '開始玩日影',
       c2: '雙人', c3: '每方兩枚棋子', c4: '已完整求解：雙方都無必勝',
       f1: '資訊公開', f1s: '雙方看得到全部。同樣的局面，同樣的選擇。',
       f2: '不靠運氣', f2s: '沒有骰子、洗牌或計時。只有棋步決定勝負。',
@@ -427,6 +446,8 @@
       zc1: '3 rings × 8 spokes', zc3: '3 pieces each', zplay: 'Play Zhuanhuan',
       gl1: 'A field of two-sided mirrors and two beams of light. On your turn, flip one mirror that a beam passes through. Every flip can bend both beams. First to bring its own light home wins.',
       glc1: '4 × 5 mirrors', glplay: 'Play Guanglu',
+      ry1: 'A sun walks round the board and the towers\' shade turns with it. On your turn, move one tower one square; a tower standing in shade cannot move, whoever\'s shade it is. First to bring a tower to the middle of the far edge wins.',
+      ryc1: '5 × 5 · 8 sun places', ryc3: '2 towers each', ryplay: 'Play Riying',
       c2: '2 players', c3: '2 pieces each', c4: 'Solved: no forced win',
       f1: 'Open information', f1s: 'Both players see everything. Same position, same options.',
       f2: 'No luck', f2s: 'No dice, no shuffles, no timer. Only the moves decide.',
@@ -490,6 +511,29 @@
     const [tg] = port(DESIGN.tgt[side]);
     h += `<circle cx="${tg[0]}" cy="${tg[1]}" r="7" fill="none" stroke="${col}" stroke-dasharray="2 2.5"/><circle cx="${tg[0]}" cy="${tg[1]}" r="3" fill="${col}" opacity=".4"/>`;
   });
+  g.innerHTML = h;
+</script>
+<script type="module">
+  // 日影 mini board: the opening, drawn from the game's own engine.
+  import { R, C, START, HEIGHTS, OWNER, TARGET, SUN_DR, SUN_DC, shades } from './riying/engine.js';
+  const g = document.getElementById('mRy');
+  const s = 34, x0 = (250 - C * s) / 2, y0 = (250 - R * s) / 2, sky = (C * s) / 2 + 26;
+  const ctr = (i) => [x0 + (i % C) * s + s / 2, y0 + Math.floor(i / C) * s + s / 2];
+  let h = `<rect x="${125 - sky}" y="${125 - sky}" width="${2 * sky}" height="${2 * sky}" fill="none" stroke="rgba(217,195,143,.16)" stroke-dasharray="1.5 5"/>`;
+  h += `<rect x="${x0}" y="${y0}" width="${C * s}" height="${R * s}" fill="rgba(236,230,218,.02)" stroke="rgba(236,230,218,.18)"/>`;
+  for (let k = 1; k < C; k++) h += `<line x1="${x0 + k * s}" y1="${y0}" x2="${x0 + k * s}" y2="${y0 + R * s}" stroke="rgba(236,230,218,.06)"/><line x1="${x0}" y1="${y0 + k * s}" x2="${x0 + C * s}" y2="${y0 + k * s}" stroke="rgba(236,230,218,.06)"/>`;
+  shades(START.towers, START.sun).forEach((list, t) => {
+    if (!list.length) return;
+    const [x1, y1] = ctr(START.towers[t]), [x2, y2] = ctr(list[list.length - 1]);
+    h += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#000" stroke-width="${HEIGHTS[t] === 2 ? 18 : 14}" stroke-linecap="round" opacity=".55"/>`;
+  });
+  [['#8fd3bf', 0], ['#ec9a82', 1]].forEach(([col, side]) => { const [x, y] = ctr(TARGET[side]); h += `<circle cx="${x}" cy="${y}" r="10" fill="none" stroke="${col}" stroke-dasharray="2 2.5"/>`; });
+  START.towers.forEach((cell, t) => {
+    const [x, y] = ctr(cell), col = OWNER[t] === 0 ? '#8fd3bf' : '#ec9a82', deep = OWNER[t] === 0 ? '#4f9a86' : '#b4644f', r = HEIGHTS[t] === 2 ? 11.5 : 9;
+    h += `<circle cx="${x}" cy="${y}" r="${r}" fill="${col}"/><circle cx="${x}" cy="${y}" r="${HEIGHTS[t] === 2 ? 7 : 4}" fill="none" stroke="${deep}" stroke-width="1.4"/>`;
+  });
+  const [sx, sy] = [125 + SUN_DC[START.sun] * sky, 125 + SUN_DR[START.sun] * sky];
+  h += `<circle cx="${sx}" cy="${sy}" r="13" fill="#f1d894" opacity=".22"/><circle cx="${sx}" cy="${sy}" r="6" fill="#f3e2b4"/>`;
   g.innerHTML = h;
 </script>
 </body>

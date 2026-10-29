@@ -125,12 +125,54 @@ repetition is marked 和 and asks first. The hub card's mini board and the analy
 figure are drawn from `engine.js`, so they follow `DESIGN`. Test: `tests/guanglu.cjs` (27 checks;
 its scripted win and repetition are found with the engine, so they follow the shipped layout).
 
+## Game 04: 日影 Riying (gambitaura#10, 2026-10-29)
+
+Owner, 2026-10-29: of five new concepts (換位 swap, 傾盤 tilt, 秤 balance, 潮汐 tide, 日影 sun and
+shade) "我們試一下2和5", then after both were solved "先做日影吧". Rules: 5 × 5 board, cell = row*5+col,
+row 0 = rank 5. Towers in index order Mint short, Mint tall, Coral short, Coral tall (heights 1 2 1 2).
+A sun stands outside the board at one of 8 places (0 = N, clockwise) and moves one place clockwise
+after every move. A tower of height h shades the h squares away from the sun (diagonal when the sun
+is at a corner); shade passes over towers. A tower standing in any shade (its own side's too) cannot
+move. A turn: step one free tower one square N E S W onto an empty square. Win: reach the middle of
+the far edge (Mint c5 = cell 2, Coral c1 = cell 22). A side with no move loses (the engine ends the
+game right after the move that leaves the other side stuck; the solver counts that side as lost in
+1). Threefold repetition draws. Opening: Mint a1 (short) d1 (tall), Coral e5 b5, sun S (`START`).
+
+**Solved (2026-10-29).** `riying/analysis/solver.c`, 4,857,600 states (25·24·23·22 × 8 suns × 2),
+about 5 s on 4 cores. Win 57.3 / loss 30.4 / draw 12.3%, longest forced win 143. The opening is a
+draw with either side first; 2 of 5 first moves hold (Mint: a1-b1, d1-d2; Coral: e5-e4, b5-b4); the
+losing ones lose only after 35 to 63 more moves. Drafts (each solved; "fair" = home-row half-turn
+starts that are draws whoever moves first, counted per sun place): sun 4 places + any far-row square
++ pass: race, 1.3% draws, 0 fair; sun 4 + far-middle + pass: longest 58, 66 fair but the most even
+ones have no wrong first move; sun 8 + pass: longest 107, 102 fair but every one gives one side 9 to
+16 points in 10%-slip simulation; only the other side's shade freezes (own 0): longest 149, the most
+even starts have no wrong first move and it drops the shared-consequence idea; chosen (sun 8, any
+shade, no move = lose): 60 fair, the most even within 1 point; a1/d1 sun S picked among them for the
+most forgiving first move. 20,000-game slips: Mint first 49.5 / 50.5, Coral first 50.9 / 49.1, about
+36 plies; a one-move player loses 100% in 14 to 16 plies. Cross-checks: perft to 6 agrees with
+`engine.js` for both first players (Mint 5 25 135 729 3848 20938; Coral 5 25 110 572 3137 16312);
+`check_table.mjs` re-derives 154,306 values with 0 mismatches (a stuck child must read 3 = lost in 1).
+Theme overlap stated on the page: Photosynthesis (2017) has a sun going round and shade (there it
+blocks scoring). **Any rule or opening change must be re-solved.**
+
+**Code.** `engine.js` (pure rules; `hashKey()` is the solver's state index, so `table.mjs` reuses it;
+`shades()`, `frozen()`), `ai.js` (alpha-beta, node budget: easy depth 1, normal depth 3, hard 300k
+nodes; keeps the solved result in 89.7 / 92.7 / 99.0%; hard about 0.4 s, at most 0.85 s; held perfect
+play in 4 games: 2 repetition draws, 2 still level at 200 plies; at 120k nodes it lost 2 of 4),
+`app.js` on `assets/shell.js`. One SVG, viewBox `-100 -100 700 700`, cells 100; the sun walks a
+square path 62 outside the board (`SKY` 312), with a dashed ring at its next place; shade is a soft
+blurred line from each tower plus darkened squares; towers in shade get a veil; a tower is selected
+(or auto-selected when it is the only one that can move), its moves are dots, and hovering a dot
+previews (dashed) the shade the other side will face after the move. The hub card and the analysis
+page's figure are drawn from `engine.js`. Test: `tests/riying.cjs` (29 checks; its lines are found
+with the engine: a target win, a line to a tower stuck in shade, an 8-move cycle for the repetition).
+
 ## The hub and the classics (gambitaura#5, 2026-10-28)
 
 Owner, 2026-10-28: put several board and strategy games on one site, the homepage as a game hub
 with each game at its own address; the four classics Hex, Reversi, Gomoku and Nim, "然後主要是我們
 自己構思創作平衡的棋類" (the main line stays our own originally designed, balanced games). So the
-hub has two shelves: **原創 Originals** (借路, 轉環, 光路, then a Game 04 slot "in the works") above **經典
+hub has two shelves: **原創 Originals** (借路, 轉環, 光路, 日影, then a Game 05 slot "in the works") above **經典
 Classics** (four cards with mini boards drawn in the site's style).
 
 Fairness copy must stay honest. A game with no draws always has a forced winner under perfect
@@ -224,8 +266,9 @@ of boxes. Do not bring back rainbow gradients, gradient buttons, glossy orbs or 
   and no proposal or suggestion wording in site copy (owner, 2026-10-29): the games are presented
   as they are, and design history says "the original opening" or "the first rules".
 - Test every UI change in headless Chromium: start a static server and run `node tests/e2e.cjs`
-  (44 checks: the hub's game cards, 借路 moves, tile moves, draw dialog and overlay, scoreboard,
-  language, phone widths, no console errors) and the test of any classic you touched
+  (66 checks: the hub's game cards, a guard against version numbers and proposal wording on every
+  original game's pages, 借路 moves, tile moves, draw dialog and overlay, scoreboard, language, phone
+  widths, no console errors) and the test of any classic you touched
   (`tests/<game>.cjs`; `tests/gomoku.cjs` has 151 checks across the three rule sets). Look at the
   screenshots in `tests/out/`.
 - Owner merges PRs; work on feature branches. Work references are `gambitaura#n` (continuing from
@@ -247,8 +290,14 @@ of boxes. Do not bring back rainbow gradients, gradient buttons, glossy orbs or 
   tick "Enforce HTTPS". Do not add Cloudflare redirect rules or turn on the proxy (README explains
   why). Cloud sessions cannot reach gambitaura.com, docs.github.com or developers.cloudflare.com
   unless the environment allows them. Play-testing with people still to do.
-- Originals are the main line. 轉環 is Game 02 and 光路 is Game 03 (both solved); Game 04 has no
-  concept yet. Play-testing 轉環 and 光路 with people is still to do.
+- Originals are the main line. 轉環, 光路 and 日影 are Games 02 to 04 (all solved). Play-testing them
+  with people is still to do. Game 05 candidate: 傾盤 Qingpan (tilt), solved but not built:
+  `lab/qingpan/solver.c` holds the solver and the chosen design in its header (pillars b5 d1, holes
+  a4 / e2, 3 pieces each, tilt or step, no tilting straight back, start c2 d2 c1; longest forced
+  win 49; 10% slips 50.2 / 49.8; very sharp: the side to move wins 81% of positions, games about 28
+  plies). Novelty search found no whole-board tilt game (Slipe and Deblockle slide single pieces).
+  Other concepts offered on 2026-10-29 and not tried: 換位 (swap on a full board, connect your
+  edges), 秤 (balance beam; beware a mirror strategy), 潮汐 (tide floods low squares on a schedule).
 - Pro rules for the other classics (2026-10-29): Reversi's tournament game is the same game (pro
   events add clocks, which the series leaves out on purpose); Hex already uses the swap rule and
   offers 11 × 11, the classic tournament size, and 13 × 13 (used at the Computer Olympiad and on
