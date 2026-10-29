@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<meta name="description" content="罡曜 GambitAura：小棋盤、不靠運氣的雙人策略棋系列。第一款：借路 Jielu。" />
+<meta name="description" content="罡曜 GambitAura：小棋盤、不靠運氣的雙人策略棋。原創的借路與轉環，以及六角連線、黑白棋、五子棋、取石子。" />
 <meta name="theme-color" content="#08090c" />
 <title>罡曜 GambitAura</title>
 <link rel="icon" href="favicon.svg" type="image/svg+xml" />
@@ -73,8 +73,46 @@
   .fact i { display: block; font-family: var(--display); font-style: italic; font-size: 1.15rem; color: var(--gold); margin-bottom: 8px; }
   .fact b { display: block; font-size: 1rem; font-weight: 600; margin-bottom: 6px; letter-spacing: .02em; }
   .fact span { font-size: .92rem; color: var(--muted); }
-  .next { margin-top: 48px; text-align: center; color: var(--muted); font-size: .92rem; letter-spacing: .06em; }
-  .next em { font-family: var(--display); font-size: 1.05rem; color: var(--body); margin-right: 10px; }
+
+  /* Shelves: Originals first, then Classics. */
+  .shelf { margin-top: 76px; scroll-margin-top: 24px; }
+  .shelf-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 16px; padding-bottom: 14px; margin-bottom: 24px; border-bottom: 1px solid var(--edge-hi); }
+  .shelf-head h2 { font-family: var(--cjk); font-weight: 900; font-size: 1.7rem; letter-spacing: .2em; line-height: 1.1; }
+  .shelf-head .latin { font-family: var(--display); font-style: italic; font-size: 1.15rem; letter-spacing: .06em; color: var(--gold); }
+  .shelf-head p { flex: 1 1 22rem; text-align: right; font-size: .92rem; color: var(--muted); }
+  @media (max-width: 720px) { .shelf { margin-top: 56px; } .shelf-head p { text-align: left; } }
+  .game .links { display: flex; flex-wrap: wrap; gap: 10px; }
+  .game.second { margin-top: 16px; }
+  .game.second .mini svg { box-shadow: 0 0 0 1px var(--edge), 0 40px 80px -30px rgba(0, 0, 0, .8), 0 0 80px -30px rgba(217, 195, 143, .35); }
+
+  .soon { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 16px; margin-top: 16px; padding: 18px 28px; border: 1px dashed var(--edge-hi); border-radius: var(--radius); color: var(--muted); font-size: .92rem; }
+  .soon em { font-family: var(--display); font-size: 1.05rem; color: var(--gold); }
+  .soon b { font-family: var(--cjk); font-weight: 700; color: var(--body); letter-spacing: .1em; }
+
+  .classics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  @media (max-width: 960px) { .classics { grid-template-columns: repeat(2, 1fr); } }
+  .classic { display: flex; flex-direction: column; text-decoration: none; color: inherit; padding: 14px 14px 20px; transition: border-color .4s, transform .4s; }
+  .classic:hover, .classic:focus-visible { border-color: var(--edge-hi); transform: translateY(-3px); }
+  .classic .cmini svg { width: 100%; height: auto; display: block; border-radius: 14px; box-shadow: 0 0 0 1px var(--edge), 0 30px 60px -34px rgba(0, 0, 0, .9); transition: box-shadow .5s; }
+  .classic:hover .cmini svg { box-shadow: 0 0 0 1px var(--edge-hi), 0 30px 60px -34px rgba(0, 0, 0, .9), 0 0 60px -26px var(--gold-glow); }
+  .classic .cbody { display: flex; flex-direction: column; flex: 1; padding: 16px 6px 0; }
+  .classic h3 { font-family: var(--cjk); font-weight: 900; font-size: 1.45rem; letter-spacing: .12em; line-height: 1.15; }
+  .classic h3 small { font-family: var(--display); font-style: italic; font-weight: 500; font-size: 1.02rem; letter-spacing: .06em; color: var(--muted); margin-left: 8px; }
+  .classic p { font-size: .9rem; color: var(--body); margin: 8px 0 12px; }
+  .cmeta { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: .8rem; color: var(--muted); letter-spacing: .03em; margin-top: auto; }
+  .cmeta .fair { color: var(--gold); }
+  .cmeta .fair::before { content: ''; display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 8px var(--gold-glow); margin-right: 7px; vertical-align: middle; }
+  .classic .go { margin-top: 14px; font-size: .84rem; font-weight: 600; letter-spacing: .08em; color: var(--ink); }
+  .classic .go::after { content: ' →'; color: var(--gold); transition: margin .3s; }
+  .classic:hover .go::after { margin-left: 4px; }
+  @media (max-width: 560px) {
+    .classics { grid-template-columns: 1fr; gap: 12px; }
+    .classic { display: grid; grid-template-columns: 112px 1fr; gap: 16px; align-items: start; padding: 12px; }
+    .classic .cbody { padding: 2px 0 0; }
+    .classic h3 { font-size: 1.25rem; }
+    .classic p { margin: 6px 0 10px; font-size: .86rem; }
+    .classic .go { margin-top: 10px; }
+  }
 </style>
 </head>
 <body>
@@ -112,11 +150,13 @@
     <p class="tag" data-t="tag">Small boards for two players. No dice, nothing hidden. Every move is yours.</p>
     <div class="cta">
       <a class="ga-btn primary" href="jielu/" data-t="play">Play Jielu</a>
-      <a class="ga-btn" href="jielu/analysis/" data-t="check">How we check fairness</a>
+      <a class="ga-btn" href="#games" data-t="all">All games</a>
     </div>
   </section>
 
-  <section class="ga-card game">
+  <section class="shelf" id="games">
+    <div class="shelf-head"><h2 data-t="origT">原創</h2><span class="latin">Originals</span><p data-t="origS">Games we design ourselves. Before one goes live, a computer solves its opening.</p></div>
+    <div class="ga-card game">
     <div class="mini">
       <svg viewBox="0 0 250 250" role="img" aria-labelledby="miniTitle">
         <title id="miniTitle">借路 Jielu</title>
@@ -127,6 +167,9 @@
           <radialGradient id="gc" cx=".5" cy=".58" r=".6"><stop offset="0" stop-color="#f8d9cd"/><stop offset=".45" stop-color="#ec9a82"/><stop offset=".85" stop-color="#a9503b"/><stop offset="1" stop-color="#6f2f22"/></radialGradient>
           <radialGradient id="sheen" cx=".36" cy=".26" r=".3"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
           <filter id="soft" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="5"/></filter>
+          <radialGradient id="obs" cx=".5" cy=".62" r=".6"><stop offset="0" stop-color="#3b3f48"/><stop offset=".52" stop-color="#20232a"/><stop offset="1" stop-color="#0b0c0f"/></radialGradient>
+          <radialGradient id="pearl" cx=".5" cy=".6" r=".6"><stop offset="0" stop-color="#fffcf4"/><stop offset=".48" stop-color="#ece4d2"/><stop offset="1" stop-color="#bfb39a"/></radialGradient>
+          <radialGradient id="cream" cx=".5" cy=".6" r=".6"><stop offset="0" stop-color="#f7f0de"/><stop offset=".45" stop-color="#e2d2a8"/><stop offset="1" stop-color="#a8915e"/></radialGradient>
         </defs>
         <rect width="250" height="250" fill="url(#bg)"/>
         <rect x="0" y="180" width="250" height="70" fill="rgba(143,211,191,.07)" filter="url(#soft)"/>
@@ -140,17 +183,79 @@
       <div class="meta">
         <span>5 × 5</span><span data-t="c2">2 players</span><span data-t="c3">2 pieces each</span><span class="ok" data-t="c4">Solved: no forced win</span>
       </div>
-      <a class="ga-btn primary" href="jielu/" data-t="play">Play Jielu</a>
+      <div class="links">
+        <a class="ga-btn primary" href="jielu/" data-t="play">Play Jielu</a>
+        <a class="ga-btn" href="jielu/analysis/" data-t="check">How we check fairness</a>
+      </div>
+    </div>
+  </div>
+    <div class="ga-card game second">
+      <div class="mini">
+        <svg viewBox="0 0 250 250" role="img" aria-label="轉環 Zhuanhuan"><rect width="250" height="250" fill="url(#bg)"/><g id="mZh"></g></svg>
+      </div>
+      <div>
+        <div class="num">Game 02</div>
+        <h2>轉環<small>Zhuanhuan</small></h2>
+        <p data-t="zh1">Three pieces each, set out in a spiral. On your turn, turn a ring or step a piece. A turn carries every piece on that ring, the other side's too. First to line up three wins.</p>
+        <div class="meta">
+          <span data-t="zc1">3 rings × 8 spokes</span><span data-t="c2">2 players</span><span data-t="zc3">3 pieces each</span><span class="ok" data-t="c4">Solved: no forced win</span>
+        </div>
+        <div class="links">
+          <a class="ga-btn primary" href="zhuanhuan/" data-t="zplay">Play Zhuanhuan</a>
+          <a class="ga-btn" href="zhuanhuan/analysis/" data-t="check">How we check fairness</a>
+        </div>
+      </div>
+    </div>
+    <div class="soon"><em>Game 03</em><b data-t="g2">In the works</b><span data-t="g2s">The next original game is being designed. Once its rules are final, it is solved before it goes live.</span></div>
+  </section>
+
+  <section class="shelf" id="classics">
+    <div class="shelf-head"><h2 data-t="clsT">經典</h2><span class="latin">Classics</span><p data-t="clsS">Well-known games. Each uses an accepted way to handle the first player's edge, and each page says how fair it really is.</p></div>
+    <div class="classics">
+      <a class="ga-card classic" href="hex/">
+        <div class="cmini"><svg viewBox="0 0 250 250" role="img" aria-label="六角連線 Hex"><rect width="250" height="250" fill="url(#bg)"/><g id="mHex"></g></svg></div>
+        <div class="cbody">
+          <h3>六角連線<small>Hex</small></h3>
+          <p data-t="hex1">Join your two sides of the board. Someone always connects, so there are no draws.</p>
+          <div class="cmeta"><span>7 · 9 · 11</span><span class="fair" data-t="hexF">Swap rule</span></div>
+          <span class="go" data-t="go">Play</span>
+        </div>
+      </a>
+      <a class="ga-card classic" href="reversi/">
+        <div class="cmini"><svg viewBox="0 0 250 250" role="img" aria-label="黑白棋 Reversi"><rect width="250" height="250" fill="url(#bg)"/><g id="mRv"></g></svg></div>
+        <div class="cbody">
+          <h3>黑白棋<small>Reversi</small></h3>
+          <p data-t="rv1">Trap the other side's discs and turn them to your colour. More discs at the end wins.</p>
+          <div class="cmeta"><span>8 × 8</span><span class="fair" data-t="rvF">Solved in 2023: a draw</span></div>
+          <span class="go" data-t="go">Play</span>
+        </div>
+      </a>
+      <a class="ga-card classic" href="gomoku/">
+        <div class="cmini"><svg viewBox="0 0 250 250" role="img" aria-label="五子棋 Gomoku"><rect width="250" height="250" fill="url(#bg)"/><g id="mGm"></g></svg></div>
+        <div class="cbody">
+          <h3>五子棋<small>Gomoku</small></h3>
+          <p data-t="gm1">Five in a row, in any direction, wins.</p>
+          <div class="cmeta"><span>15 × 15</span><span class="fair" data-t="gmF">Swap2 opening</span></div>
+          <span class="go" data-t="go">Play</span>
+        </div>
+      </a>
+      <a class="ga-card classic" href="nim/">
+        <div class="cmini"><svg viewBox="0 0 250 250" role="img" aria-label="取石子 Nim"><rect width="250" height="250" fill="url(#bg)"/><g id="mNim"></g></svg></div>
+        <div class="cbody">
+          <h3>取石子<small>Nim</small></h3>
+          <p data-t="nim1">Take stones from one pile at a time. Whoever takes the last stone wins.</p>
+          <div class="cmeta"><span data-t="nimM">3 to 5 piles</span><span class="fair" data-t="nimF">One sets up, one picks the order</span></div>
+          <span class="go" data-t="go">Play</span>
+        </div>
+      </a>
     </div>
   </section>
 
   <section class="facts">
     <div class="fact"><i>I</i><b data-t="f1">Open information</b><span data-t="f1s">Both players see everything. Same position, same options.</span></div>
     <div class="fact"><i>II</i><b data-t="f2">No luck</b><span data-t="f2s">No dice, no shuffles, no timer. Only the moves decide.</span></div>
-    <div class="fact"><i>III</i><b data-t="f3">Checked for fairness</b><span data-t="f3s">Openings are solved by computer so that moving first or second gives no forced win.</span></div>
+    <div class="fact"><i>III</i><b data-t="f3">Fairness, stated plainly</b><span data-t="f3s">Our own games have their openings solved by computer. The classics use an accepted balancing rule, and each one says how fair it really is.</span></div>
   </section>
-
-  <p class="next"><em>Game 02</em><span data-t="soon">In the works.</span></p>
 
   <footer class="ga-foot">
     <span>gambitaura.com</span>
@@ -189,28 +294,130 @@
     g.innerHTML = out;
   })();
 
+  // Mini boards for the classics. Each shows a moment from a game, drawn in the site's style.
+  (function () {
+    var NS = function (id, html) { document.getElementById(id).innerHTML = html; };
+    var orb = function (x, y, r, fill, glow) {
+      return (glow ? '<circle cx="' + x + '" cy="' + y + '" r="' + (r + 2) + '" fill="' + glow + '" opacity=".22" filter="url(#soft)"/>' : '') +
+        '<circle cx="' + x + '" cy="' + (y + 1.5) + '" r="' + r + '" fill="#000" opacity=".4" filter="url(#soft)"/>' +
+        '<circle cx="' + x + '" cy="' + y + '" r="' + r + '" fill="url(#' + fill + ')"/>' +
+        '<circle cx="' + x + '" cy="' + y + '" r="' + r + '" fill="url(#sheen)" opacity="' + (fill === 'obs' ? '.4' : '1') + '"/>' +
+        (fill === 'obs' ? '<circle cx="' + x + '" cy="' + y + '" r="' + (r - .4) + '" fill="none" stroke="rgba(236,230,218,.42)" stroke-width=".8"/>' : '');
+    };
+
+    // Hex: 7 x 7 rhombus; jade joins top and bottom, agate joins left and right.
+    var n = 7, a = 13, w = Math.sqrt(3) * a, x0 = (250 - 10 * w) / 2 + w / 2, y0 = (250 - 11 * a) / 2 + a, out = '', edges = '';
+    var corner = function (cx, cy, k) { var t = Math.PI / 180 * (60 * k - 90); return [cx + a * Math.cos(t), cy + a * Math.sin(t)]; };
+    var seg = function (cx, cy, k1, k2, col) { var p = corner(cx, cy, k1), q = corner(cx, cy, k2); return '<path d="M' + p[0].toFixed(1) + ' ' + p[1].toFixed(1) + 'L' + q[0].toFixed(1) + ' ' + q[1].toFixed(1) + '" stroke="' + col + '" stroke-width="2" stroke-linecap="round" opacity=".75"/>'; };
+    var jade = [3, 10, 17, 23, 30], agate = [15, 16, 24, 32, 39];
+    for (var r = 0; r < n; r++) for (var c = 0; c < n; c++) {
+      var cx = x0 + (c + r / 2) * w, cy = y0 + r * 1.5 * a, pts = [];
+      for (var k = 0; k < 6; k++) pts.push(corner(cx, cy, k).map(function (v) { return v.toFixed(1); }).join(' '));
+      out += '<polygon points="' + pts.join(' ') + '" fill="#161920" stroke="rgba(236,230,218,.1)" stroke-width=".8"/>';
+      if (r === 0) edges += seg(cx, cy, 5, 0, '#8fd3bf') + seg(cx, cy, 0, 1, '#8fd3bf');
+      if (r === n - 1) edges += seg(cx, cy, 2, 3, '#8fd3bf') + seg(cx, cy, 3, 4, '#8fd3bf');
+      if (c === 0) edges += seg(cx, cy, 4, 5, '#ec9a82') + (r < n - 1 ? seg(cx, cy, 3, 4, '#ec9a82') : '');
+      if (c === n - 1) edges += seg(cx, cy, 1, 2, '#ec9a82') + (r > 0 ? seg(cx, cy, 0, 1, '#ec9a82') : '');
+    }
+    out += edges;
+    jade.concat(agate).forEach(function (i, j) {
+      var r = Math.floor(i / n), c = i % n;
+      out += orb(x0 + (c + r / 2) * w, y0 + r * 1.5 * a, a * .62, j < jade.length ? 'gm' : 'gc', j < jade.length ? '#8fd3bf' : '#ec9a82');
+    });
+    NS('mHex', out);
+
+    // Reversi: 8 x 8, a middle-game moment.
+    var s = 28, o = 13, rv = '<rect x="' + o + '" y="' + o + '" width="224" height="224" rx="6" fill="#121419" stroke="rgba(236,230,218,.08)"/>';
+    for (var i = 1; i < 8; i++) rv += '<path d="M' + (o + i * s) + ' ' + o + 'V' + (o + 224) + 'M' + o + ' ' + (o + i * s) + 'H' + (o + 224) + '" stroke="rgba(236,230,218,.07)" stroke-width=".8"/>';
+    [[2, 2], [6, 2], [2, 6], [6, 6]].forEach(function (p) { rv += '<circle cx="' + (o + p[0] * s) + '" cy="' + (o + p[1] * s) + '" r="1.6" fill="rgba(217,195,143,.6)"/>'; });
+    var board = ['........', '...w....', '..wwb...', '..bwwb..', '..bbwb..', '...bww..', '....b...', '........'];
+    board.forEach(function (row, y) { row.split('').forEach(function (ch, x) { if (ch !== '.') rv += orb(o + x * s + s / 2, o + y * s + s / 2, 10.5, ch === 'b' ? 'obs' : 'pearl', ch === 'w' ? '#ece6da' : null); }); });
+    NS('mRv', rv);
+
+    // Gomoku: a corner of the 15 x 15 board; black has an open four, white is late.
+    var g2 = 25, go = 25, gm = '';
+    for (var i = 0; i < 9; i++) gm += '<path d="M' + (go + i * g2) + ' 0V250M0 ' + (go + i * g2) + 'H250" stroke="rgba(236,230,218,.09)" stroke-width=".8"/>';
+    [[2, 2], [6, 2], [4, 4], [2, 6], [6, 6]].forEach(function (p) { gm += '<circle cx="' + (go + p[0] * g2) + '" cy="' + (go + p[1] * g2) + '" r="2" fill="rgba(217,195,143,.6)"/>'; });
+    var bs = [[2, 6], [3, 5], [4, 4], [5, 3], [4, 6], [6, 4]], ws = [[3, 4], [5, 5], [4, 5], [3, 6], [6, 3]];
+    ws.forEach(function (p) { gm += orb(go + p[0] * g2, go + p[1] * g2, 10.5, 'pearl', '#ece6da'); });
+    bs.forEach(function (p) { gm += orb(go + p[0] * g2, go + p[1] * g2, 10.5, 'obs'); });
+    gm += '<circle cx="' + (go + 6 * g2) + '" cy="' + (go + 2 * g2) + '" r="11" fill="none" stroke="#d9c38f" stroke-width="1" opacity=".8"/>';
+    gm += '<circle cx="' + (go + 1 * g2) + '" cy="' + (go + 7 * g2) + '" r="11" fill="none" stroke="#d9c38f" stroke-width="1" opacity=".8"/>';
+    NS('mGm', gm);
+
+    // Nim: piles of 3, 5 and 6 out of seven slots.
+    var piles = [3, 5, 6], nm = '';
+    piles.forEach(function (p, r) {
+      var y = 72 + r * 53;
+      nm += '<text x="22" y="' + (y + 5) + '" fill="#8e897f" font-family="Cormorant Garamond, serif" font-style="italic" font-size="15" text-anchor="middle">' + (r + 1) + '</text>';
+      for (var j = 0; j < 7; j++) {
+        var x = 52 + j * 29;
+        nm += '<circle cx="' + x + '" cy="' + y + '" r="9" fill="rgba(4,5,7,.6)" stroke="rgba(236,230,218,.05)"/>';
+        if (j < p) nm += orb(x, y, 11, 'cream', '#d9c38f');
+      }
+      if (r < 2) nm += '<path d="M38 ' + (y + 26.5) + 'H236" stroke="rgba(236,230,218,.06)"/>';
+    });
+    NS('mNim', nm);
+
+    // 轉環: three rings around the core, the spiral opening.
+    var R = [38, 67, 95], zh = '<circle cx="125" cy="125" r="34" fill="#d9c38f" opacity=".1" filter="url(#soft)"/>';
+    for (var q = 0; q < 8; q++) {
+      var t = q * Math.PI / 4;
+      zh += '<path d="M' + (125 + 24 * Math.sin(t)).toFixed(1) + ' ' + (125 - 24 * Math.cos(t)).toFixed(1) + 'L' + (125 + 108 * Math.sin(t)).toFixed(1) + ' ' + (125 - 108 * Math.cos(t)).toFixed(1) + '" stroke="rgba(236,230,218,.07)"/>';
+    }
+    zh += '<circle cx="125" cy="125" r="16" fill="none" stroke="#d9c38f" stroke-dasharray="1 3" opacity=".55"/><circle cx="125" cy="125" r="5.5" fill="#ecdcb4"/>';
+    R.forEach(function (r) {
+      zh += '<circle cx="125" cy="125" r="' + r + '" fill="none" stroke="rgba(217,195,143,.3)"/>';
+      for (var q = 0; q < 8; q++) { var t = q * Math.PI / 4; zh += '<circle cx="' + (125 + r * Math.sin(t)).toFixed(1) + '" cy="' + (125 - r * Math.cos(t)).toFixed(1) + '" r="5.5" fill="#07080b" stroke="rgba(236,230,218,.07)"/>'; }
+    });
+    // Mint d1 e2 f3, Coral h1 a2 b3 (spoke a at the top, letters clockwise)
+    [[0, 3, 'gm', '#8fd3bf'], [1, 4, 'gm', '#8fd3bf'], [2, 5, 'gm', '#8fd3bf'], [0, 7, 'gc', '#ec9a82'], [1, 0, 'gc', '#ec9a82'], [2, 1, 'gc', '#ec9a82']].forEach(function (p) {
+      var t = p[1] * Math.PI / 4, r = R[p[0]];
+      zh += orb(125 + r * Math.sin(t), 125 - r * Math.cos(t), 10, p[2], p[3]);
+    });
+    NS('mZh', zh);
+  })();
+
   var T = {
     zh: {
       kicker: '雙人策略棋系列',
       tag: '小棋盤，兩個人。沒有骰子，沒有隱藏資訊。每一步都由你決定。',
       play: '開始玩借路', check: '我們怎麼檢查公平',
       jielu1: '每方兩枚棋子，各有一面要抵達的旗。輪到你時，走一格，或把一塊地板搬進水裡。你替自己鋪的路，對手也可以借來走。',
+      zh1: '每方三枚棋子，排成螺旋。輪到你時，轉一個環，或走一步。轉環會帶著環上所有棋子一起轉，對方的也一樣。先讓三枚連成一線的人獲勝。',
+      zc1: '3 環 × 8 輻', zc3: '每方三枚棋子', zplay: '開始玩轉環',
       c2: '雙人', c3: '每方兩枚棋子', c4: '已完整求解：雙方都無必勝',
       f1: '資訊公開', f1s: '雙方看得到全部。同樣的局面，同樣的選擇。',
       f2: '不靠運氣', f2s: '沒有骰子、洗牌或計時。只有棋步決定勝負。',
-      f3: '先驗證公平', f3s: '開局先用電腦完整求解，確認先走或後走都沒有必勝。',
-      soon: '構思中。', by: '遊戲系列作者'
+      f3: '公平，說清楚', f3s: '原創棋的開局用電腦完整求解。經典棋沿用公認的平衡辦法，每款都說明它公平到什麼程度。',
+      all: '全部遊戲', origT: '原創', origS: '我們自己設計的棋。上線前，先用電腦把開局完整算過一遍。',
+      g2: '構思中', g2s: '下一款原創棋正在設計。規則定稿後，一樣先求解再上線。',
+      clsT: '經典', clsS: '大家熟悉的幾款棋。每款都用一套公認的辦法處理先手的優勢，頁面上寫明它公平到什麼程度。',
+      hex1: '把屬於你的兩條對邊連起來。總有一方會連通，所以沒有和局。', hexF: '交換規則',
+      rv1: '夾住對手的棋子，把它們翻成你的顏色。結束時棋子多的一方獲勝。', rvF: '2023 年算出：雙方下對是和局',
+      gm1: '橫、直、斜都算，先連成五子的一方獲勝。', gmF: 'Swap2 開局',
+      nim1: '每次從一堆拿走石子，拿走最後一顆的人獲勝。', nimM: '3 到 5 堆', nimF: '一方擺石子，一方選先後',
+      go: '開始玩', by: '遊戲系列作者'
     },
     en: {
       kicker: 'A strategy game series',
       tag: 'Small boards for two players. No dice, nothing hidden. Every move is yours.',
       play: 'Play Jielu', check: 'How we check fairness',
       jielu1: 'Two pieces each, one flag to reach. On your turn, step one square or lift a floor tile and drop it into the water. Every road you build can also be borrowed by the other side.',
+      zh1: 'Three pieces each, set out in a spiral. On your turn, turn a ring or step a piece. A turn carries every piece on that ring, the other side\'s too. First to line up three wins.',
+      zc1: '3 rings × 8 spokes', zc3: '3 pieces each', zplay: 'Play Zhuanhuan',
       c2: '2 players', c3: '2 pieces each', c4: 'Solved: no forced win',
       f1: 'Open information', f1s: 'Both players see everything. Same position, same options.',
       f2: 'No luck', f2s: 'No dice, no shuffles, no timer. Only the moves decide.',
-      f3: 'Checked for fairness', f3s: 'Openings are solved by computer so that moving first or second gives no forced win.',
-      soon: 'In the works.', by: 'A game series by'
+      f3: 'Fairness, stated plainly', f3s: 'Our own games have their openings solved by computer. The classics use an accepted balancing rule, and each one says how fair it really is.',
+      all: 'All games', origT: '原創', origS: 'Games we design ourselves. Before one goes live, a computer solves its opening.',
+      g2: 'In the works', g2s: 'The next original game is being designed. Once its rules are final, it is solved before it goes live.',
+      clsT: '經典', clsS: 'Well-known games. Each uses an accepted way to handle the first player\'s edge, and each page says how fair it really is.',
+      hex1: 'Join your two sides of the board. Someone always connects, so there are no draws.', hexF: 'Swap rule',
+      rv1: 'Trap the other side\'s discs and turn them to your colour. More discs at the end wins.', rvF: 'Solved in 2023: a draw',
+      gm1: 'Five in a row, in any direction, wins.', gmF: 'Swap2 opening',
+      nim1: 'Take stones from one pile at a time. Whoever takes the last stone wins.', nimM: '3 to 5 piles', nimF: 'One sets up, one picks the order',
+      go: 'Play', by: 'A game series by'
     }
   };
   function getLang() {

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="轉環 Zhuanhuan 公平性檢查：規則怎麼定出來、螺旋開局為什麼是和棋、電腦對手有多強。" />
+<title>轉環 公平性檢查 · 罡曜 GambitAura</title>
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Instrument+Sans:wght@400..700&family=Noto+Serif+TC:wght@500;700;900&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../../assets/ga.css" />
+<meta name="theme-color" content="#08090c" />
+<style>
+  .wrap { max-width: 840px; margin: 0 auto; }
+  body { line-height: 1.75; }
+  h1 { font-family: var(--cjk); font-weight: 900; font-size: clamp(1.7rem, 5vw, 2.5rem); line-height: 1.2; letter-spacing: .02em; }
+  html[lang="en"] h1 { font-family: var(--display); font-weight: 600; letter-spacing: .01em; font-size: clamp(2rem, 6vw, 3rem); }
+  .meta { font-family: var(--mono); font-size: .74rem; color: var(--muted); margin: 10px 0 24px; }
+  h2 { font-family: var(--cjk); font-weight: 700; font-size: 1.2rem; letter-spacing: .06em; margin: 42px 0 12px; padding-left: 14px; border-left: 1px solid var(--gold); }
+  html[lang="en"] h2 { font-family: var(--display); font-size: 1.45rem; letter-spacing: .02em; }
+  h3 { font-size: 1rem; margin: 20px 0 6px; color: var(--ink); }
+  p, li { color: var(--body); }
+  p + p { margin-top: 10px; }
+  ul, ol { margin: 8px 0 8px 1.3em; }
+  li { margin: 5px 0; }
+  b, strong { color: var(--ink); }
+  .summary { padding: 18px 22px; border-left: 1px solid var(--gold); }
+  .summary li { margin: 9px 0; }
+  .tablewrap { overflow-x: auto; margin: 10px 0; border-radius: 12px; border: 1px solid var(--edge); }
+  table { border-collapse: collapse; width: 100%; font-size: .9rem; background: rgba(16, 18, 24, .6); }
+  th, td { padding: 8px 11px; border-bottom: 1px solid var(--edge); text-align: left; vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
+  th { font-weight: 600; color: var(--muted); font-size: .78rem; font-family: var(--mono); letter-spacing: .04em; }
+  td.num { font-family: var(--mono); white-space: nowrap; }
+  tr.pick td { background: rgba(217, 195, 143, .08); color: var(--ink); }
+  tr.pick td:first-child { box-shadow: inset 3px 0 0 var(--gold); }
+  code { font-family: var(--mono); font-size: .86em; color: var(--ink); background: rgba(255, 255, 255, .06); padding: 1px 5px; border-radius: 5px; }
+  pre { font-family: var(--mono); font-size: .8rem; background: rgba(8, 11, 18, .85); border: 1px solid var(--edge); border-radius: 12px; padding: 13px 15px; overflow-x: auto; line-height: 1.6; color: var(--body); }
+  .line { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3px 18px; font-family: var(--mono); font-size: .8rem; background: rgba(8, 11, 18, .85); border: 1px solid var(--edge); border-radius: 12px; padding: 12px 15px; }
+  .line span.m { color: var(--mint); } .line span.c { color: var(--coral); }
+  @media (max-width: 560px) { .line { grid-template-columns: 1fr; } }
+  .note { font-size: .88rem; color: var(--muted); }
+  [data-l] { display: none; }
+  html[lang="zh-Hant"] [data-l="zh"], html[lang="en"] [data-l="en"] { display: block; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="ga-top">
+    <a class="ga-brand" href="../../" aria-label="罡曜 GambitAura">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><defs><radialGradient id="gaCore" cx=".5" cy=".45" r=".55"><stop offset="0" stop-color="#fffaf0"/><stop offset=".55" stop-color="#ecdcb4"/><stop offset="1" stop-color="#c9ad74"/></radialGradient><radialGradient id="gaHalo" cx=".5" cy=".5" r=".5"><stop offset=".3" stop-color="#d9c38f" stop-opacity=".28"/><stop offset="1" stop-color="#d9c38f" stop-opacity="0"/></radialGradient></defs><circle cx="32" cy="32" r="30" fill="url(#gaHalo)"/><circle cx="32" cy="32" r="22" fill="none" stroke="#d9c38f" stroke-width="1.4" opacity=".7"/><circle cx="32" cy="32" r="15" fill="none" stroke="#d9c38f" stroke-width="1" stroke-dasharray="1.5 3.5" opacity=".6"/><circle cx="32" cy="32" r="7" fill="url(#gaCore)"/></svg>
+      <span class="ga-lock" aria-hidden="true"><span class="ga-zh">罡曜</span><span class="ga-word">Gambit<b>Aura</b></span></span>
+    </a>
+    <div class="ga-langs" role="group" aria-label="Language">
+      <button class="ga-chip" data-lang="zh" aria-pressed="true">中文</button>
+      <button class="ga-chip" data-lang="en" aria-pressed="false">EN</button>
+    </div>
+  </header>
+
+<!-- ======================= 中文 ======================= -->
+<article data-l="zh">
+  <h1>轉環：規則設計與公平性檢查</h1>
+  <p class="meta">2026-10-29 · 罡曜第二款原創棋 · <a href="../">回到遊戲</a></p>
+
+  <div class="ga-card summary">
+    <ul>
+      <li><b>螺旋開局是和棋。</b>電腦把所有 18,843,440 個局面都算過：從這個開局，雙方都下最好時，沒有人能強迫取勝。先走的一方第一手有 16 種走法，12 種保持均勢，4 種會輸，其中 2 種下一手就輸。</li>
+      <li><b>第一版規則太安全，所以改了。</b>只有「同一條輻線三子」能贏的時候，任何威脅都能用轉一個環化解，整個遊戲沒有一個局面能強迫取勝。加上「同一環上相鄰三子」也算贏以後，轉環擋得住一種威脅，卻擋不住另一種，最長的強制勝利變成 31 手。</li>
+      <li><b>雙方程度相近時，勝負接近一半一半。</b>模擬中雙方每步有 10% 機會隨機走錯：先手勝 48.9%，後手勝 48.5%，和棋 2.6%。</li>
+      <li><b>值得學。</b>只會看一步（能贏就贏、不送對方一步贏）的玩家，對上完美下法 4,000 盤全輸，平均撐 30 手左右。看得越深，越有優勢。</li>
+    </ul>
+  </div>
+
+  <h2>1. 怎麼檢查的</h2>
+  <p>棋盤有 24 格，雙方各 3 枚棋子，棋子的擺法有 2,024 × 1,330 種。再記下「上一手轉了哪個環、往哪邊轉」（決定這一手不能轉回哪裡），共 18,843,440 個局面。規則對雙方完全一樣，所以一張表就能涵蓋兩種顏色。電腦從已經連成一線的局面往回推，一層一層標出每個局面在雙方都下最好時的結果：輪到的一方會贏、會輸，或沒有人能強迫取勝（和棋）。這種做法叫逆推分析（retrograde analysis）。4 核心約 10 秒完成。</p>
+  <h3>交叉檢查</h3>
+  <ol>
+    <li><b>兩套程式數走法：</b>網頁上的規則引擎（JavaScript）和求解器（C）分開撰寫。從開局數到第 6 手的所有走法序列（16、242、3,252、43,192、575,026、7,736,316）完全相同。</li>
+    <li><b>逐一驗算：</b>由 JavaScript 引擎在 3,000 盤隨機對局中走到的 138,359 個局面，自己產生每一步的後續局面，再檢查表裡的結果是否正好由後續局面推得出來（包括幾手之內分出勝負）。0 個不一致。</li>
+  </ol>
+
+  <h2>2. 規則怎麼定出來</h2>
+  <p>每一版都用同一個求解器算完整張表，再看兩件事：有多少局面能強迫取勝，以及最長的強制勝利有幾手。如果幾乎沒有局面能強迫取勝，代表任何威脅都擋得住，棋就下不出結果。</p>
+  <div class="tablewrap"><table>
+    <tr><th>規則版本</th><th>輪到者必勝</th><th>輪到者必敗</th><th>和棋</th><th>最長強制勝利</th></tr>
+    <tr><td>只有輻線三子算贏，任何環都能轉</td><td class="num">2.4%</td><td class="num">0.0%</td><td class="num">97.6%</td><td class="num">1 手</td></tr>
+    <tr><td>只有輻線三子，只能轉有自己棋子的環</td><td class="num">2.6%</td><td class="num">0.0%</td><td class="num">97.4%</td><td class="num">3 手</td></tr>
+    <tr><td>加上環上相鄰三子，任何環都能轉</td><td class="num">19.6%</td><td class="num">2.7%</td><td class="num">77.7%</td><td class="num">19 手</td></tr>
+    <tr><td>加上環上相鄰三子，只能轉有自己棋子的環，但可以馬上轉回</td><td class="num">19.9%</td><td class="num">2.9%</td><td class="num">77.3%</td><td class="num">15 手</td></tr>
+    <tr class="pick"><td>採用：兩種連線，只能轉有自己棋子的環，不能馬上轉回</td><td class="num">22.9%</td><td class="num">3.5%</td><td class="num">73.6%</td><td class="num">31 手</td></tr>
+  </table></div>
+  <p class="note">比例只算還沒分出勝負的局面。「必勝」包含下一手就能連成的局面。</p>
+  <p>關鍵在兩種連線對轉環的反應不同：轉一個環會把輻線上的三子拆開，卻會把環上相鄰的三子整串帶著走。所以防守一方不能只靠轉環，有時得用棋子去擋。「不能馬上轉回」沿用借路「不能馬上搬回」的想法，讓強制勝利的長度加倍，也避免兩人來回轉同一個環。</p>
+
+  <h2>3. 開局怎麼選</h2>
+  <p>開局限定為公平的形狀：珊瑚的擺法是薄荷的擺法轉半圈。這樣的開局去掉旋轉和翻面重複後有 117 種：89 種是和棋，28 種先手必勝，沒有先手必敗。下表比較幾個和棋開局，模擬中雙方都下最好的走法，但每步有一定機會改成隨機走一步。</p>
+  <div class="tablewrap"><table>
+    <tr><th>薄荷（先手）</th><th>珊瑚</th><th>結果</th><th>第一手保持均勢</th><th>10% 失誤：先手／後手／和</th><th>平均手數</th></tr>
+    <tr class="pick"><td class="num">d1 e2 f3（螺旋）</td><td class="num">h1 a2 b3</td><td>和棋</td><td class="num">12 / 16</td><td class="num">48.9 / 48.5 / 2.6</td><td class="num">73</td></tr>
+    <tr><td class="num">e1 h2 e3</td><td class="num">a1 d2 a3</td><td>和棋</td><td class="num">16 / 16</td><td class="num">49.0 / 47.8 / 3.2</td><td class="num">89</td></tr>
+    <tr><td class="num">b1 g2 e3</td><td class="num">f1 c2 a3</td><td>和棋</td><td class="num">16 / 16</td><td class="num">48.5 / 48.2 / 3.3</td><td class="num">91</td></tr>
+    <tr><td class="num">e2 g2 b2</td><td class="num">a2 c2 f2</td><td>和棋</td><td class="num">10 / 10</td><td class="num">47.6 / 48.7 / 3.7</td><td class="num">93</td></tr>
+    <tr><td class="num">e1 f1 h1</td><td class="num">a1 b1 d1</td><td>先手 1 手勝</td><td class="num">1 / 7</td><td></td><td></td></tr>
+  </table></div>
+  <p>選螺旋開局有三個理由：每方三個環各一枚，輻線連線一開始就需要三個環都動到；第一手就有 4 個陷阱，開局就要想；在這幾個和棋開局裡它的對局最短，比較少拖成長時間的拉鋸。它也剛好是兩條旋臂，和罡曜的光環標誌同一個樣子。</p>
+  <h3>第一手</h3>
+  <div class="tablewrap"><table>
+    <tr><th>第一手</th><th>結果</th></tr>
+    <tr><td>內環順時針</td><td>輸：珊瑚把外環逆時針一轉，a1 a2 a3 連成一線（同時也讓薄荷連成，但走這一手的珊瑚獲勝）</td></tr>
+    <tr><td>外環逆時針</td><td>輸：珊瑚下一手連成一線</td></tr>
+    <tr><td>內環逆時針、外環順時針</td><td>輸：珊瑚 7 手內強迫取勝</td></tr>
+    <tr><td>中環任一方向，或任何一步走棋（共 12 種）</td><td>保持和棋</td></tr>
+  </table></div>
+
+  <h2>4. 看得深有沒有用</h2>
+  <p>一個只看一步的玩家：能馬上連成就連成，不走會讓對方下一手連成的棋，其餘隨機。它對上完美下法，不論先後手，4,000 盤全輸，平均在 30 手左右被擊敗。代表勝負常常來自兩三步以外的組合，例如一手同時做出兩種威脅。</p>
+
+  <h2>5. 電腦對手</h2>
+  <p>電腦用 alpha-beta 搜尋，搜尋量固定（不看時間），所以同一個局面永遠回同一手。下表用完整的結果表打分：隨機抽 300 個輪到電腦、而且還沒輸定的局面，看它的一手有沒有保住原本的結果（必勝仍是必勝，和棋至少還是和棋）。</p>
+  <div class="tablewrap"><table>
+    <tr><th>難度</th><th>保住結果</th><th>每步時間（Node）</th></tr>
+    <tr><td>簡單</td><td class="num">88.0%</td><td class="num">不到 1 毫秒</td></tr>
+    <tr><td>普通</td><td class="num">94.0%</td><td class="num">約 1 毫秒</td></tr>
+    <tr><td>困難</td><td class="num">99.7%</td><td class="num">約 0.4 秒，最多 0.7 秒</td></tr>
+  </table></div>
+  <p class="note">困難難度對上完美下法，執薄荷或執珊瑚都撐滿 200 手的測試沒有輸。它仍不是完美對手。</p>
+
+  <h2>6. 限制</h2>
+  <ul>
+    <li>模擬裡的失誤是隨機走一步，和真人的失誤不同，真人試玩仍然必要。</li>
+    <li>模擬沒有套用三次重複判和，改用 300 手上限。</li>
+    <li>「和棋」是指雙方都下最好時的結果，不代表實戰常常和棋。</li>
+  </ul>
+
+  <h2>7. 重現</h2>
+  <pre>cd zhuanhuan/analysis
+gcc -O3 -march=native -fopenmp -o solver solver.c
+./solver --perft d1,e2,f3 h1,a2,b3 6              # must match perft() in ../engine.js
+./solver --show d1,e2,f3 h1,a2,b3 --dump table.bin   # value of every first move; writes the table (38 MB)
+node check_table.mjs table.bin 3000                  # independent check with the JavaScript engine
+node probe_ai.mjs table.bin 300                      # computer player against the table
+./solver --arc 0 --rot 0 --openings | tail -1        # the first draft: no forced wins</pre>
+</article>
+
+<!-- ======================= English ======================= -->
+<article data-l="en">
+  <h1>Zhuanhuan: how the rules were made, and how fair they are</h1>
+  <p class="meta">2026-10-29 · GambitAura original game 02 · <a href="../">Back to the game</a></p>
+
+  <div class="ga-card summary">
+    <ul>
+      <li><b>The spiral opening is a draw.</b> A computer worked through all 18,843,440 positions: from this start, with best play on both sides, nobody can force a win. The first player has 16 first moves; 12 keep the balance and 4 lose, 2 of them on the very next move.</li>
+      <li><b>The first draft was too safe, so it changed.</b> When only three on a spoke could win, turning one ring always broke the threat, and no position in the whole game was a forced win. Once three side by side on a ring also wins, a turn can stop one kind of threat but not the other, and the longest forced win grows to 31 moves.</li>
+      <li><b>Between equal players, results are close to even.</b> In simulated games where each move has a 10% chance of being random, the first player wins 48.9%, the second 48.5%, and 2.6% are draws.</li>
+      <li><b>It rewards thinking ahead.</b> A player who looks only one move ahead (wins when it can, never hands over a win in one) lost all 4,000 games against perfect play, lasting about 30 moves.</li>
+    </ul>
+  </div>
+
+  <h2>1. How it was checked</h2>
+  <p>The board has 24 spots and each side has 3 pieces, so there are 2,024 × 1,330 ways to place them. Add which ring was just turned and which way (that decides what may not be turned straight back) and there are 18,843,440 positions. The rules are the same for both sides, so one table covers both colours. Starting from positions that already have a line, the computer works backwards, marking every position with its result under best play: the side to move wins, loses, or nobody can force a win (a draw). This is called retrograde analysis. It takes about 10 seconds on 4 cores.</p>
+  <h3>Cross-checks</h3>
+  <ol>
+    <li><b>Two programs count moves:</b> the rules engine on the page (JavaScript) and the solver (C) were written separately. They agree on every move sequence from the opening to depth 6 (16, 242, 3,252, 43,192, 575,026, 7,736,316).</li>
+    <li><b>Every value re-derived:</b> for 138,359 positions reached in 3,000 random games, the JavaScript engine generated each position's next positions itself, and the table's result had to follow exactly from theirs, including how many moves until the end. 0 mismatches.</li>
+  </ol>
+
+  <h2>2. How the rules were chosen</h2>
+  <p>Each version was solved in full. Two numbers matter: how many positions are forced wins, and how long the longest forced win is. If almost nothing is a forced win, every threat can be stopped and games go nowhere.</p>
+  <div class="tablewrap"><table>
+    <tr><th>Rules</th><th>Side to move wins</th><th>Side to move loses</th><th>Draw</th><th>Longest forced win</th></tr>
+    <tr><td>Only three on a spoke wins; any ring may turn</td><td class="num">2.4%</td><td class="num">0.0%</td><td class="num">97.6%</td><td class="num">1 move</td></tr>
+    <tr><td>Only three on a spoke; turn only a ring with your piece</td><td class="num">2.6%</td><td class="num">0.0%</td><td class="num">97.4%</td><td class="num">3 moves</td></tr>
+    <tr><td>Ring lines too; any ring may turn</td><td class="num">19.6%</td><td class="num">2.7%</td><td class="num">77.7%</td><td class="num">19 moves</td></tr>
+    <tr><td>Ring lines too; own rings only; turning straight back allowed</td><td class="num">19.9%</td><td class="num">2.9%</td><td class="num">77.3%</td><td class="num">15 moves</td></tr>
+    <tr class="pick"><td>Chosen: both lines, own rings only, no turning straight back</td><td class="num">22.9%</td><td class="num">3.5%</td><td class="num">73.6%</td><td class="num">31 moves</td></tr>
+  </table></div>
+  <p class="note">Shares count only positions that are not already decided. "Wins" includes positions where a line can be made at once.</p>
+  <p>The key is that the two lines react to a turn in opposite ways. Turning a ring breaks three on a spoke, but carries three side by side on that ring along unbroken. So a defender cannot rely on turning alone and sometimes has to block with a piece. "No turning straight back" follows 借路's "no moving a tile straight back". It doubles the longest forced win and stops two players from turning the same ring back and forth.</p>
+
+  <h2>3. How the opening was chosen</h2>
+  <p>Openings were limited to fair shapes: Coral's pieces are Mint's turned half way round. Leaving out turned and mirrored copies, there are 117: 89 are draws, 28 are first-player wins, and none is a first-player loss. The table compares some draws. In the simulation both sides play best moves, but each move has a set chance of being random instead.</p>
+  <div class="tablewrap"><table>
+    <tr><th>Mint (first)</th><th>Coral</th><th>Result</th><th>First moves that hold</th><th>10% slips: first / second / draw</th><th>Mean length</th></tr>
+    <tr class="pick"><td class="num">d1 e2 f3 (spiral)</td><td class="num">h1 a2 b3</td><td>Draw</td><td class="num">12 / 16</td><td class="num">48.9 / 48.5 / 2.6</td><td class="num">73</td></tr>
+    <tr><td class="num">e1 h2 e3</td><td class="num">a1 d2 a3</td><td>Draw</td><td class="num">16 / 16</td><td class="num">49.0 / 47.8 / 3.2</td><td class="num">89</td></tr>
+    <tr><td class="num">b1 g2 e3</td><td class="num">f1 c2 a3</td><td>Draw</td><td class="num">16 / 16</td><td class="num">48.5 / 48.2 / 3.3</td><td class="num">91</td></tr>
+    <tr><td class="num">e2 g2 b2</td><td class="num">a2 c2 f2</td><td>Draw</td><td class="num">10 / 10</td><td class="num">47.6 / 48.7 / 3.7</td><td class="num">93</td></tr>
+    <tr><td class="num">e1 f1 h1</td><td class="num">a1 b1 d1</td><td>First wins in 1</td><td class="num">1 / 7</td><td></td><td></td></tr>
+  </table></div>
+  <p>The spiral was chosen for three reasons. Each side has one piece on each ring, so a spoke line needs all three rings from the start. Four of the first moves are already traps, so the opening asks for thought. Of these draws it gives the shortest games, so fewer turn into long stand-offs. It also happens to have two spiral arms, the same shape as the GambitAura mark.</p>
+  <h3>The first move</h3>
+  <div class="tablewrap"><table>
+    <tr><th>First move</th><th>Result</th></tr>
+    <tr><td>Inner ring clockwise</td><td>Loses: Coral turns the outer ring anticlockwise and lines up a1 a2 a3 (this also lines up Mint, but Coral moved, so Coral wins)</td></tr>
+    <tr><td>Outer ring anticlockwise</td><td>Loses: Coral makes a line next move</td></tr>
+    <tr><td>Inner ring anticlockwise, outer ring clockwise</td><td>Loses: Coral forces a win within 7 moves</td></tr>
+    <tr><td>Middle ring either way, or any step (12 moves)</td><td>Keeps the draw</td></tr>
+  </table></div>
+
+  <h2>4. Does thinking ahead pay?</h2>
+  <p>A player who looks one move ahead makes a line when it can, avoids moves that let the other side make one next move, and otherwise moves at random. Against perfect play it lost all 4,000 games, moving first or second, usually in about 30 moves. Wins often come from plans two or three moves deep, such as one move that makes two different threats.</p>
+
+  <h2>5. The computer player</h2>
+  <p>The computer uses alpha-beta search with a fixed amount of search (not a clock), so a position always gets the same reply. It was scored against the full table: in 300 random positions where the computer is to move and not already lost, did its move keep the result (a win stays a win, a draw stays at least a draw)?</p>
+  <div class="tablewrap"><table>
+    <tr><th>Level</th><th>Keeps the result</th><th>Time per move (Node)</th></tr>
+    <tr><td>Easy</td><td class="num">88.0%</td><td class="num">under 1 ms</td></tr>
+    <tr><td>Normal</td><td class="num">94.0%</td><td class="num">about 1 ms</td></tr>
+    <tr><td>Hard</td><td class="num">99.7%</td><td class="num">about 0.4 s, at most 0.7 s</td></tr>
+  </table></div>
+  <p class="note">Playing against perfect play, as Mint or as Coral, Hard lasted the full 200-move test without losing. It is still not a perfect player.</p>
+
+  <h2>6. Limits</h2>
+  <ul>
+    <li>A simulated slip is a random move, unlike human mistakes, so play-testing with people is still needed.</li>
+    <li>The simulation does not apply the threefold-repetition draw; it stops at 300 moves instead.</li>
+    <li>"Draw" means the result under best play on both sides. It does not mean real games are often drawn.</li>
+  </ul>
+
+  <h2>7. Reproduce</h2>
+  <pre>cd zhuanhuan/analysis
+gcc -O3 -march=native -fopenmp -o solver solver.c
+./solver --perft d1,e2,f3 h1,a2,b3 6              # must match perft() in ../engine.js
+./solver --show d1,e2,f3 h1,a2,b3 --dump table.bin   # value of every first move; writes the table (38 MB)
+node check_table.mjs table.bin 3000                  # independent check with the JavaScript engine
+node probe_ai.mjs table.bin 300                      # computer player against the table
+./solver --arc 0 --rot 0 --openings | tail -1        # the first draft: no forced wins</pre>
+</article>
+
+  <footer class="ga-foot">
+    <a href="../">轉環 Zhuanhuan</a>
+    <a href="../../">GambitAura</a>
+  </footer>
+</div>
+<script>
+  function getLang() {
+    try { var v = localStorage.getItem('ga-jielu-lang'); if (v) return v; } catch (e) {}
+    return (navigator.language || '').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en';
+  }
+  function apply(l) {
+    if (l !== 'zh' && l !== 'en') l = 'zh';
+    document.documentElement.lang = l === 'zh' ? 'zh-Hant' : 'en';
+    document.title = l === 'zh' ? '轉環 公平性檢查 · 罡曜 GambitAura' : 'Zhuanhuan fairness check · GambitAura';
+    document.querySelectorAll('[data-lang]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-lang') === l)); });
+  }
+  document.querySelectorAll('[data-lang]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var l = b.getAttribute('data-lang');
+      try { localStorage.setItem('ga-jielu-lang', l); } catch (e) {}
+      apply(l);
+    });
+  });
+  apply(getLang());
+</script>
+</body>
+</html>

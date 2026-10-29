@@ -42,6 +42,82 @@ deterministic. `app.js` is the UI: a piece first means a step, a tile first mean
 v0.4 the same square can be both a step target and a liftable tile). The C solver and the JS engine
 must agree on `perft` and on `replay.mjs`; run both after touching move rules.
 
+## Game 02: 轉環 Zhuanhuan (gambitaura#5, 2026-10-29)
+
+Owner, 2026-10-29: of the two Game 02 concepts (concentric rings; light paths), "兩個都可以保留，先做
+concentric rings". So 轉環 is Game 02 and **light paths** (25 two-sided mirror tiles; a turn flips one
+mirror, not the one just flipped; first to steer your own beam to your target wins; every flip
+changes both beams) is kept as the Game 03 candidate. Name 轉環 Zhuanhuan confirmed by the owner
+on 2026-10-29 ("就用轉環"; 星軌 and 連星 were the alternatives offered).
+
+Rules: 3 rings (1 inner, 2 middle, 3 outer) × 8 spokes (a at the top, clockwise), spot = ring*8+ray
+in code, named like `e2`. Three pieces each. A turn: turn a ring that carries at least one of your
+pieces one step either way (every piece on it rides along, both sides'), or step one of your pieces
+to an empty neighbour (along its ring, or along its spoke to the next ring). The ring the other side
+just turned cannot be turned straight back on the next move. Win: three on one spoke, or three side
+by side on one ring. A move that lines up only the other side loses; one that lines up both wins for
+the mover. Threefold repetition draws. Never a pass (a ring with your piece can always turn one way).
+Opening ("spiral"): Mint d1 e2 f3 (moves first, bottom), Coral h1 a2 b3.
+
+**Solved (2026-10-29).** `zhuanhuan/analysis/solver.c`, 18,843,440 states, about 10 s on 4 cores.
+The spiral is a draw; 12 of Mint's 16 first moves hold (inner ring clockwise and outer ring
+anticlockwise lose at once; inner anticlockwise and outer clockwise lose within 7 plies). Rule
+design was decided by the solver: spoke-only lines gave 0 forced wins anywhere (turning a ring always
+breaks a spoke line), so ring lines were added (a turn carries an arc along intact); "own rings
+only" and the no-straight-back ban lengthen the longest forced win to 31 plies (15 without the ban).
+Of 117 half-turn-symmetric openings, 89 are draws, 28 first-player wins, 0 losses; the spiral has
+traps on move one and the shortest games among the draws. Simulated 10% slips: 48.9 / 48.5 / 2.6.
+A one-move-lookahead player loses 100% to perfect play (about 30 plies). Cross-checks: perft to 6
+agrees with `engine.js` (16 … 7,736,316); `check_table.mjs` re-derives 138,359 table values from the
+JS engine's own move generation with 0 mismatches. **Any rule or opening change must be re-solved.**
+
+**Code.** `engine.js` (pure rules, 24-bit masks per side), `ai.js` (alpha-beta, node budget: easy
+depth 1, normal depth 3, hard 200k nodes; keeps the solved result in 88 / 94 / 99.7% of sampled
+positions; hard about 0.4 s), `app.js` on `assets/shell.js`. Pieces are HTML on the board in polar
+form (`rotate(a) translateY(-r) rotate(-a)`, `cqw` units), so a ring turn animates along the arc;
+each ring's SVG group turns with it. In SVG with `transform-box: view-box`, `transform-origin: 0 0`
+is the viewBox origin, which is the board centre here (50% 50% was the bug). Turns are made with
+the row of buttons under the board; the banned direction is disabled and explained in the status.
+Test: `tests/zhuanhuan.cjs` (31 checks).
+
+## The hub and the classics (gambitaura#5, 2026-10-28)
+
+Owner, 2026-10-28: put several board and strategy games on one site, the homepage as a game hub
+with each game at its own address; the four classics Hex, Reversi, Gomoku and Nim, "然後主要是我們
+自己構思創作平衡的棋類" (the main line stays our own originally designed, balanced games). So the
+hub has two shelves: **原創 Originals** (借路, 轉環, then a Game 03 slot "in the works") above **經典
+Classics** (four cards with mini boards drawn in the site's style).
+
+Fairness copy must stay honest. A game with no draws always has a forced winner under perfect
+play, so "solved so that neither side has a forced win" is only true of the originals we solve.
+The hub's principle III is "公平，說清楚 / Fairness, stated plainly": originals have their openings
+solved; classics use an accepted balancing rule and each page says how fair it really is:
+- 六角連線 Hex (`hex/`, boards 7 · 9 · 11, Jade joins top and bottom, Agate left and right): no
+  draws, first player wins in theory (Nash's strategy-stealing argument); the swap rule.
+- 黑白棋 Reversi (`reversi/`, 8 × 8): weakly solved as a draw (Takizawa, 2023). Black alternates
+  between the two players each game.
+- 五子棋 Gomoku (`gomoku/`, 15 × 15, free-style: six or more counts): free-style is a first-player
+  win (Allis, 1994); Swap2 opening (one player lays black, white, black; the other takes white,
+  takes black, or lays two more and lets the opener pick). Swap2 is not proven fair, and the page
+  says so; it makes the opener lay a balanced start.
+- 取石子 Nim (`nim/`, 3 to 5 piles of 1 to 7): every position is solved (Bouton, 1901), so fairness
+  lives in the format: one player sets up the piles, the other looks and picks first or second,
+  roles swap every game. A perfect chooser wins any single game; the match is what is fair. The
+  hard computer sets traps (nim-sum 0) and always reads the position right; the teaching view
+  shows each pile in binary, the nim-sum and one winning move.
+
+**Code.** `assets/game.css` holds the shared game page (extracted from 借路; `.boardframe` and `.at`
+take `--n` cells per side). `assets/shell.js` holds the shared helpers and `AIClient` (module Web
+Worker, replies no sooner than 520 ms, stale replies dropped). Every computer player is
+deterministic (no `Math.random`): Reversi is alpha-beta with a node budget plus an exact endgame
+(perft matches the published 4 12 56 244 1396 8200 55092 390216); Hex is UCT with RAVE on a fixed
+playout count, seeded from a hash of the position, and decides swaps with its hard search on every
+level (swap when its best reply wins under 52%); Gomoku is a shape table plus a win-by-fours (VCF)
+search and alpha-beta with a node budget, opening from six fixed starts it scored as the least
+lopsided (balanced in its own judgement, not proven); Nim is exact nim-sum play with weaker
+levels by design. 借路 keeps its own `app.js` logic. The language key `ga-jielu-lang` is
+shared by every page; other settings use `ga-<game>-<key>`.
+
 ## Design system: "Ling Mo" 靈墨 (`assets/ga.css`, 2026-10-28)
 
 Owner's brief: 霸氣, 科技感, Aura 感 (gambitaura#2 answered it with "Aura Noir": neon gradients,
@@ -79,8 +155,9 @@ of boxes. Do not bring back rainbow gradients, gradient buttons, glossy orbs or 
 - Copy rules (the owner's, shared with their other sites): plain language for a general reader, no
   em dashes in site copy, short sentences. zh-Hant and English for every string.
 - Test every UI change in headless Chromium: start a static server and run `node tests/e2e.cjs`
-  (31 checks: moves, tile moves, draw dialog and overlay, scoreboard, language, phone widths, no
-  console errors). Look at the screenshots in `tests/out/`.
+  (41 checks: the hub's game cards, 借路 moves, tile moves, draw dialog and overlay, scoreboard,
+  language, phone widths, no console errors) and the test of any classic you touched
+  (`tests/<game>.cjs`). Look at the screenshots in `tests/out/`.
 - Owner merges PRs; work on feature branches. Work references are `gambitaura#n` (continuing from
   the portfolio repo), used as the PR title prefix `[gambitaura#n]`.
 - Commit messages explain the reasoning (design or rules rationale), not just the diff.
@@ -94,5 +171,7 @@ of boxes. Do not bring back rainbow gradients, gradient buttons, glossy orbs or 
   tick "Enforce HTTPS". Do not add Cloudflare redirect rules or turn on the proxy (README explains
   why). Cloud sessions cannot reach gambitaura.com, docs.github.com or developers.cloudflare.com
   unless the environment allows them. Play-testing with people still to do.
+- Originals are the main line. 轉環 is Game 02; light paths is the Game 03 candidate, to be solved
+  like the others before it ships. Play-testing 轉環 with people is still to do.
 - 罡曜 has not been checked against trademarks (e.g. TIPO in Taiwan) or app stores yet. Other
   candidates considered on 2026-10-28: 鋼曜, 罡奧, 罡闢奧, 罡比特.
