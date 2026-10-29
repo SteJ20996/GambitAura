@@ -23,7 +23,7 @@ for (let s = 0; s < SPOTS; s++) {
   NB.push(n);
 }
 
-// The suggested opening: each side's pieces curl outward in a spiral, one per ring,
+// The opening: each side's pieces curl outward in a spiral, one per ring,
 // and Coral's spiral is Mint's turned half way round. The solver shows it is a draw.
 export const OPENING = [['d1', 'e2', 'f3'], ['h1', 'a2', 'b3']];
 

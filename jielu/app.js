@@ -15,9 +15,10 @@ const T = {
     you: '你', cpu: '電腦',
     round: (n) => `第 ${n} 局`, firstMove: (s) => `${T.zh.side[s]}先手`,
     plyN: (n) => `第 ${n} 手`,
-    verV05: '開局 v0.5 提案', verV04: '開局 v0.4 原版',
-    noteV05: '<b>建議開局。</b>水洞在 A2、E2、A4、E4。電腦完整求解的結果：雙方都無法強迫取勝，誰先犯錯誰吃虧。',
-    noteV04: '<b>原版開局。</b>水洞在 B2、D2、B4、D4。電腦完整求解的結果：先走的一方怎麼走都會輸，後手最多 22 手內獲勝。',
+    optStd: '標準', optOrig: '最初',
+    verV05: '標準開局', verV04: '最初的開局',
+    noteV05: '<b>標準開局。</b>水洞在 A2、E2、A4、E4。電腦完整求解的結果：雙方都無法強迫取勝，誰先犯錯誰吃虧。',
+    noteV04: '<b>最初的開局。</b>水洞在 B2、D2、B4、D4。電腦完整求解的結果：先走的一方怎麼走都會輸，後手最多 22 手內獲勝。所以標準開局把水洞往外移了一欄。',
     turnYou: '輪到你', turnAi: '電腦思考中', turnSide: (s) => `輪到${T.zh.side[s]}`,
     hintPick: '走棋：點自己的棋子，再點圓點。搬地板：直接點虛線框的地板，再點水洞。',
     hintPiece: '點圓點走一格。想搬地板，改點虛線框的地板。',
@@ -56,9 +57,10 @@ const T = {
     you: 'You', cpu: 'Computer',
     round: (n) => `Game ${n}`, firstMove: (s) => `${T.en.side[s]} first`,
     plyN: (n) => `Move ${n}`,
-    verV05: 'Opening v0.5 proposal', verV04: 'Opening v0.4 original',
-    noteV05: '<b>Suggested opening.</b> Water at A2, E2, A4, E4. A full computer solve shows neither side can force a win. The first real mistake decides it.',
-    noteV04: '<b>Original opening.</b> Water at B2, D2, B4, D4. A full computer solve shows the side that moves first loses whatever it does; the second player wins within 22 moves.',
+    optStd: 'Standard', optOrig: 'Original',
+    verV05: 'Standard opening', verV04: 'Original opening',
+    noteV05: '<b>Standard opening.</b> Water at A2, E2, A4, E4. A full computer solve shows neither side can force a win. The first real mistake decides it.',
+    noteV04: '<b>Original opening.</b> Water at B2, D2, B4, D4. A full computer solve shows the side that moves first loses whatever it does; the second player wins within 22 moves. That is why the standard opening moves the water one file outward.',
     turnYou: 'Your move', turnAi: 'Computer is thinking', turnSide: (s) => `${T.en.side[s]} to move`,
     hintPick: 'To step: tap your piece, then a dot. To move a tile: tap a dashed tile, then a water square.',
     hintPiece: 'Tap a dot to step there. To move a tile instead, tap a dashed tile.',
@@ -104,14 +106,14 @@ if (!['ai', 'pvp'].includes(mode)) mode = 'ai';
 if (!['easy', 'normal', 'hard'].includes(level)) level = 'normal';
 if (!E.LAYOUTS[layoutId]) layoutId = 'v05';
 
-const HUMAN = MINT;   // vs computer, the player is Mint (as in v0.4)
+const HUMAN = MINT;   // vs computer, the player is Mint
 let first = MINT;     // a fresh load starts with Mint; "Next game" swaps
 let state = null;
 let sel = null, selSrc = null;
 let busy = false;
 let logRows = [];
 let reqId = 0;
-// Session score only: a reload starts over, as in v0.4.
+// Session score only: a reload starts over.
 let score = [0, 0], gameNo = 1, counted = false, overlayHidden = false;
 
 // ---------- DOM ----------
