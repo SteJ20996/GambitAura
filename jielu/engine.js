@@ -25,9 +25,10 @@ const bit = (c) => 1 << c;
 const has = (m, c) => (m >> c) & 1;
 
 // Starting layouts. Everything else in the rules is shared.
-// v0.4 is the documented layout; the solver shows the side to move there is
-// lost (the second player wins in at most 22 plies). v0.5 moves the four
-// holes one file outward; its start is a theoretical draw.
+// v05 is the standard opening: its start is a theoretical draw. v04 is the
+// original layout; the solver shows the side to move there is lost (the second
+// player wins in at most 22 plies), so the standard one moves the four holes
+// one file outward. The ids are internal (and stored in settings), never shown.
 export const LAYOUTS = {
   v05: { id: 'v05', holes: [5, 9, 15, 19], pieces: [[21, 23], [1, 3]] },   // A2 E2 A4 E4
   v04: { id: 'v04', holes: [6, 8, 16, 18], pieces: [[21, 23], [1, 3]] },   // B2 D2 B4 D4

@@ -29,9 +29,12 @@ with no legal move. Threefold repetition draws. Source: `jielu/docs/mechanics-v0
 **Solved (2026-10-28).** `jielu/analysis/solver.c` solves every position with four water squares
 (456,515,280 states). The v0.4 opening (water B2 D2 B4 D4) is a forced win for the SECOND player
 within 22 plies; proven again by `verify_strategy.mjs` replaying the exported strategy in the JS
-engine. Proposed v0.5 opening, **pending the owner's decision**: water A2 E2 A4 E4, everything else
-unchanged; theoretical draw, about 50/50 between equal players in random-slip simulation, 56-ply
-games at high skill (runner-up C2 B3 D3 C4). The demo defaults to v0.5 and keeps v0.4 selectable.
+engine. The **standard opening** (internally v0.5, adopted 2026-10-29): water A2 E2 A4 E4, everything
+else unchanged; theoretical draw, about 50/50 between equal players in random-slip simulation, 56-ply
+games at high skill (runner-up C2 B3 D3 C4). The page defaults to it and keeps the original (v0.4)
+opening selectable. Owner, 2026-10-29: "請把網站裡說明'提案'的文字全部去除，也把版本號去除", so the
+site says 標準開局 / Standard and 最初的開局 / Original, never v0.4, v0.5, proposal or suggestion;
+the ids `v05` / `v04` stay internal (code and the stored setting).
 The reversal ban only bites after a diagonal tile move with an opponent piece on the 2×2 block's
 fourth corner (about 1.3% of positions), never forces a pass, and counts in the repetition key only
 when it bites. **Any change to the board, opening or win rule must be re-solved before it ships.**
@@ -217,7 +220,9 @@ of boxes. Do not bring back rainbow gradients, gradient buttons, glossy orbs or 
 ## Working rules
 
 - Copy rules (the owner's, shared with their other sites): plain language for a general reader, no
-  em dashes in site copy, short sentences. zh-Hant and English for every string.
+  em dashes in site copy, short sentences. zh-Hant and English for every string. No version numbers
+  and no proposal or suggestion wording in site copy (owner, 2026-10-29): the games are presented
+  as they are, and design history says "the original opening" or "the first rules".
 - Test every UI change in headless Chromium: start a static server and run `node tests/e2e.cjs`
   (44 checks: the hub's game cards, 借路 moves, tile moves, draw dialog and overlay, scoreboard,
   language, phone widths, no console errors) and the test of any classic you touched
@@ -229,8 +234,9 @@ of boxes. Do not bring back rainbow gradients, gradient buttons, glossy orbs or 
 
 ## Open threads
 
-- v0.5 opening adoption and the matching mechanics-doc update (§2 table, §4/§5.1 examples, §5.3 and
-  §7.2 wording, §11).
+- The owner's mechanics document (`jielu/docs/mechanics-v0.4.md`, not linked from the site) still
+  describes the original opening; updating it (§2 table, §4/§5.1 examples, §5.3 and §7.2 wording,
+  §11) is the owner's call.
 - Keep the repository public (2026-10-29): while it was private on GitHub Free, the 光路 merge did
   not deploy and gambitaura.com showed GitHub's 404 "There isn't a GitHub Pages site here". Going
   public again was not enough: the owner re-enabled Settings → Pages (main, root, custom domain,

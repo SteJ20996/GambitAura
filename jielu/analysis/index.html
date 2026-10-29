@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="description" content="借路 Jielu v0.4 規則審查：完整求解顯示原版開局後手必勝，並提出經驗證的 v0.5 開局。" />
+<meta name="description" content="借路 Jielu 公平性檢查：最初的開局後手必勝，標準開局經完整求解是和棋。" />
 <title>借路 公平性檢查 · 罡曜 GambitAura</title>
 <link rel="icon" href="../../favicon.svg" type="image/svg+xml" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -60,15 +60,15 @@
 
 <!-- ======================= 中文 ======================= -->
 <article data-l="zh">
-  <h1>借路 v0.4 規則審查與公平性檢查</h1>
-  <p class="meta">2026-10-28 · 依據《借路》遊戲機制 v0.4（整理日期 2026-10-26） · <a href="../">回到遊戲</a></p>
+  <h1>借路：規則設計與公平性檢查</h1>
+  <p class="meta">2026-10-28 · 罡曜第一款原創棋 · <a href="../">回到遊戲</a></p>
 
   <div class="ga-card summary">
     <ul>
-      <li><b>v0.4 開局後手必勝。</b>不論哪一方先走，先走的一方在開局就已經輸了：四個合法的第一手全部會輸，對手最多 22 手內抵達旗格。這是電腦完整求解的結果，並由第二套程式獨立驗證。</li>
-      <li><b>原因是「必須走棋」。</b>v0.4 規定只要還有合法行動就不能跳過。開局時先走的一方只有兩種動作：把守在對方旗格旁的棋子移開，或把面前的水洞填平。前者讓出入口，後者替對方鋪路，四個選項都會削弱自己。</li>
-      <li><b>建議修法：只移動四個水洞。</b>把水洞從 B2、D2、B4、D4 移到 A2、E2、A4、E4，其他規則不變。新開局是理論和棋，也就是雙方都無法強迫取勝。在模擬的同等程度對局中（每步失誤率 5% 到 30%），先手勝率維持在 50% 到 53% 之間。</li>
-      <li>其他規則沒有發現矛盾。「禁止立即搬回」實際生效的範圍比文字看起來窄得多，建議在文件中寫清楚。</li>
+      <li><b>標準開局是和棋。</b>水洞在 A2、E2、A4、E4。電腦把所有局面都算過：從這個開局，雙方都下最好時，沒有人能強迫取勝。在模擬的同等程度對局中（每步失誤率 5% 到 30%），先手勝率維持在 50% 到 53% 之間。</li>
+      <li><b>最初的開局後手必勝，所以改了。</b>最初水洞在 B2、D2、B4、D4。不論哪一方先走，先走的一方在開局就已經輸了：四個合法的第一手全部會輸，對手最多 22 手內抵達旗格。這是電腦完整求解的結果，並由第二套程式獨立驗證。</li>
+      <li><b>原因是「必須走棋」。</b>只要還有合法行動就不能跳過。在最初的開局，先走的一方只有兩種動作：把守在對方旗格旁的棋子移開，或把面前的水洞填平。前者讓出入口，後者替對方鋪路，四個選項都會削弱自己。標準開局只移動四個水洞，其他規則不變。</li>
+      <li>其他規則沒有發現矛盾。「不能馬上搬回」實際生效的範圍比字面上窄得多（約 1.3% 的局面），而且永遠不會逼人跳過。</li>
     </ul>
   </div>
 
@@ -81,7 +81,8 @@
     <li><b>獨立證明：</b>把後手的必勝策略匯出，由 JavaScript 引擎窮舉先手的所有應對，共 12,121 個不同局面。每一條路線都在 22 手內由後手抵達旗格，途中不會出現三次重複。</li>
   </ol>
 
-  <h2>2. 發現一：v0.4 開局後手必勝</h2>
+  <h2>2. 最初的開局：後手必勝</h2>
+  <p>最初的開局，水洞在 B2、D2、B4、D4，棋子和標準開局相同。</p>
   <div class="tablewrap"><table>
     <tr><th>先手（薄荷）第一手</th><th>雙方都下最好時</th></tr>
     <tr><td>B5 走到 A5</td><td>珊瑚 21 手內獲勝</td></tr>
@@ -105,17 +106,17 @@
   </div>
   <p>這不是「先手稍微吃虧」，而是在雙方都下對的前提下，結果在第一手之前就已經決定。實戰中影響也很大。模擬雙方每一步都有固定機率隨手亂走：失誤率 5%（接近高手）時後手勝 83%，15% 時後手仍勝 66%，要到 50%（近乎亂下）才接近五五波。</p>
 
-  <h2>3. 為什麼文件原有的檢查看不出來</h2>
-  <p>文件第 8、11 節很謹慎，已經提醒「先手輪替不等於證明沒有先手優勢」。實際情況比這句提醒更嚴重：原有的三種檢查，在結構上都看不到這類問題。</p>
+  <h2>3. 為什麼一般的檢查看不出來</h2>
+  <p>「先手輪替」不等於證明沒有先手優勢。實際情況更嚴重：常見的三種檢查，在結構上都看不到這類問題。</p>
   <ul>
     <li><b>換色對稱檢查</b>只能證明「薄荷先走」和「珊瑚先走」一樣，無法比較「先走」和「後走」。這次的問題正好出在先後，不在顏色。</li>
     <li><b>先手輪替</b>在連續對局中反而會把問題藏起來：每個人都在自己後走的那局獲勝，比分永遠接近 1:1，看起來很公平，其實每一局在開始前就已決定。</li>
     <li><b>三手搜尋的電腦</b>看不到 22 手深的必勝線，所以電腦對戰的結果也不會暴露問題。</li>
   </ul>
-  <p>這不是文件寫錯，而是這類問題只有完整求解或很深的搜尋才看得出來。建議往後每次改動棋盤、開局或勝負條件，都重新跑一次求解（本頁附原始碼）。</p>
+  <p>這類問題只有完整求解或很深的搜尋才看得出來。所以往後每次改動棋盤、開局或勝負條件，都會重新跑一次求解（本頁附原始碼）。</p>
 
-  <h2>4. 發現二：「禁止立即搬回」只在很窄的情況下生效</h2>
-  <p>文件 §5.3 的寫法，容易讓人以為每次搬地板後，對手下一手都受到限制。實際上：</p>
+  <h2>4. 「不能馬上搬回」只在很窄的情況下生效</h2>
+  <p>這條規則容易讓人以為每次搬地板後，對手下一手都受到限制。實際上：</p>
   <ul>
     <li>搬地板時，來源和落點都貼著同一枚支點棋子。如果兩格在支點的兩側（排成一直線），唯一同時貼著兩格的就是那枚支點棋子本身，對手根本沒有棋子能把它搬回去，限制不會發生作用。</li>
     <li>只有來源和落點成斜角，而且這個 2×2 方塊的第四個角剛好站著對手的棋子時，限制才真正擋住一步棋。</li>
@@ -124,35 +125,35 @@
   <p>另外兩點：</p>
   <ul>
     <li><b>限制永遠不會逼人跳過。</b>限制生效時，那枚對手棋子貼著剛放好的地板，隨時可以改成走上去。掃描全部局面也找不到反例。</li>
-    <li><b>判斷「同一局面」的方式。</b>文件 §7.2 把搬回限制算進局面。如果實作是每次搬地板後都記錄限制（包括不可能生效的情況），兩個在玩家眼中完全相同、可選的走法也完全相同的局面，會被當成不同局面，「和」的提醒可能比預期晚出現。建議改成：只有限制真的會擋住某一步時，才算進局面。本 demo 採用這個做法；它不改變任何局面的勝負。</li>
+    <li><b>判斷「同一局面」的方式。</b>搬回限制只有在真的會擋住某一步時，才算進局面。如果每次搬地板後都記下限制（包括不可能生效的情況），兩個在玩家眼中完全相同、可選的走法也完全相同的局面，會被當成不同局面，「和」的提醒會比預期晚出現。這個做法不改變任何局面的勝負。</li>
   </ul>
 
   <h2>5. 檢查過、沒有問題的部分</h2>
   <ul>
-    <li><b>走棋不會破壞「不得完全封死」。</b>棋子只走到相鄰地板，仍在同一片相連的地板上，所以只需要在搬地板後檢查。文件的做法正確。</li>
+    <li><b>走棋不會破壞「不得完全封死」。</b>棋子只走到相鄰地板，仍在同一片相連的地板上，所以只需要在搬地板後檢查。</li>
     <li><b>和棋很少。</b>在輪到薄荷、沒有搬回限制的 2.06 億個局面中，理論和棋只占約 1.5%。用棋子堵路雖然合法，並不會讓這個遊戲變得容易和棋。</li>
-    <li><b>被迫跳過確實會發生</b>（3,000 盤隨機對局中出現 36 次），文件 §6 的處理沒有矛盾。</li>
+    <li><b>被迫跳過確實會發生</b>（3,000 盤隨機對局中出現 36 次），規則對這種情況的處理沒有矛盾。</li>
     <li>抵達旗格優先於三次重複、資訊完全公開、沒有隨機，都和規則一致。</li>
   </ul>
 
-  <h2>6. 修法比較</h2>
+  <h2>6. 標準開局怎麼選出來</h2>
   <h3>為什麼不用「允許跳過」或「選邊規則」</h3>
   <ul>
     <li><b>允許主動跳過：</b>開局雙方都不想先動，就會互相跳過，很快進入三次重複和棋，遊戲失去張力。（這個變體沒有重新求解，此為推論。）</li>
-    <li><b>選邊規則</b>（一方先走第一手，另一方再選要哪一邊）：v0.4 開局任何第一手都會讓「接著走的一方」必勝，選邊的人只要選接著走的那方就贏，問題沒有解決。</li>
+    <li><b>選邊規則</b>（一方先走第一手，另一方再選要哪一邊）：在最初的開局，任何第一手都會讓「接著走的一方」必勝，選邊的人只要選接著走的那方就贏，問題沒有解決。</li>
   </ul>
   <h3>只改水洞位置</h3>
   <p>棋子仍在 B5、D5 和 B1、D1。下表列出所有左右對稱、雙方互為鏡像的 4 洞配置。勝率欄是模擬雙方同等程度對局的先手勝率，每格 20,000 局。</p>
   <div class="tablewrap"><table>
     <tr><th>水洞</th><th>完美對局</th><th>先手勝率<br>失誤 5%</th><th>先手勝率<br>失誤 15%</th><th>先手勝率<br>失誤 30%</th><th>平均手數<br>失誤 5%</th></tr>
-    <tr><td class="num">B2 D2 B4 D4（v0.4）</td><td>後手 22 手內必勝</td><td class="num">17.1%</td><td class="num">33.8%</td><td class="num">43.5%</td><td class="num">20</td></tr>
+    <tr><td class="num">B2 D2 B4 D4（最初）</td><td>後手 22 手內必勝</td><td class="num">17.1%</td><td class="num">33.8%</td><td class="num">43.5%</td><td class="num">20</td></tr>
     <tr><td class="num">A1 E1 A5 E5</td><td>後手 18 手內必勝</td><td class="num">未模擬</td><td class="num"></td><td class="num"></td><td class="num"></td></tr>
-    <tr class="pick"><td class="num">A2 E2 A4 E4（建議）</td><td>和棋</td><td class="num">50.3%</td><td class="num">52.2%</td><td class="num">51.9%</td><td class="num">56</td></tr>
+    <tr class="pick"><td class="num">A2 E2 A4 E4（標準）</td><td>和棋</td><td class="num">50.3%</td><td class="num">52.2%</td><td class="num">51.9%</td><td class="num">56</td></tr>
     <tr><td class="num">C2 A3 E3 C4</td><td>和棋</td><td class="num">69.5%</td><td class="num">60.1%</td><td class="num">58.8%</td><td class="num">45</td></tr>
     <tr><td class="num">C2 B3 D3 C4</td><td>和棋</td><td class="num">51.4%</td><td class="num">52.8%</td><td class="num">53.2%</td><td class="num">43</td></tr>
     <tr><td class="num">A3 B3 D3 E3</td><td>和棋</td><td class="num">50.5%</td><td class="num">53.1%</td><td class="num">56.0%</td><td class="num">44</td></tr>
   </table></div>
-  <p>建議 <b>A2、E2、A4、E4</b>，理由如下：</p>
+  <p>標準開局選 <b>A2、E2、A4、E4</b>，理由如下：</p>
   <ol>
     <li><b>改動最小：</b>水洞只往外移一欄，所在的列不變。</li>
     <li><b>各種程度都最接近五五波。</b>C2 A3 E3 C4 雖然理論上也是和棋，實戰卻明顯偏向先手，可見「理論和棋」不等於「實戰公平」，兩者都要檢查。</li>
@@ -162,16 +163,10 @@
   <p>次選是 C2、B3、D3、C4：同樣接近五五波，但只有一步能守和的局面更多（約 66%，A2 E2 A4 E4 約 59%），棋風更尖銳。</p>
   <p class="note">限制：模擬中的「失誤」是隨機亂走一步，和真人的失誤型態不同，真人試玩仍然必要。模擬沒有套用三次重複規則，只設 400 手上限（沒有任何一局撞到上限），所以真人對局的和棋比例可能較高。理論和棋代表完美對局下無人能贏，實戰勝負取決於誰先犯錯；在這個開局的和棋局面中，平均只有約 27% 的走法能守住和棋，犯錯的空間很大。</p>
 
-  <h2>7. 建議的 v0.5 改動清單</h2>
-  <ol>
-    <li>初始水洞改為 A2、E2、A4、E4。其餘規則不變。</li>
-    <li>更新文件 §2 的表格，以及 §4、§5.1 的例子：B4 不再是水洞，開局時棋子旁邊沒有水洞，所以第一手只能走棋。</li>
-    <li>§5.3 補一句限制實際生效的情況；§7.2 改成「只有會擋住某一步的搬回限制，才算進局面」。</li>
-    <li>§11 補上：開局已用完整求解確認雙方都沒有必勝。往後改棋盤或開局，重跑一次求解。</li>
-  </ol>
+  <p class="note">標準開局時，棋子旁邊沒有水洞，所以第一手只能走棋。</p>
 
-  <h2>8. Demo 的電腦對手</h2>
-  <p>簡單：只看一步，但認得「棋子已貼在自己旗格旁＝下一步必勝」。普通：三手搜尋，和 v0.4 同深度。困難：逐步加深的搜尋，每步固定 25 萬個節點上限，所以同一局面永遠得到同一步，不靠計時，也不靠隨機。</p>
+  <h2>7. 電腦對手</h2>
+  <p>簡單：只看一步，但認得「棋子已貼在自己旗格旁＝下一步必勝」。普通：三手搜尋。困難：逐步加深的搜尋，每步固定 25 萬個節點上限，所以同一局面永遠得到同一步，不靠計時，也不靠隨機。</p>
   <p>用求解結果出題測試：</p>
   <div class="tablewrap"><table>
     <tr><th>難度</th><th>3 到 9 手內必勝的局面，找到致勝手</th><th>理論和棋、有 8 手內會輸的陷阱，成功避開</th></tr>
@@ -181,7 +176,7 @@
   </table></div>
   <p class="note">困難難度每步約 0.4 到 1.4 秒。它不是完美對手，看不到很長的計畫。</p>
 
-  <h2>9. 重現</h2>
+  <h2>8. 重現</h2>
   <p>原始碼在本資料夾：<code>solver.c</code>（求解器）、<code>replay.mjs</code>、<code>verify_strategy.mjs</code>、<code>probe_ai.mjs</code>（和網頁引擎對照）。需要約 4 GB 記憶體與 4 GB 磁碟。</p>
 <pre>gcc -O3 -march=native -fopenmp -o solver solver.c
 ./solver check 200000                 # 往回推與往前走互為鏡像
@@ -195,15 +190,15 @@ node verify_strategy.mjs coral.txt ../engine.js
 
 <!-- ======================= English ======================= -->
 <article data-l="en">
-  <h1>Jielu v0.4: rules review and fairness check</h1>
-  <p class="meta">2026-10-28 · based on the Jielu mechanics document v0.4 (2026-10-26) · <a href="../">Back to the game</a></p>
+  <h1>Jielu: how the rules were made, and how fair they are</h1>
+  <p class="meta">2026-10-28 · GambitAura original game 01 · <a href="../">Back to the game</a></p>
 
   <div class="ga-card summary">
     <ul>
-      <li><b>The v0.4 opening is a win for the second player.</b> Whichever side moves first is already lost: all four legal first moves lose, and the opponent reaches its flag within 22 moves. This comes from a full computer solve and was checked again by a second, separate program.</li>
-      <li><b>The cause is the duty to move.</b> v0.4 does not allow a pass while any legal move exists. At the start, the first player can only move a piece that guards the other flag, or fill the water in front of it. The first opens a door, the second builds a road for the opponent. All four options hurt.</li>
-      <li><b>Suggested fix: move the four water squares, nothing else.</b> Move them from B2, D2, B4, D4 to A2, E2, A4, E4. The new start is a theoretical draw: neither side can force a win. In simulated games between equal players (5% to 30% of moves are slips), the first player wins 50% to 53% of the time.</li>
-      <li>No other contradictions were found. The "no instant undo" rule applies far less often than its wording suggests, and the document should say so.</li>
+      <li><b>The standard opening is a draw.</b> The water is on A2, E2, A4, E4. A computer worked through every position: from this start, with best play on both sides, nobody can force a win. In simulated games between equal players (5% to 30% of moves are slips), the first player wins 50% to 53% of the time.</li>
+      <li><b>The original opening was a second-player win, so it changed.</b> The water used to be on B2, D2, B4, D4. Whichever side moved first was already lost: all four legal first moves lose, and the opponent reaches its flag within 22 moves. This comes from a full computer solve and was checked again by a second, separate program.</li>
+      <li><b>The cause is the duty to move.</b> The rules do not allow a pass while any legal move exists. In the original opening, the first player can only move a piece that guards the other flag, or fill the water in front of it. The first opens a door, the second builds a road for the opponent. All four options hurt. The standard opening moves only the four water squares; every other rule stays.</li>
+      <li>No other contradictions were found. "No moving a tile straight back" applies far less often than its wording suggests (about 1.3% of positions), and it never forces a pass.</li>
     </ul>
   </div>
 
@@ -216,7 +211,8 @@ node verify_strategy.mjs coral.txt ../engine.js
     <li><b>Independent proof:</b> the second player's winning strategy was exported and the JavaScript engine tried every reply for the first player, 12,121 distinct positions. Every line ends with the second player on its flag within 22 moves, with no threefold repetition along the way.</li>
   </ol>
 
-  <h2>2. Finding one: the v0.4 opening is a second-player win</h2>
+  <h2>2. The original opening: a second-player win</h2>
+  <p>In the original opening the water is on B2, D2, B4, D4; the pieces start where they do in the standard one.</p>
   <div class="tablewrap"><table>
     <tr><th>First move (Mint)</th><th>Under best play</th></tr>
     <tr><td>B5 to A5</td><td>Coral wins within 21 more moves</td></tr>
@@ -240,17 +236,17 @@ node verify_strategy.mjs coral.txt ../engine.js
   </div>
   <p>This is not a small edge: with correct play the result is fixed before the first move. It also matters in practice. When each move has a fixed chance of being a random slip, the second player wins 83% of games at a 5% slip rate (close to expert play) and still 66% at 15%. Only near-random play (50%) evens out.</p>
 
-  <h2>3. Why the document's own checks could not see it</h2>
-  <p>Sections 8 and 11 of the document are careful: they already say that alternating the first move does not prove there is no first-move edge. The real situation is stronger than that warning, because each of the three existing checks is blind to this kind of problem by design.</p>
+  <h2>3. Why the usual checks cannot see it</h2>
+  <p>Alternating the first move does not prove there is no first-move edge. The real situation is stronger than that, because each of the three usual checks is blind to this kind of problem by design.</p>
   <ul>
     <li><b>The colour-swap symmetry check</b> shows that Mint-first equals Coral-first. It cannot compare moving first with moving second, and that is exactly where the problem is.</li>
     <li><b>Alternating the first move</b> hides it over a series: each player wins the game where they move second, so the score stays near 1:1 and looks fair, while every single game is decided in advance.</li>
     <li><b>The three-move computer</b> cannot see a 22-move forced win, so computer games do not expose it either.</li>
   </ul>
-  <p>None of this is an error in the document; only a full solve or a very deep search can show it. The suggestion is to rerun the solve after any change to the board, the opening or the win condition (the source is on this page).</p>
+  <p>Only a full solve or a very deep search can show this kind of problem. So the solve is run again after any change to the board, the opening or the win condition (the source is on this page).</p>
 
-  <h2>4. Finding two: "no instant undo" applies only in a narrow case</h2>
-  <p>Section 5.3 reads as if every tile move restricts the opponent's next move. In fact:</p>
+  <h2>4. "No moving a tile straight back" applies only in a narrow case</h2>
+  <p>The rule reads as if every tile move restricts the opponent's next move. In fact:</p>
   <ul>
     <li>The tile's old and new squares both touch the same anchor piece. If they sit on opposite sides of it, in a straight line, the only piece touching both is the anchor itself, so the opponent can never move the tile back and the rule never applies.</li>
     <li>The rule only blocks a move when the two squares are diagonal and the fourth corner of that 2×2 block holds an opponent's piece.</li>
@@ -259,35 +255,35 @@ node verify_strategy.mjs coral.txt ../engine.js
   <p>Two more points:</p>
   <ul>
     <li><b>The rule can never force a pass.</b> Whenever it applies, the opponent's piece touches the tile that was just placed and can step onto it instead. A scan of every position found no exception.</li>
-    <li><b>What counts as "the same position".</b> Section 7.2 includes the undo rule in the position. If the code records it after every tile move, including cases where it can never apply, two positions that look the same and offer exactly the same moves are counted as different, and the draw warning can come later than players expect. Suggested wording: count the rule only when it actually blocks a move. This demo does that; it does not change the result of any position.</li>
+    <li><b>What counts as "the same position".</b> The rule counts as part of the position only when it actually blocks a move. If it were recorded after every tile move, including cases where it can never apply, two positions that look the same and offer exactly the same moves would count as different, and the draw warning would come later than players expect. This does not change the result of any position.</li>
   </ul>
 
   <h2>5. Checked and fine</h2>
   <ul>
-    <li><b>Steps never break the "no sealing off" rule.</b> A piece only steps onto a neighbouring floor square, which is in the same connected area, so checking after tile moves is enough. The document gets this right.</li>
+    <li><b>Steps never break the "no sealing off" rule.</b> A piece only steps onto a neighbouring floor square, which is in the same connected area, so checking after tile moves is enough.</li>
     <li><b>Draws are rare.</b> Among the 206 million positions with Mint to move and no undo rule in force, only about 1.5% are theoretical draws. Blocking with pieces is legal but does not make the game drawish.</li>
-    <li><b>Forced passes do happen</b> (36 times in 3,000 random games), and section 6 handles them consistently.</li>
+    <li><b>Forced passes do happen</b> (36 times in 3,000 random games), and the rules handle them consistently.</li>
     <li>Reaching the flag beats the repetition rule, all information is open, and nothing is random, as stated.</li>
   </ul>
 
-  <h2>6. Comparing fixes</h2>
+  <h2>6. How the standard opening was chosen</h2>
   <h3>Why not allow passing, or a choose-your-side rule</h3>
   <ul>
     <li><b>Allowing a voluntary pass:</b> neither side wants to move first, so both pass and the game soon ends in a repetition draw. (This variant was not re-solved; this is reasoning.)</li>
-    <li><b>Choose-your-side</b> (one player makes the first move, the other picks a side): in v0.4 every first move leaves the side to move winning, so the chooser simply takes that side. Nothing changes.</li>
+    <li><b>Choose-your-side</b> (one player makes the first move, the other picks a side): in the original opening every first move leaves the side to move winning, so the chooser simply takes that side. Nothing changes.</li>
   </ul>
   <h3>Moving only the water</h3>
   <p>Pieces stay on B5, D5 and B1, D1. The table lists every layout that is symmetric left to right and mirrored between the two sides. The win rates are for the first player in simulated games between equal players, 20,000 games per cell.</p>
   <div class="tablewrap"><table>
     <tr><th>Water</th><th>Perfect play</th><th>First wins<br>5% slips</th><th>First wins<br>15% slips</th><th>First wins<br>30% slips</th><th>Avg moves<br>5% slips</th></tr>
-    <tr><td class="num">B2 D2 B4 D4 (v0.4)</td><td>Second wins in ≤22</td><td class="num">17.1%</td><td class="num">33.8%</td><td class="num">43.5%</td><td class="num">20</td></tr>
+    <tr><td class="num">B2 D2 B4 D4 (original)</td><td>Second wins in ≤22</td><td class="num">17.1%</td><td class="num">33.8%</td><td class="num">43.5%</td><td class="num">20</td></tr>
     <tr><td class="num">A1 E1 A5 E5</td><td>Second wins in ≤18</td><td class="num">not run</td><td class="num"></td><td class="num"></td><td class="num"></td></tr>
-    <tr class="pick"><td class="num">A2 E2 A4 E4 (suggested)</td><td>Draw</td><td class="num">50.3%</td><td class="num">52.2%</td><td class="num">51.9%</td><td class="num">56</td></tr>
+    <tr class="pick"><td class="num">A2 E2 A4 E4 (standard)</td><td>Draw</td><td class="num">50.3%</td><td class="num">52.2%</td><td class="num">51.9%</td><td class="num">56</td></tr>
     <tr><td class="num">C2 A3 E3 C4</td><td>Draw</td><td class="num">69.5%</td><td class="num">60.1%</td><td class="num">58.8%</td><td class="num">45</td></tr>
     <tr><td class="num">C2 B3 D3 C4</td><td>Draw</td><td class="num">51.4%</td><td class="num">52.8%</td><td class="num">53.2%</td><td class="num">43</td></tr>
     <tr><td class="num">A3 B3 D3 E3</td><td>Draw</td><td class="num">50.5%</td><td class="num">53.1%</td><td class="num">56.0%</td><td class="num">44</td></tr>
   </table></div>
-  <p>The suggestion is <b>A2, E2, A4, E4</b>:</p>
+  <p>The standard opening uses <b>A2, E2, A4, E4</b>:</p>
   <ol>
     <li><b>Smallest change:</b> the water moves one file outward and stays on the same ranks.</li>
     <li><b>Closest to even at every skill level.</b> C2 A3 E3 C4 is also a theoretical draw but clearly favours the first player in play, so a theoretical draw and fairness in practice both need checking.</li>
@@ -297,16 +293,10 @@ node verify_strategy.mjs coral.txt ../engine.js
   <p>The runner-up is C2, B3, D3, C4: just as even, but more positions have only one move that holds (about 66% against 59%), so it plays sharper.</p>
   <p class="note">Limits: a simulated slip is a random move, unlike human mistakes, so play-testing with people is still needed. The simulation does not apply the repetition rule; it stops at 400 moves (no game got there), so human games may end in a draw more often. A theoretical draw means nobody wins with perfect play; real games are decided by who errs first. In drawn positions from this opening, only about 27% of moves keep the draw on average, so there is plenty of room to go wrong.</p>
 
-  <h2>7. Suggested changes for v0.5</h2>
-  <ol>
-    <li>Start with water on A2, E2, A4, E4. Everything else stays.</li>
-    <li>Update the table in section 2 and the examples in sections 4 and 5.1: B4 is no longer water, and no piece touches water at the start, so the first move must be a step.</li>
-    <li>Section 5.3: add when the undo rule actually applies. Section 7.2: count it in the position only when it blocks a move.</li>
-    <li>Section 11: note that a full solve shows neither side has a forced win from the start, and rerun it after any board or opening change.</li>
-  </ol>
+  <p class="note">In the standard opening no piece touches water, so the first move must be a step.</p>
 
-  <h2>8. The demo's computer player</h2>
-  <p>Easy looks one move ahead but knows that a piece next to its own flag wins next turn. Normal searches three moves, the same depth as v0.4. Hard deepens step by step with a fixed budget of 250,000 positions per move, so the same position always gets the same reply, with no clock and no randomness.</p>
+  <h2>7. The computer player</h2>
+  <p>Easy looks one move ahead but knows that a piece next to its own flag wins next turn. Normal searches three moves. Hard deepens step by step with a fixed budget of 250,000 positions per move, so the same position always gets the same reply, with no clock and no randomness.</p>
   <p>Tested on positions taken from the solve:</p>
   <div class="tablewrap"><table>
     <tr><th>Level</th><th>Forced win in 3 to 9: found a winning move</th><th>Draw with a trap that loses within 8: avoided it</th></tr>
@@ -316,7 +306,7 @@ node verify_strategy.mjs coral.txt ../engine.js
   </table></div>
   <p class="note">Hard takes about 0.4 to 1.4 seconds per move. It is not a perfect player and can miss long plans.</p>
 
-  <h2>9. Reproduce</h2>
+  <h2>8. Reproduce</h2>
   <p>The source is in this folder: <code>solver.c</code> (the solver) and <code>replay.mjs</code>, <code>verify_strategy.mjs</code>, <code>probe_ai.mjs</code> (checks against the browser engine). Needs about 4 GB of memory and 4 GB of disk.</p>
 <pre>gcc -O3 -march=native -fopenmp -o solver solver.c
 ./solver check 200000                 # backward and forward rules mirror each other

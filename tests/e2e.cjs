@@ -30,7 +30,7 @@ const cell = (n) => (n.charCodeAt(1) - 49) * 5 + (n.charCodeAt(0) - 65);
     ok(r.ok(), g + ' page is served');
   }
 
-  // game, vs computer, v0.5
+  // game, vs computer, standard opening
   await page.goto(BASE + 'jielu/');
   await page.evaluate(() => { localStorage.clear(); localStorage.setItem('ga-jielu-lang', 'zh'); });
   await page.reload();
@@ -38,6 +38,7 @@ const cell = (n) => (n.charCodeAt(1) - 49) * 5 + (n.charCodeAt(0) - 65);
   const clickCell = (n) => page.click(`#cells .cellbtn:nth-child(${cell(n) + 1})`);
   const st = () => page.evaluate(() => { const s = window.__jielu.state; return { turn: s.turn, ply: s.ply, pieces: s.pieces, holes: s.holes, winner: s.winner, draw: s.draw, busy: window.__jielu.busy }; });
   ok((await st()).turn === 0, 'Mint moves first on load');
+  ok((await page.textContent('#ver')) === '標準開局' && (await page.textContent('#layoutSeg')).includes('最初'), 'openings are named 標準 / 最初, not by version');
   await clickCell('B5');
   ok(await page.locator('#marks .mark.walk').count() === 2, 'two step targets for B5 (A5, B4)');
   await page.screenshot({ path: OUT + '/game-selected.png' });
@@ -154,6 +155,19 @@ const cell = (n) => (n.charCodeAt(1) - 49) * 5 + (n.charCodeAt(0) - 65);
   await page.screenshot({ path: OUT + '/analysis-zh.png', fullPage: false });
   await page.click('[data-lang="en"]');
   ok(await page.isVisible('article[data-l="en"] h1'), 'analysis page switches to English');
+  // owner, 2026-10-29: no version numbers or proposal wording anywhere a player reads
+  const BANNED = /v0\.\d|提案|建議|原版|[Pp]ropos|[Ss]uggest(ed|ion)|[Vv]ersion/;
+  for (const u of ['', 'jielu/', 'jielu/analysis/', 'zhuanhuan/', 'zhuanhuan/analysis/', 'guanglu/', 'guanglu/analysis/']) {
+    for (const l of ['zh', 'en']) {
+      await page.goto(BASE + u);
+      await page.evaluate((l) => localStorage.setItem('ga-jielu-lang', l), l);
+      await page.reload();
+      await page.waitForTimeout(250);
+      const txt = await page.evaluate(() => document.body.innerText + ' ' + document.title);
+      const hit = txt.match(BANNED);
+      ok(!hit, `no version or proposal wording on /${u} (${l})` + (hit ? ': ' + hit[0] : ''));
+    }
+  }
   await p2.goto(BASE + 'jielu/analysis/');
   await p2.waitForTimeout(300);
   const sw3 = await p2.evaluate(() => document.documentElement.scrollWidth);

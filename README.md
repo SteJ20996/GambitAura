@@ -10,7 +10,7 @@ uses an accepted balancing rule and its page says plainly how fair it is.
 
 | Shelf | Game | Folder | Fairness, as the page states it |
 |-------|------|--------|---------------------------------|
-| Original 01 | 借路 Jielu | `jielu/` | Solved: the default v0.5 opening is a draw with perfect play (v0.4 selectable) |
+| Original 01 | 借路 Jielu | `jielu/` | Solved: the standard opening is a draw with perfect play (the original opening, a second-player win, stays selectable) |
 | Original 02 | 轉環 Zhuanhuan | `zhuanhuan/` | Solved: the spiral opening is a draw with perfect play; 12 of the 16 first moves hold |
 | Original 03 | 光路 Guanglu | `guanglu/` | Solved: the opening is a draw with perfect play; 8 of the 16 first moves hold |
 | Classic | 六角連線 Hex | `hex/` | No draws, so the first player has a forced win; the swap rule takes that edge away |
@@ -54,8 +54,8 @@ for t in zhuanhuan guanglu hex reversi gomoku nim; do node tests/$t.cjs; done
 
 ## Key result
 
-The v0.4 opening (water on B2 D2 B4 D4) is a forced win for the second player within 22 moves.
-The proposed v0.5 opening (water on A2 E2 A4 E4) is a theoretical draw and plays close to 50/50
+借路's original opening (water on B2 D2 B4 D4) is a forced win for the second player within 22
+moves. The standard opening (water on A2 E2 A4 E4) is a theoretical draw and plays close to 50/50
 between equal players. Details and reproduction steps: `jielu/analysis/index.html`.
 
 轉環 Zhuanhuan (Game 02): every one of its 18,843,440 positions is solved. From the spiral opening

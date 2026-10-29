@@ -66,7 +66,7 @@
   <div class="ga-card summary">
     <ul>
       <li><b>螺旋開局是和棋。</b>電腦把所有 18,843,440 個局面都算過：從這個開局，雙方都下最好時，沒有人能強迫取勝。先走的一方第一手有 16 種走法，12 種保持均勢，4 種會輸，其中 2 種下一手就輸。</li>
-      <li><b>第一版規則太安全，所以改了。</b>只有「同一條輻線三子」能贏的時候，任何威脅都能用轉一個環化解，整個遊戲沒有一個局面能強迫取勝。加上「同一環上相鄰三子」也算贏以後，轉環擋得住一種威脅，卻擋不住另一種，最長的強制勝利變成 31 手。</li>
+      <li><b>最初的規則太安全，所以改了。</b>只有「同一條輻線三子」能贏的時候，任何威脅都能用轉一個環化解，整個遊戲沒有一個局面能強迫取勝。加上「同一環上相鄰三子」也算贏以後，轉環擋得住一種威脅，卻擋不住另一種，最長的強制勝利變成 31 手。</li>
       <li><b>雙方程度相近時，勝負接近一半一半。</b>模擬中雙方每步有 10% 機會隨機走錯：先手勝 48.9%，後手勝 48.5%，和棋 2.6%。</li>
       <li><b>值得學。</b>只會看一步（能贏就贏、不送對方一步贏）的玩家，對上完美下法 4,000 盤全輸，平均撐 30 手左右。看得越深，越有優勢。</li>
     </ul>
@@ -81,9 +81,9 @@
   </ol>
 
   <h2>2. 規則怎麼定出來</h2>
-  <p>每一版都用同一個求解器算完整張表，再看兩件事：有多少局面能強迫取勝，以及最長的強制勝利有幾手。如果幾乎沒有局面能強迫取勝，代表任何威脅都擋得住，棋就下不出結果。</p>
+  <p>每一種規則都用同一個求解器算完整張表，再看兩件事：有多少局面能強迫取勝，以及最長的強制勝利有幾手。如果幾乎沒有局面能強迫取勝，代表任何威脅都擋得住，棋就下不出結果。</p>
   <div class="tablewrap"><table>
-    <tr><th>規則版本</th><th>輪到者必勝</th><th>輪到者必敗</th><th>和棋</th><th>最長強制勝利</th></tr>
+    <tr><th>規則</th><th>輪到者必勝</th><th>輪到者必敗</th><th>和棋</th><th>最長強制勝利</th></tr>
     <tr><td>只有輻線三子算贏，任何環都能轉</td><td class="num">2.4%</td><td class="num">0.0%</td><td class="num">97.6%</td><td class="num">1 手</td></tr>
     <tr><td>只有輻線三子，只能轉有自己棋子的環</td><td class="num">2.6%</td><td class="num">0.0%</td><td class="num">97.4%</td><td class="num">3 手</td></tr>
     <tr><td>加上環上相鄰三子，任何環都能轉</td><td class="num">19.6%</td><td class="num">2.7%</td><td class="num">77.7%</td><td class="num">19 手</td></tr>
@@ -140,7 +140,7 @@ gcc -O3 -march=native -fopenmp -o solver solver.c
 ./solver --show d1,e2,f3 h1,a2,b3 --dump table.bin   # value of every first move; writes the table (38 MB)
 node check_table.mjs table.bin 3000                  # independent check with the JavaScript engine
 node probe_ai.mjs table.bin 300                      # computer player against the table
-./solver --arc 0 --rot 0 --openings | tail -1        # the first draft: no forced wins</pre>
+./solver --arc 0 --rot 0 --openings | tail -1        # the first rules: no forced wins</pre>
 </article>
 
 <!-- ======================= English ======================= -->
@@ -151,7 +151,7 @@ node probe_ai.mjs table.bin 300                      # computer player against t
   <div class="ga-card summary">
     <ul>
       <li><b>The spiral opening is a draw.</b> A computer worked through all 18,843,440 positions: from this start, with best play on both sides, nobody can force a win. The first player has 16 first moves; 12 keep the balance and 4 lose, 2 of them on the very next move.</li>
-      <li><b>The first draft was too safe, so it changed.</b> When only three on a spoke could win, turning one ring always broke the threat, and no position in the whole game was a forced win. Once three side by side on a ring also wins, a turn can stop one kind of threat but not the other, and the longest forced win grows to 31 moves.</li>
+      <li><b>The first rules were too safe, so they changed.</b> When only three on a spoke could win, turning one ring always broke the threat, and no position in the whole game was a forced win. Once three side by side on a ring also wins, a turn can stop one kind of threat but not the other, and the longest forced win grows to 31 moves.</li>
       <li><b>Between equal players, results are close to even.</b> In simulated games where each move has a 10% chance of being random, the first player wins 48.9%, the second 48.5%, and 2.6% are draws.</li>
       <li><b>It rewards thinking ahead.</b> A player who looks only one move ahead (wins when it can, never hands over a win in one) lost all 4,000 games against perfect play, lasting about 30 moves.</li>
     </ul>
@@ -166,7 +166,7 @@ node probe_ai.mjs table.bin 300                      # computer player against t
   </ol>
 
   <h2>2. How the rules were chosen</h2>
-  <p>Each version was solved in full. Two numbers matter: how many positions are forced wins, and how long the longest forced win is. If almost nothing is a forced win, every threat can be stopped and games go nowhere.</p>
+  <p>Each set of rules was solved in full. Two numbers matter: how many positions are forced wins, and how long the longest forced win is. If almost nothing is a forced win, every threat can be stopped and games go nowhere.</p>
   <div class="tablewrap"><table>
     <tr><th>Rules</th><th>Side to move wins</th><th>Side to move loses</th><th>Draw</th><th>Longest forced win</th></tr>
     <tr><td>Only three on a spoke wins; any ring may turn</td><td class="num">2.4%</td><td class="num">0.0%</td><td class="num">97.6%</td><td class="num">1 move</td></tr>
@@ -225,7 +225,7 @@ gcc -O3 -march=native -fopenmp -o solver solver.c
 ./solver --show d1,e2,f3 h1,a2,b3 --dump table.bin   # value of every first move; writes the table (38 MB)
 node check_table.mjs table.bin 3000                  # independent check with the JavaScript engine
 node probe_ai.mjs table.bin 300                      # computer player against the table
-./solver --arc 0 --rot 0 --openings | tail -1        # the first draft: no forced wins</pre>
+./solver --arc 0 --rot 0 --openings | tail -1        # the first rules: no forced wins</pre>
 </article>
 
   <footer class="ga-foot">
