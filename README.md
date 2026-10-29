@@ -13,6 +13,7 @@ uses an accepted balancing rule and its page says plainly how fair it is.
 | Original 01 | 借路 Jielu | `jielu/` | Solved: the standard opening is a draw with perfect play (the original opening, a second-player win, stays selectable) |
 | Original 02 | 轉環 Zhuanhuan | `zhuanhuan/` | Solved: the spiral opening is a draw with perfect play; 12 of the 16 first moves hold |
 | Original 03 | 光路 Guanglu | `guanglu/` | Solved: the opening is a draw with perfect play; 8 of the 16 first moves hold |
+| Original 04 | 日影 Riying | `riying/` | Solved: the opening is a draw whoever moves first; 2 of the 5 first moves hold |
 | Classic | 六角連線 Hex | `hex/` | No draws, so the first player has a forced win; the swap rule takes that edge away |
 | Classic | 黑白棋 Reversi | `reversi/` | 8 × 8 was weakly solved in 2023 (Takizawa): a draw with perfect play |
 | Classic | 五子棋 Gomoku | `gomoku/` | Casual by default (free-style is a first-player win, Allis 1994; Black alternates each game). Pro options: gomoku as at the Gomoku World Championship (Swap2, exactly five) and renju as at the Renju World Championship (Black's forbidden moves, Taraguchi-10 opening) |
@@ -37,8 +38,12 @@ uses an accepted balancing rule and its page says plainly how fair it is.
   and the Node cross-checks (`check_table.mjs`, `probe_ai.mjs`, `table.mjs`).
 - `guanglu/`: Game 03, same files as 轉環. `guanglu/analysis/`: how its rules, light placement and
   opening were chosen (`index.html`), the solver (`solver.c`) and the same three Node cross-checks.
-- `tests/e2e.cjs`: browser test of the hub, 借路 and its fairness page. `tests/zhuanhuan.cjs`: 轉環.
-  `tests/guanglu.cjs`: 光路.
+- `riying/`: Game 04, same files as 轉環. `riying/analysis/`: how its rules and opening were chosen
+  (`index.html`), the solver (`solver.c`) and the same three Node cross-checks.
+- `lab/qingpan/solver.c`: 傾盤, a solved Game 05 candidate (not built, not linked from the site).
+- `tests/e2e.cjs`: browser test of the hub, 借路 and its fairness page, plus a guard against version
+  numbers and proposal wording on every original game's pages. `tests/zhuanhuan.cjs`: 轉環.
+  `tests/guanglu.cjs`: 光路. `tests/riying.cjs`: 日影.
   `tests/hex.cjs`, `tests/reversi.cjs`, `tests/gomoku.cjs`, `tests/nim.cjs`: one browser test per classic.
 
 No build step: every page is static HTML, CSS and ES modules.
@@ -49,7 +54,7 @@ No build step: every page is static HTML, CSS and ES modules.
 npx http-server -p 8765 -c-1 .
 open http://127.0.0.1:8765/
 node tests/e2e.cjs          # with the server running; screenshots land in tests/out/
-for t in zhuanhuan guanglu hex reversi gomoku nim; do node tests/$t.cjs; done
+for t in zhuanhuan guanglu riying hex reversi gomoku nim; do node tests/$t.cjs; done
 ```
 
 ## Key result
@@ -70,6 +75,13 @@ moves lose within 7 moves. Earlier drafts were shallow (any mirror: longest forc
 pure race (own beam only: 5% draws); without the no-flip-back rule every attack is undone at once
 (longest forced win 2). Details: `guanglu/analysis/index.html`.
 
+日影 Riying (Game 04): a sun goes round a 5 × 5 board one place per move; a tower shades 1 or 2
+squares away from the sun, and any tower in any shade cannot move. All 4,857,600 positions are
+solved. From the opening (Mint a1 short, d1 tall; Coral e5, b5; sun in the south) neither side can
+force a win, whoever moves first. Earlier drafts were a race (any far-row square wins: 1.3% draws,
+no fair start) or fair only in theory (a side with no move passed: every fair start gave one side
+9 or more points in simulated games). Details: `riying/analysis/index.html`.
+
 ## Before changing the rules or the opening
 
 1. `gcc -O3 -march=native -fopenmp -o solver jielu/analysis/solver.c`
@@ -86,6 +98,11 @@ For 光路: `cd guanglu/analysis && gcc -O3 -march=native -fopenmp -o solver sol
 `./solver --design 11 17 --start 3840 --perft 6` (must match `perft()` in `guanglu/engine.js`),
 `./solver --design 11 17 --start 3840 --dump table.bin` (about 15 seconds, 88 MB) and
 `node check_table.mjs table.bin 3000`. The design and start numbers are `DESIGN` in the engine.
+
+For 日影: `cd riying/analysis && gcc -O3 -march=native -fopenmp -o solver solver.c`, then
+`./solver --start a1,d1 --sunat S --perft 6` (must match `perft()` in `riying/engine.js` for both
+first players), `./solver --dump table.bin` (about 5 seconds, 12 MB) and
+`node check_table.mjs table.bin 3000`. The opening is `START` in the engine.
 
 The 借路 solver covers every terrain with four water squares and the pieces anywhere. A change to the
 board size, the number of water squares, the flags or the move rules needs the solver updated first.

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="description" content="日影 Riying：罡曜 GambitAura 的第四款原創棋。太陽繞著棋盤走，影子裡的塔不能動。" />
+<meta name="theme-color" content="#08090c" />
+<title>日影 Riying · 罡曜 GambitAura</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Instrument+Sans:wght@400..700&family=Noto+Serif+TC:wght@500;700;900&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../assets/ga.css" />
+<link rel="stylesheet" href="../assets/game.css" />
+<style>
+  /* 日影 only. One SVG in board units: cells are 100 wide, the sun walks a square path 62
+     outside the board. */
+  .board.ry { aspect-ratio: 1 / 1; }
+  .ry .art { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; }
+  .ry .cellbg { fill: rgba(236, 230, 218, .03); stroke: rgba(236, 230, 218, .08); stroke-width: 1; }
+  .ry .frame { fill: none; stroke: rgba(236, 230, 218, .2); stroke-width: 1.2; }
+  .ry .lbl { font-family: var(--display); font-style: italic; fill: var(--muted); text-anchor: middle; dominant-baseline: central; }
+
+  /* the sun's path, its eight places, the sun and where it goes next */
+  .ry .orbit { fill: none; stroke: rgba(217, 195, 143, .14); stroke-width: 1.2; stroke-dasharray: 2 8; }
+  .ry .station { fill: rgba(217, 195, 143, .28); }
+  .ry .sun { transition: transform .75s cubic-bezier(.3, .7, .2, 1); }
+  .ry .sun .halo { fill: url(#sunHalo); }
+  .ry .sun .core { fill: url(#sunCore); }
+  .ry .sun .ray { stroke: rgba(255, 238, 200, .55); stroke-width: 2; stroke-linecap: round; transform-origin: 0 0; animation: raySpin 40s linear infinite; }
+  @keyframes raySpin { to { transform: rotate(360deg); } }
+  .ry .next { fill: none; stroke: rgba(217, 195, 143, .5); stroke-width: 1.4; stroke-dasharray: 3 4; transition: transform .75s cubic-bezier(.3, .7, .2, 1); }
+
+  /* shade: a soft shadow from each tower, and the shaded squares darkened */
+  .ry .shadow { stroke: #000; stroke-linecap: round; opacity: .5; filter: blur(6px); }
+  .ry .shade { fill: #020305; opacity: .3; stroke: rgba(0, 0, 0, .55); stroke-width: 1; }
+  .ry .pshade { fill: none; stroke: var(--gold); stroke-width: 1.6; stroke-dasharray: 5 5; opacity: .75; }
+
+  /* targets */
+  .ry .tgt { fill: none; stroke-width: 2; }
+  .ry .tgt.m { stroke: var(--mint); } .ry .tgt.c { stroke: var(--coral); }
+  .ry .tgt .core { stroke: none; opacity: .2; }
+  .ry .tgt.m .core { fill: var(--mint); } .ry .tgt.c .core { fill: var(--coral); }
+  .ry .tgt .spin { transform-box: fill-box; transform-origin: 50% 50%; animation: tgtSpin 30s linear infinite; }
+  .ry .tgt.hit .core { opacity: .9; }
+  @keyframes tgtSpin { to { transform: rotate(360deg); } }
+
+  /* towers: lit stones seen from above; the tall one carries a second ring */
+  .ry .tower { transition: transform .45s cubic-bezier(.3, .7, .2, 1), opacity .4s; }
+  .ry .tower .body { stroke: rgba(255, 255, 255, .35); stroke-width: 1.2; }
+  .ry .tower.m .body { fill: url(#gMint); filter: drop-shadow(0 0 7px var(--mint-glow)); }
+  .ry .tower.c .body { fill: url(#gCoral); filter: drop-shadow(0 0 7px var(--coral-glow)); }
+  .ry .tower .ring { fill: none; stroke-width: 2.2; opacity: .75; }
+  .ry .tower.m .ring { stroke: #4f9a86; } .ry .tower.c .ring { stroke: #b4644f; }
+  .ry .tower .veil { fill: #05070a; opacity: 0; transition: opacity .4s; }
+  .ry .tower.frozen .veil { opacity: .55; }
+  .ry .tower.frozen .body { filter: none; }
+  .ry .tower .sel { fill: none; stroke: var(--gold); stroke-width: 2; opacity: 0; }
+  .ry .tower.selected .sel { opacity: 1; }
+  .ry .tower.last .body { stroke: var(--gold); }
+
+  .ry .dot { fill: var(--gold); opacity: .8; transition: r .2s; pointer-events: none; }
+  .ry .hitbox { fill: transparent; cursor: default; }
+  .ry .hitbox.act { cursor: pointer; }
+  .ry .hitbox.act:hover { fill: rgba(236, 230, 218, .05); }
+  .ry .hitbox:focus { outline: none; }
+  .ry .hitbox:focus-visible { stroke: var(--gold); stroke-width: 1.5; }
+  .ry .tag { font-family: var(--cjk); font-size: 22px; font-weight: 700; fill: var(--gold); text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+  @media (prefers-reduced-motion: reduce) {
+    .ry .sun, .ry .next, .ry .tower { transition: none; }
+    .ry .sun .ray, .ry .tgt .spin { animation: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="ga-top">
+    <a class="ga-brand" href="../" aria-label="罡曜 GambitAura">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><defs><radialGradient id="gaCore" cx=".5" cy=".45" r=".55"><stop offset="0" stop-color="#fffaf0"/><stop offset=".55" stop-color="#ecdcb4"/><stop offset="1" stop-color="#c9ad74"/></radialGradient><radialGradient id="gaHalo" cx=".5" cy=".5" r=".5"><stop offset=".3" stop-color="#d9c38f" stop-opacity=".28"/><stop offset="1" stop-color="#d9c38f" stop-opacity="0"/></radialGradient></defs><circle cx="32" cy="32" r="30" fill="url(#gaHalo)"/><circle cx="32" cy="32" r="22" fill="none" stroke="#d9c38f" stroke-width="1.4" opacity=".7"/><circle cx="32" cy="32" r="15" fill="none" stroke="#d9c38f" stroke-width="1" stroke-dasharray="1.5 3.5" opacity=".6"/><circle cx="32" cy="32" r="7" fill="url(#gaCore)"/></svg>
+      <span class="ga-lock" aria-hidden="true"><span class="ga-zh">罡曜</span><span class="ga-word">Gambit<b>Aura</b></span></span>
+      <span class="ga-crumb">· Game 04</span>
+    </a>
+    <div class="ga-langs" role="group" aria-label="Language">
+      <button class="ga-chip" data-lang="zh" aria-pressed="true">中文</button>
+      <button class="ga-chip" data-lang="en" aria-pressed="false">EN</button>
+    </div>
+  </header>
+
+  <main class="game">
+    <section class="stage">
+      <div class="col title-row">
+        <div class="title"><h1>日影</h1><span class="latin">Riying</span></div>
+        <span class="opening-tag" id="tag"></span>
+      </div>
+
+      <div class="col ga-card score" id="score">
+        <div class="side-box mint" id="sbMint"><span class="orb"></span><span class="who" id="whoMint"></span><span class="pts" id="ptsMint">0</span></div>
+        <div class="round" id="round"></div>
+        <div class="side-box coral" id="sbCoral"><span class="orb"></span><span class="who" id="whoCoral"></span><span class="pts" id="ptsCoral">0</span></div>
+      </div>
+
+      <div class="col">
+        <div class="board ry" id="board">
+          <div class="mist mist-0" aria-hidden="true"></div>
+          <div class="mist mist-1" aria-hidden="true"></div>
+          <svg class="art" id="art" viewBox="-100 -100 700 700" role="group" aria-label="board">
+            <defs>
+              <radialGradient id="sunCore" cx=".45" cy=".4" r=".6"><stop offset="0" stop-color="#fffdf4"/><stop offset=".5" stop-color="#f3e2b4"/><stop offset="1" stop-color="#d4b46f"/></radialGradient>
+              <radialGradient id="sunHalo" cx=".5" cy=".5" r=".5"><stop offset=".25" stop-color="#f1d894" stop-opacity=".42"/><stop offset="1" stop-color="#f1d894" stop-opacity="0"/></radialGradient>
+              <radialGradient id="gMint" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#e6fbf4"/><stop offset=".45" stop-color="#8fd3bf"/><stop offset="1" stop-color="#3f7f70"/></radialGradient>
+              <radialGradient id="gCoral" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#fff0e9"/><stop offset=".45" stop-color="#ec9a82"/><stop offset="1" stop-color="#9a4f3c"/></radialGradient>
+            </defs>
+            <g id="cells"></g>
+            <g id="sky"></g>
+            <g id="shadows"></g>
+            <g id="shade"></g>
+            <g id="targets"></g>
+            <g id="preview"></g>
+            <g id="towers"></g>
+            <g id="dots"></g>
+            <g id="hits"></g>
+          </svg>
+          <div class="overlay" id="overlay" aria-live="polite">
+            <div>
+              <div class="big" id="ovBig"></div>
+              <div class="small" id="ovSmall"></div>
+              <div class="btns">
+                <button class="ga-btn primary" id="ovNext"></button>
+                <button class="ga-btn" id="ovLook"></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col ga-card status" id="status" aria-live="polite">
+        <span class="msg" id="msg"></span>
+        <span class="ply" id="ply"></span>
+        <span class="sub" id="sub"></span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <div class="ga-card">
+        <span class="ga-label" data-i18n="setup">Setup</span>
+        <div class="row"><span data-i18n="mode">Mode</span>
+          <div class="ga-seg" id="modeSeg">
+            <button data-v="ai" data-i18n="modeAi">vs computer</button>
+            <button data-v="pvp" data-i18n="modePvp">Two players</button>
+          </div>
+        </div>
+        <div class="row" id="levelRow"><span data-i18n="level">Computer</span>
+          <div class="ga-seg" id="levelSeg">
+            <button data-v="easy" data-i18n="easy">Easy</button>
+            <button data-v="normal" data-i18n="normal">Normal</button>
+            <button data-v="hard" data-i18n="hard">Hard</button>
+          </div>
+        </div>
+        <p class="note" id="note"></p>
+        <div class="btns">
+          <button class="ga-btn" id="restartBtn" data-i18n="restart">Restart</button>
+          <button class="ga-btn primary" id="nextBtn" data-i18n="next" hidden>Next game</button>
+        </div>
+      </div>
+
+      <div class="ga-card">
+        <span class="ga-label" data-i18n="moves">Moves</span>
+        <ol class="log" id="log"></ol>
+        <p class="empty" id="logEmpty" data-i18n="noMoves">No moves yet.</p>
+      </div>
+
+      <div class="ga-card">
+        <details class="rules" id="rules">
+          <summary data-i18n="rulesTitle">How to play</summary>
+          <div id="rulesBody"></div>
+        </details>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="ga-foot">
+    <span data-i18n="footer1">No dice, no timer, nothing hidden.</span>
+    <a href="analysis/" data-i18n="footer2">How we checked fairness</a>
+    <a href="../" data-i18n="footer3">All games</a>
+  </footer>
+</div>
+
+<dialog id="drawDlg">
+  <p id="drawText"></p>
+  <div class="btns">
+    <button class="ga-btn" id="drawCancel"></button>
+    <button class="ga-btn primary" id="drawOk"></button>
+  </div>
+</dialog>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
