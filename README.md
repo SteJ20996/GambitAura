@@ -14,7 +14,7 @@ uses an accepted balancing rule and its page says plainly how fair it is.
 | Original 02 | 轉環 Zhuanhuan | `zhuanhuan/` | Solved: the spiral opening is a draw with perfect play; 12 of the 16 first moves hold |
 | Classic | 六角連線 Hex | `hex/` | No draws, so the first player has a forced win; the swap rule takes that edge away |
 | Classic | 黑白棋 Reversi | `reversi/` | 8 × 8 was weakly solved in 2023 (Takizawa): a draw with perfect play |
-| Classic | 五子棋 Gomoku | `gomoku/` | Free-style is a first-player win (Allis 1994); the Swap2 opening splits the choice |
+| Classic | 五子棋 Gomoku | `gomoku/` | Casual by default (free-style is a first-player win, Allis 1994; Black alternates each game). Pro options: gomoku as at the Gomoku World Championship (Swap2, exactly five) and renju as at the Renju World Championship (Black's forbidden moves, Taraguchi-10 opening) |
 | Classic | 取石子 Nim | `nim/` | Every position is solved (Bouton 1901); fairness comes from the format: one sets up, the other picks the order, roles swap |
 
 ## Layout

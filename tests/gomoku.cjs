@@ -13,6 +13,7 @@ const ok = (cond, msg) => { console.log((cond ? 'PASS ' : 'FAIL ') + msg); if (!
 async function unit() {
   const E = await import(pathToFileURL(path.join(__dirname, '../gomoku/engine.js')).href);
   const AI = await import(pathToFileURL(path.join(__dirname, '../gomoku/ai.js')).href);
+  const R = await import(pathToFileURL(path.join(__dirname, '../gomoku/renju.js')).href);
   const P = E.parseCell;
   const board = (blacks, whites = '') => {
     const b = new Int8Array(225).fill(-1);
@@ -39,7 +40,7 @@ async function unit() {
 
   // Swap2 phase transitions
   const open3 = (opener) => {
-    let s = E.initialState(opener);
+    let s = E.initialState(opener, 'std');
     const seen = [];
     for (const c of ['h8', 'i9', 'g9']) { seen.push([E.actor(s), E.stoneColor(s)]); s = E.applyMove(s, { t: 'stone', i: P(c) }); }
     return { s, seen };
@@ -81,6 +82,81 @@ async function unit() {
     ok(s.phase === 'over' && s.winner === 0 && s.lines.length === 1 && s.lines[0].length === 5, 'five ends the game and names the player who made it');
   }
 
+  // the three rule sets
+  {
+    let s = E.initialState(0);
+    ok(s.rule === 'free' && s.phase === 'play' && E.actor(s) === 0 && E.stoneColor(s) === E.BLACK, 'casual is the default: player 1 plays Black from the first stone');
+    s = E.applyMove(s, { t: 'stone', i: P('h8') });
+    ok(E.actor(s) === 1 && E.stoneColor(s) === E.WHITE, 'casual: then player 2 plays White; turns alternate');
+    const six = board('c8 d8 e8 f8 g8 h8');
+    ok(E.winLines(six, P('f8'), 'std').length === 0 && E.winLines(six, P('f8'), 'free').length === 1, 'pro gomoku: six is no win (it is in casual play)');
+    ok(E.winLines(six, P('f8'), 'renju').length === 0, 'renju: six is no win for Black');
+    const wsix = new Int8Array(225).fill(-1); for (const c of ['c8', 'd8', 'e8', 'f8', 'g8', 'h8']) wsix[P(c)] = E.WHITE;
+    ok(E.winLines(wsix, P('f8'), 'renju').length === 1, 'renju: six wins for White');
+  }
+  {
+    // renju forbidden points (board for renju.js: 0 empty, 1 black, 2 white)
+    const rb = (bl, wh = '') => { const b = new Uint8Array(225); for (const c of bl.split(' ').filter(Boolean)) b[P(c)] = 1; for (const c of wh.split(' ').filter(Boolean)) b[P(c)] = 2; return b; };
+    const why = (bl, wh, at) => R.forbiddenReason(rb(bl, wh), P(at));
+    ok(why('g8 i8 h9 h7', '', 'h8') === R.DOUBLE_THREE, 'renju: two open threes are forbidden (three-three)');
+    ok(why('f8 i8 h10 h11', '', 'h8') === R.DOUBLE_THREE, 'renju: split threes count too');
+    ok(why('g8 i8 h9 h7', 'f8', 'h8') === 0, 'renju: a three blocked at one end is not open, so this is allowed');
+    ok(why('g8 i8 j8 h10 h11 h12', '', 'h8') === R.DOUBLE_FOUR, 'renju: two fours are forbidden (four-four)');
+    ok(why('e8 g8 i8 k8', '', 'h8') === R.DOUBLE_FOUR, 'renju: two fours on one line (X.XXX.X) are forbidden');
+    ok(why('g8 i8 j8 h9 h10', 'f8', 'h8') === 0, 'renju: four-three is allowed');
+    ok(why('d8 e8 f8 g8 i8', '', 'h8') === R.OVERLINE, 'renju: six or more is forbidden (overline)');
+    ok(why('d8 e8 f8 g8 i8 h9 h10 h11 h12', '', 'h8') === 0 && why('d8 e8 f8 g8 h9 h7 i9 j10', '', 'h8') === 0, 'renju: making exactly five wins even with a forbidden shape');
+    const walls = 'f6 f7 f9 f10 f11 j6 j7 j9 j10 j11';
+    ok(why('g8 i8 h9 h7 ' + walls, '', 'h8') === 0, 'renju: a three whose extension points are forbidden is a false three');
+    ok(why('g8 i8 h9 h7 f6 f7 f9 f10 f11', '', 'h8') === R.DOUBLE_THREE, 'renju: with one extension still legal, the three is real');
+  }
+  {
+    // Taraguchi-10
+    const mv = (s, ...xs) => { for (const x of xs) s = E.applyMove(s, typeof x === 'string' && x.length <= 3 ? { t: 'stone', i: P(x) } : { t: 'choice', v: x.v }); return s; };
+    let s = E.initialState(0, 'renju');
+    ok(s.phase === 'tplace' && E.canPlace(s, P('h8')) && !E.canPlace(s, P('i9')), 'Taraguchi-10: stone 1 on h8 only');
+    s = mv(s, 'h8');
+    ok(s.phase === 'tswap' && E.actor(s) === 1, 'Taraguchi-10: then the other player may swap');
+    s = mv(s, { v: 'swap' });
+    ok(E.actor(s) === 0 && s.colorOf[0] === E.WHITE && E.canPlace(s, P('g9')) && !E.canPlace(s, P('f9')), 'Taraguchi-10: after a swap the first player is White and places stone 2 inside 3 x 3');
+    s = mv(s, 'g9', { v: 'keep' });
+    ok(E.canPlace(s, P('f10')) && !E.canPlace(s, P('e10')), 'Taraguchi-10: stone 3 inside 5 x 5');
+    s = mv(s, 'j7', { v: 'keep' });
+    ok(E.canPlace(s, P('e11')) && !E.canPlace(s, P('d11')), 'Taraguchi-10: stone 4 inside 7 x 7');
+    s = mv(s, 'k10');
+    ok(s.phase === 'tfifth' && E.actor(s) === 1, 'Taraguchi-10: then the Black player chooses how stone 5 is played');
+    let a = mv(s, { v: 'place' });
+    ok(E.canPlace(a, P('d12')) && !E.canPlace(a, P('c12')), 'Taraguchi-10: stone 5 inside 9 x 9');
+    a = mv(a, 'd12');
+    ok(a.phase === 'tswap' && E.actor(a) === 0, 'Taraguchi-10: then White may swap once more');
+    a = mv(a, { v: 'keep' });
+    ok(a.phase === 'play' && a.turn === E.WHITE, 'Taraguchi-10: White plays stone 6');
+    let t = mv(s, { v: 'ten' });
+    for (const c of ['a1', 'b1', 'c1', 'd1', 'e1', 'f1', 'g1', 'h1', 'i1', 'j1']) t = mv(t, c);
+    ok(t.phase === 'tpick' && t.offers.length === 10 && E.actor(t) === 0, 'Taraguchi-10: ten offers, then White picks');
+    t = mv(t, 'c1');
+    ok(t.phase === 'play' && t.board[P('c1')] === E.BLACK && t.stones === 5 && t.offers.length === 0, 'Taraguchi-10: the pick becomes Black stone 5');
+    let y = { ...E.initialState(0, 'renju'), phase: 'toffer', offers: [P('i9')], board: board('h8') };
+    ok(E.offerClash(y, P('g7')) && !E.offerClash(y, P('i10')), 'Taraguchi-10: offers that mirror each other are refused');
+  }
+  {
+    // the computer under the pro rules
+    let r = AI.bestMove(board('b8 c8 d8 e8 g8 h9 h10 h11 h12', 'a8 a1 a3 a5 a11 a13 o1 o3 o5'), 0, 'hard', 1, 'std');
+    ok(['h8', 'h13'].includes(E.cellName(r.move)), `pro gomoku: Black takes a real five (${E.cellName(r.move)}), not the six at f8`);
+    r = AI.bestMove(board('b8 c8 d8 e8 g8', 'a8 a1 a3 a5 o9'), 0, 'hard', 1, 'std');
+    ok(E.cellName(r.move) !== 'f8', 'pro gomoku: Black does not waste a move on a six');
+    r = AI.bestMove(board('g8 i8 h9 h7 m2', 'e11 f10 g9 a1 a2'), 1, 'hard', 1, 'renju');
+    ok(r.score > 1000000, 'renju: White sees a win by leaving Black only a forbidden block');
+    const st = { ...E.initialState(0, 'renju'), phase: 'play', turn: E.BLACK, colorOf: [E.BLACK, E.WHITE], board: board('g8 i8 h9 h7', 'a1 a2 a3') };
+    const d = AI.decide(st, 'hard', 1).move;
+    ok(E.canPlace(st, d.i) && E.cellName(d.i) !== 'h8', `renju: Black never plays its forbidden point (played ${E.cellName(d.i)})`);
+    for (const rule of ['free', 'std', 'renju']) {
+      let g = E.initialState(0, rule);
+      while (!E.isOver(g) && g.moves.length < 240) g = E.applyMove(g, AI.decide(g, 'normal', 2).move);
+      ok(E.isOver(g), `${rule}: a computer-against-computer game ends with legal moves only (${g.stones} stones)`);
+    }
+  }
+
   // the computer
   const pick = (bl, wh, color, level) => E.cellName(AI.bestMove(board(bl, wh), color, level, 1).move);
   for (const lv of ['easy', 'normal', 'hard']) {
@@ -103,7 +179,7 @@ async function unit() {
   }
   {
     // the computer as opener places its listed opening; as chooser it answers with a legal choice
-    let s = E.initialState(1);
+    let s = E.initialState(1, 'std');
     for (let k = 0; k < 3; k++) s = E.applyMove(s, AI.decide(s, 'hard', 4).move);
     ok(s.phase === 'swap' && s.stones === 3 && [...s.board].filter((v) => v === 0).length === 2, 'computer opener places two black and one white');
     const choice = AI.decide(s, 'hard', 4).move;
@@ -166,9 +242,29 @@ async function browser() {
   ok((await page.title()) === '五子棋 Gomoku · 罡曜 GambitAura', 'page title');
   ok(await page.locator('#cells .cellbtn').count() === 225 && await page.locator('#grid line').count() === 30 && await page.locator('#grid .star').count() === 5,
     '225 points, 15 + 15 grid lines, five star points');
-  ok((await page.textContent('.opening-tag')) === 'Swap2' && (await page.textContent('.ga-crumb')).includes('Classic'), 'Swap2 tag and Classic crumb');
   let g = await G();
-  ok(g.phase === 'open3' && g.actor === 0, 'game 1: you open');
+  // --- casual is the default: you play Black, then the computer answers stone for stone ---
+  ok((await page.textContent('#tag')) === '一般玩法' && (await page.textContent('.ga-crumb')).includes('Classic'), 'casual by default (tag 一般玩法) and Classic crumb');
+  ok(g.phase === 'play' && g.actor === 0 && g.colorOf[0] === 0, 'casual: you play Black from the first stone');
+  await click('h8');
+  await settle();
+  g = await G();
+  ok(g.stones === 2 && g.moves[1].player === 1 && g.moves[1].color === 1, 'casual: the computer answers with one white stone');
+  await click(await free());
+  await settle();
+  g = await G();
+  ok(g.stones === 4 && g.moves.every((m, k) => m.player === k % 2), 'casual: one stone each, turn by turn');
+  await page.waitForTimeout(400);
+  await page.screenshot({ path: OUT + '/gomoku-free.png' });
+  // switch to pro gomoku (Swap2); a game in progress asks first
+  await page.click('#ruleSeg button[data-v="std"]');
+  await page.waitForTimeout(150);
+  ok(await page.locator('#drawDlg[open]').count() === 1, 'changing rules mid-game asks first');
+  await page.click('#drawOk');
+  await page.waitForTimeout(250);
+  g = await G();
+  ok((await page.textContent('#tag')).includes('Swap2') && (await page.textContent('#fairNote')).includes('剛好五子'), 'pro gomoku: Swap2 tag, exactly-five note');
+  ok(g.phase === 'open3' && g.actor === 0 && g.gameNo === 1, 'game 1: you open');
 
   // --- vs computer, you open ---
   await click('h8');
@@ -320,12 +416,49 @@ async function browser() {
   g = await G();
   ok(aimed === startCell - 16 && g.stones === 1 && g.last === aimed, 'keyboard: arrows move the focus, Enter places a stone');
 
+  // --- pro renju, two players: Taraguchi-10 opening, then a forbidden point ---
+  await page.click('#ruleSeg button[data-v="renju"]');
+  await page.waitForTimeout(150);
+  if (await page.locator('#drawDlg[open]').count()) await page.click('#drawOk');
+  await page.waitForTimeout(250);
+  g = await G();
+  ok(g.phase === 'tplace' && (await page.textContent('#tag')).includes('Taraguchi-10'), 'pro renju: Taraguchi-10 opening');
+  ok((await page.textContent('#sub')).includes('h8'), 'stone 1: the status says it goes on h8');
+  const choose = async (v) => { await page.click(`#choices button[data-v="${v}"]`); await page.waitForTimeout(80); };
+  await click('h8');
+  ok(await page.locator('#choices button').count() === 2 && (await page.textContent('#msg')).includes('交換'), 'after stone 1: keep or swap');
+  await choose('keep');
+  ok(await page.locator('#marks .zone').count() === 1 && (await page.textContent('#sub')).includes('3 × 3'), 'stone 2: a gold frame shows the 3 × 3 square');
+  await page.screenshot({ path: OUT + '/gomoku-renju-zone.png' });
+  await click('i9'); await choose('swap');
+  await click('g7'); await choose('keep');
+  await click('k10');
+  g = await G();
+  ok(g.phase === 'tfifth' && await page.locator('#choices button').count() === 3, 'after stone 4: three ways to play stone 5');
+  await choose('ten');
+  for (const c of ['k7', 'e8', 'l5', 'c13', 'm12', 'f4', 'j3', 'n8', 'b9', 'g12']) await click(c);
+  g = await G();
+  ok(g.phase === 'tpick' && await page.locator('#marks .mark.offer').count() === 10, 'ten offered fifth stones are marked');
+  await page.screenshot({ path: OUT + '/gomoku-renju-offers.png' });
+  await click('k7');
+  g = await G();
+  ok(g.phase === 'play' && g.stones === 5 && (await page.textContent('#log')).includes('挑中'), 'White picked k7; it is Black stone 5');
+  // Black builds k7 m7 and l6 l8, so l7 becomes a three-three for Black
+  for (const c of ['a1', 'm7', 'a3', 'l8', 'a5', 'l6', 'a7']) await click(c);
+  const banned = await page.evaluate(() => window.__gomoku.banned);
+  ok(banned.includes(P('l7')) && await page.locator('#marks .mark.ban').count() >= 1, 'Black to move: l7 (three-three) is marked ×');
+  ok((await page.textContent('#sub')).includes('禁手'), 'the status explains the × marks');
+  const before = (await G()).stones;
+  await click('l7');
+  ok((await G()).stones === before, 'Black cannot play on a forbidden point');
+  await page.screenshot({ path: OUT + '/gomoku-renju-ban.png' });
+
   // --- phone ---
   const phone = await br.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
   const p2 = await phone.newPage();
   watch(p2);
   await p2.goto(BASE + 'gomoku/');
-  await p2.evaluate(() => { localStorage.setItem('ga-jielu-lang', 'zh'); localStorage.setItem('ga-gomoku-mode', 'ai'); localStorage.setItem('ga-gomoku-level', 'normal'); });
+  await p2.evaluate(() => { localStorage.setItem('ga-jielu-lang', 'zh'); localStorage.setItem('ga-gomoku-mode', 'ai'); localStorage.setItem('ga-gomoku-level', 'normal'); localStorage.setItem('ga-gomoku-rule', 'std'); });
   await p2.reload();
   await p2.waitForTimeout(500);
   const sw = await p2.evaluate(() => document.documentElement.scrollWidth);

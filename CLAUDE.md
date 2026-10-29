@@ -96,10 +96,21 @@ solved; classics use an accepted balancing rule and each page says how fair it r
   draws, first player wins in theory (Nash's strategy-stealing argument); the swap rule.
 - 黑白棋 Reversi (`reversi/`, 8 × 8): weakly solved as a draw (Takizawa, 2023). Black alternates
   between the two players each game.
-- 五子棋 Gomoku (`gomoku/`, 15 × 15, free-style: six or more counts): free-style is a first-player
-  win (Allis, 1994); Swap2 opening (one player lays black, white, black; the other takes white,
-  takes black, or lays two more and lets the opener pick). Swap2 is not proven fair, and the page
-  says so; it makes the opener lay a balanced start.
+- 五子棋 Gomoku (`gomoku/`, 15 × 15), three rule sets (gambitaura#6, 2026-10-29). The owner found the
+  Swap2-only page broken-looking ("前三手怎麼都是玩家在下": the opener lays three stones) and asked for
+  a pro option, so **casual is the default**: Black first, one stone each, five or more wins, Black
+  alternates each game (free-style is a first-player win, Allis 1994, and the note says so). Pro
+  options: **pro gomoku** as at the Gomoku World Championship: Swap2 (one player lays black,
+  white, black; the other takes white, takes black, or lays two more and lets the opener pick) and
+  exactly five (six or more is no win; play goes on); Swap2 is not proven fair, and the page says
+  so. **Pro renju** as at the Renju World Championship (RIF): Black only wins with exactly five and
+  may not play a three-three, four-four or overline (five takes priority; a three whose extension
+  point is itself forbidden is a false three); White has no limits and five or more wins. Opening
+  Taraguchi-10 (RIF World Championship rule since 2024 or 2025; sources differ): stone n inside the
+  central (2n-1)² square, stone 1 on h8, a swap option after stones 1-3, after stone 4 the Black
+  holder places stone 5 in 9 × 9 (then White may swap), swaps first, or offers ten fifth stones
+  anywhere with no two alike by the board's symmetry, and White picks one. Sources were read
+  through search summaries only: renju.net, renju.se and Wikipedia are blocked in cloud sessions.
 - 取石子 Nim (`nim/`, 3 to 5 piles of 1 to 7): every position is solved (Bouton, 1901), so fairness
   lives in the format: one player sets up the piles, the other looks and picks first or second,
   roles swap every game. A perfect chooser wins any single game; the match is what is fair. The
@@ -113,10 +124,17 @@ deterministic (no `Math.random`): Reversi is alpha-beta with a node budget plus 
 (perft matches the published 4 12 56 244 1396 8200 55092 390216); Hex is UCT with RAVE on a fixed
 playout count, seeded from a hash of the position, and decides swaps with its hard search on every
 level (swap when its best reply wins under 52%); Gomoku is a shape table plus a win-by-fours (VCF)
-search and alpha-beta with a node budget, opening from six fixed starts it scored as the least
-lopsided (balanced in its own judgement, not proven); Nim is exact nim-sum play with weaker
-levels by design. 借路 keeps its own `app.js` logic. The language key `ga-jielu-lang` is
-shared by every page; other settings use `ga-<game>-<key>`.
+search and alpha-beta with a node budget, opening Swap2 from six fixed starts it scored as the least
+lopsided (balanced in its own judgement, not proven). It is rule-aware: `gomoku/renju.js` holds the
+forbidden-move test (shared by engine and search; it works on the search's 0/1/2 board), exact-five
+completions are checked by walking the whole line (the search's LINE table only reaches 4 points,
+which cannot tell five from six), Black never plays a forbidden point, a forced Black block on a
+forbidden point counts as lost, and points that only make six are not counted as fives. In
+Taraguchi-10 it places level stones in the zone, swaps when the side to move looks worse, never
+offers ten itself, and picks the offer best for White. `decide()` always ends in `safe()`, which
+falls back to a legal move. Nim is exact nim-sum play with weaker levels by design. 借路 keeps its
+own `app.js` logic. The language key `ga-jielu-lang` is shared by every page; other settings use
+`ga-<game>-<key>` (Gomoku's rule set is `ga-gomoku-rule`, default `free`).
 
 ## Design system: "Ling Mo" 靈墨 (`assets/ga.css`, 2026-10-28)
 
@@ -147,6 +165,10 @@ of boxes. Do not bring back rainbow gradients, gradient buttons, glossy orbs or 
   5, Coral from rank 1) and a soft tint on the board's outer glow. Selected piece: a steady ring
   plus a ring of light opening outward; tile-move anchor: a steady ring. The result fades in over
   the board in large serif type; the scoreboard is type only, the side to move underlined.
+- Black stones and discs (Gomoku, Reversi; owner, 2026-10-29: "黑棋做得更明顯一些"): a lit ivory
+  rim (1.5px at 50%), a brighter sheen and a faint ring of light around each one, so black reads
+  clearly on the dark board; the Gomoku field is a touch lighter (4% ivory). Do not let black
+  stones sink back into the board.
 - Kept from before: `[hidden]` forced to `display: none` (`.ga-btn`, `.row` set a display);
   `html { overflow-x: clip }` so the hero halo never causes sideways scroll on phones.
 
@@ -157,7 +179,8 @@ of boxes. Do not bring back rainbow gradients, gradient buttons, glossy orbs or 
 - Test every UI change in headless Chromium: start a static server and run `node tests/e2e.cjs`
   (41 checks: the hub's game cards, 借路 moves, tile moves, draw dialog and overlay, scoreboard,
   language, phone widths, no console errors) and the test of any classic you touched
-  (`tests/<game>.cjs`). Look at the screenshots in `tests/out/`.
+  (`tests/<game>.cjs`; `tests/gomoku.cjs` has 151 checks across the three rule sets). Look at the
+  screenshots in `tests/out/`.
 - Owner merges PRs; work on feature branches. Work references are `gambitaura#n` (continuing from
   the portfolio repo), used as the PR title prefix `[gambitaura#n]`.
 - Commit messages explain the reasoning (design or rules rationale), not just the diff.
@@ -173,5 +196,9 @@ of boxes. Do not bring back rainbow gradients, gradient buttons, glossy orbs or 
   unless the environment allows them. Play-testing with people still to do.
 - Originals are the main line. 轉環 is Game 02; light paths is the Game 03 candidate, to be solved
   like the others before it ships. Play-testing 轉環 with people is still to do.
+- Pro rules for the other classics (2026-10-29): Reversi's tournament game is the same game (pro
+  events add clocks, which the series leaves out on purpose); Hex already uses the swap rule and
+  offers 11 × 11, the classic tournament size, and 13 × 13 (used at the Computer Olympiad and on
+  Little Golem) could be added on request; Nim has no pro form.
 - 罡曜 has not been checked against trademarks (e.g. TIPO in Taiwan) or app stores yet. Other
   candidates considered on 2026-10-28: 鋼曜, 罡奧, 罡闢奧, 罡比特.

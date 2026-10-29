@@ -15,9 +15,17 @@ const T = {
     moves: '棋譜', noMoves: '還沒有落子。', rulesTitle: '怎麼玩',
     footer1: '沒有骰子，沒有計時，沒有隱藏資訊。', footer2: '全部遊戲',
     color: ['黑', '白'], you: '你', cpu: '電腦', p: ['玩家一', '玩家二'],
-    round: (n) => `第 ${n} 局`, opens: (n) => `${n}開局`,
+    round: (n) => `第 ${n} 局`,
+    opens: { free: (n) => `${n}執黑先下`, std: (n) => `${n}開局`, renju: (n) => `${n}先執黑` },
+    ruleLbl: '規則', ruleFree: '一般', ruleStd: 'Swap2 職業', ruleRenju: '連珠職業',
+    tag: { free: '一般玩法', std: 'Swap2 · 剛好五子', renju: '連珠 · Taraguchi-10' },
+    ruleAsk: '換規則會重新開始這一局。', ruleNo: '繼續這一局', ruleYes: '換規則',
     stoneN: (n) => `第 ${n} 子`, endPly: (n) => `共 ${n} 手`,
-    fair: '<b>Swap2 開局。</b>五子棋如果不加限制，先下的一方只要每步都下對，一定會贏（Allis，1994）。所以先由一方擺出開局，再由另一方挑顏色。Swap2 沒有被證明完全公平，它的作用是讓擺開局的人必須擺得均勢，因為顏色由對手來挑。',
+    fair: {
+      free: '<b>一般玩法。</b>黑棋先下，雙方輪流，五子以上連成一線就贏。先下的一方佔便宜：不加限制時，黑棋只要每步都下對就一定會贏（Allis，1994）。所以「下一局」會交換執黑的人。想下得更公平，可以選職業玩法。',
+      std: '<b>職業五子棋。</b>五子棋世界錦標賽用的規則：要剛好五子才算贏，六子以上不算，棋局繼續。開局用 Swap2：一方先擺三子（兩黑一白），另一方看過再決定執黑、執白，或再擺兩子把選擇權交回去。這樣擺開局的人必須擺得均勢。Swap2 沒有被證明完全公平。',
+      renju: '<b>職業連珠。</b>連珠世界錦標賽用的規則（國際連珠聯盟 RIF）。黑棋先下但有限制：要剛好五子才算贏，而且不能下禁手，也就是三三、四四和長連（六子以上）。白棋沒有限制，五子以上都算贏。開局用 Taraguchi-10：前五手要下在中央逐漸放大的範圍內，每一手之後對方都可以交換顏色。黑棋的禁手點會標上 ×。',
+    },
     youOpen: '由你擺開局', pOpen: (n) => `${n}擺開局`, aiOpen: '電腦正在擺開局',
     open3Hint: (k, c) => `放三子：兩黑一白。之後對手會挑顏色，所以擺得越均勢越好。下一子：${c}（${k}/3）。`,
     youChoose: '輪到你選', pChoose: (n) => `輪到${n}選`, aiChoose: '電腦正在選擇',
@@ -29,8 +37,26 @@ const T = {
     pickHint: '對手加了兩子。挑一個顏色，白棋先走。',
     pickOpt: { black: '執黑', white: '執白' },
     yourMove: (c) => `輪到你（${c}）`, pMove: (n, c) => `輪到${n}（${c}）`, aiMove: '電腦思考中',
-    playHint: '白棋先走，連成五子就贏。',
-    chose: (n, v) => ({ white: `${n}選了執白`, black: `${n}選了執黑`, two: `${n}選了再下兩子` })[v],
+    playHint: '白棋先走，剛好五子才算贏。',
+    freeHint: '黑棋先下，雙方輪流，五子以上連成一線就贏。',
+    youPlace: (n, c) => `下第 ${n} 手（${c}）`, pPlace: (p, n, c) => `${p}下第 ${n} 手（${c}）`, aiPlace: (n) => `電腦正在下第 ${n} 手`,
+    zoneHint: (n, k) => (n === 1 ? '第一手固定下在天元 h8。下完後，對方可以選擇交換顏色。'
+      : `第 ${n} 手要下在中央 ${k} × ${k} 的金框內。${n === 4 ? '下完後由執黑的一方決定第五手怎麼下' : '下完後對方可以選擇交換顏色'}，所以下得均勢最好。`),
+    youSwapQ: '要不要交換顏色？', pSwapQ: (p) => `${p}決定要不要交換`, aiSwapQ: '電腦正在決定要不要交換',
+    swapQ: (n, c, o) => (n === 5 ? '第五手已經下好。你可以繼續執白，下第六手，之後正常輪流；或交換成執黑，讓對方執白下第六手。'
+      : `第 ${n} 手已經下好。你可以繼續執${c}，下第 ${n + 1} 手；或交換成執${o}，讓對方下第 ${n + 1} 手。`),
+    keepOpt: (c, n) => `繼續執${c}，我下第 ${n} 手`, swapOpt: (o) => `交換，改執${o}`,
+    youFifth: '第五手怎麼下？', pFifth: (p) => `${p}決定第五手`, aiFifth: '電腦正在決定第五手',
+    fifthHint: '你執黑。可以在中央 9 × 9 內下第五手（之後白方可以交換）；可以先交換顏色，改由對方執黑下第五手；也可以在任何地方提出十個第五手，讓白方挑一個。',
+    fifthOpt: { place: '在 9 × 9 內下第五手', swap: '交換顏色', ten: '提出十個第五手' },
+    youOffer: (k) => `提出第五手（${k}/10）`, pOffer: (p, k) => `${p}提出第五手（${k}/10）`, aiOffer: '電腦正在提出第五手',
+    offerHint: '在任何空點放下一個候選的第五手。和已提出的點對稱的位置不能用。白方會從十個裡挑一個。',
+    youPick5: '挑一個第五手', pPick5: (p) => `${p}挑第五手`, aiPick5: '電腦正在挑第五手',
+    pick5Hint: '黑方提出了十個第五手（金色虛圈）。點其中一個，它就成為黑棋的第五手，接著輪到白棋下第六手。',
+    renjuPlay: '開局結束，白棋下第六手。黑棋要剛好五子才算贏，白棋五子以上都算。',
+    banHint: '× 是黑棋的禁手點（三三、四四或長連），黑棋不能下。',
+    offerLog: (c) => `提出 ${c}`, pickLog: (c, p) => `黑 ${c}（${p}挑中）`,
+    chose: (n, v) => ({ white: `${n}選了執白`, black: `${n}選了執黑`, two: `${n}選了再下兩子`, keep: `${n}不交換`, swap: `${n}交換顏色`, place: `${n}選擇在 9 × 9 內下第五手`, ten: `${n}選擇提出十個第五手` })[v],
     stop: '。',
     tapAim: '點一下瞄準，再點一下落子。', tapAgain: (c) => `再點一次 ${c} 就落子。`,
     winYou: '你贏了', winAi: '電腦獲勝', winP: (n) => `${n}勝`,
@@ -38,17 +64,34 @@ const T = {
     endSmall: (c, n) => `${c}棋連成五子，共 ${n} 手`,
     look: '看一下棋盤',
     restartAsk: '重新開始會清掉這一局。', restartNo: '繼續這一局', restartYes: '重新開始',
-    cell: { empty: '空', 0: '黑子', 1: '白子' }, boardLabel: '棋盤',
-    rules: `
+    cell: { empty: '空', 0: '黑子', 1: '白子', ban: '黑棋禁手', offer: '候選第五手' }, boardLabel: '棋盤',
+    rules: {
+      free: `
       <ol>
         <li><b>目標：</b>讓自己的五顆棋子連成一直線，橫、直、斜都可以。六顆以上也算贏。</li>
         <li>棋子下在線的交叉點上，下了就不再移動。</li>
+        <li>黑棋先下，之後雙方輪流，一次下一子。</li>
+        <li>棋盤下滿還沒有人連成五子，就是和局。</li>
+        <li>「下一局」會交換執黑的人。</li>
+      </ol>`,
+      std: `
+      <ol>
+        <li><b>目標：</b>剛好五顆棋子連成一直線，橫、直、斜都可以。六顆以上不算贏，棋局繼續。</li>
         <li><b>開局（Swap2）：</b>開局的一方先放三子：兩黑一白。</li>
         <li>另一方從三種做法選一種：執白，自己下第四子；執黑，由對方執白下第四子；或再下一黑一白，讓對方挑顏色。</li>
         <li>顏色定了以後，白棋先走，雙方輪流下。</li>
-        <li>棋盤下滿還沒有人連成五子，就是和局。</li>
-        <li>「下一局」會交換由誰開局。</li>
+        <li>棋盤下滿還沒有人連成五子，就是和局。「下一局」會交換由誰開局。</li>
       </ol>`,
+      renju: `
+      <ol>
+        <li><b>目標：</b>五顆棋子連成一直線。黑棋要剛好五子；白棋五子以上都算。</li>
+        <li><b>黑棋的禁手：</b>黑棋不能一手同時做出兩個活三（三三）、兩個四（四四），也不能連成六子以上（長連）。只要這一手剛好連成五子，就算贏，不算禁手。棋盤上會用 × 標出禁手點。</li>
+        <li>「活三」是再加一子就能變成兩頭都能連五的四。如果那一子本身是禁手，這個三不算活三。</li>
+        <li><b>開局（Taraguchi-10）：</b>第一手黑棋下在天元 h8；第二手白棋在中央 3 × 3 內；第三手黑棋在 5 × 5 內；第四手白棋在 7 × 7 內。前三手每下一手，對方都可以選擇交換顏色。</li>
+        <li><b>第五手：</b>執黑的一方可以在 9 × 9 內下第五手（之後白方可以交換）、先交換顏色，或在任何地方提出十個第五手（不能互相對稱），由白方挑一個。</li>
+        <li>之後白棋下第六手，雙方輪流。棋盤下滿還沒有人連成五子，就是和局。</li>
+      </ol>`,
+    },
   },
   en: {
     setup: 'Setup', mode: 'Mode', modeAi: 'vs computer', modePvp: 'Two players',
@@ -57,9 +100,21 @@ const T = {
     moves: 'Moves', noMoves: 'No stones yet.', rulesTitle: 'How to play',
     footer1: 'No dice, no timer, nothing hidden.', footer2: 'All games',
     color: ['Black', 'White'], you: 'You', cpu: 'Computer', p: ['Player 1', 'Player 2'],
-    round: (n) => `Game ${n}`, opens: (n) => (n === 'You' ? 'You open' : `${n} opens`),
+    round: (n) => `Game ${n}`,
+    opens: {
+      free: (n) => (n === 'You' ? 'You play Black first' : `${n} plays Black first`),
+      std: (n) => (n === 'You' ? 'You open' : `${n} opens`),
+      renju: (n) => (n === 'You' ? 'You start as Black' : `${n} starts as Black`),
+    },
+    ruleLbl: 'Rules', ruleFree: 'Casual', ruleStd: 'Pro gomoku', ruleRenju: 'Pro renju',
+    tag: { free: 'Casual', std: 'Swap2 · exactly five', renju: 'Renju · Taraguchi-10' },
+    ruleAsk: 'Changing the rules starts this game again.', ruleNo: 'Keep playing', ruleYes: 'Change rules',
     stoneN: (n) => `Stone ${n}`, endPly: (n) => `${n} moves`,
-    fair: '<b>Swap2 opening.</b> Without a rule like this, the player who moves first can always win with perfect play (Allis, 1994). So one player sets up the opening and the other picks a colour. Nobody has proven Swap2 perfectly fair. What it does is make the opener build a balanced position, because the opponent picks the side.',
+    fair: {
+      free: '<b>Casual.</b> Black moves first, then you take turns. Five or more in a row wins. Moving first is an edge: with no extra rule, Black can always win with perfect play (Allis, 1994). So "Next game" swaps who plays Black. For fairer games, pick one of the pro rules.',
+      std: '<b>Pro gomoku.</b> The rules of the Gomoku World Championship: exactly five wins, and six or more does not (play goes on). The opening is Swap2: one player lays three stones (two black, one white), and the other looks, then plays Black, plays White, or adds two more and hands the choice back. So the opener has to keep it even. Nobody has proven Swap2 perfectly fair.',
+      renju: '<b>Pro renju.</b> The rules of the Renju World Championship (Renju International Federation). Black moves first but is restricted: only exactly five wins, and Black may not play a forbidden move: a double three, a double four or an overline (six or more). White has no limits, and five or more wins. The opening is Taraguchi-10: the first five stones go inside a central square that grows each move, and after each one the other player may swap colours. Black\'s forbidden points are marked ×.',
+    },
     youOpen: 'You set the opening', pOpen: (n) => `${n} sets the opening`, aiOpen: 'The computer is setting the opening',
     open3Hint: (k, c) => `Place three stones: two black, one white. Your opponent then picks a colour, so keep it even. Next: ${c.toLowerCase()} (${k} of 3).`,
     youChoose: 'Your choice', pChoose: (n) => `${n} to choose`, aiChoose: 'The computer is choosing',
@@ -71,8 +126,26 @@ const T = {
     pickHint: 'Your opponent added two stones. Pick a colour. White moves first.',
     pickOpt: { black: 'Play Black', white: 'Play White' },
     yourMove: (c) => `Your move (${c})`, pMove: (n, c) => `${n} to move (${c})`, aiMove: 'Computer is thinking',
-    playHint: 'White moves first. Five in a row wins.',
-    chose: (n, v) => ({ white: `${n} took White`, black: `${n} took Black`, two: `${n} chose to place two more` })[v],
+    playHint: 'White moves first. Exactly five in a row wins.',
+    freeHint: 'Black moves first, then you take turns. Five or more in a row wins.',
+    youPlace: (n, c) => `Place stone ${n} (${c.toLowerCase()})`, pPlace: (p, n, c) => `${p} places stone ${n} (${c.toLowerCase()})`, aiPlace: (n) => `The computer is placing stone ${n}`,
+    zoneHint: (n, k) => (n === 1 ? 'Stone 1 always goes on the centre point, h8. Then the other player may swap colours.'
+      : `Stone ${n} goes inside the central ${k} × ${k} square (gold frame). ${n === 4 ? 'Then the player holding Black decides how stone 5 is played' : 'Then the other player may swap colours'}, so keep it even.`),
+    youSwapQ: 'Swap colours?', pSwapQ: (p) => `${p} decides whether to swap`, aiSwapQ: 'The computer is deciding whether to swap',
+    swapQ: (n, c, o) => (n === 5 ? 'Stone 5 is down. Keep White and play stone 6, after which you take turns; or swap to Black and let the other player play stone 6 as White.'
+      : `Stone ${n} is down. Keep ${c} and place stone ${n + 1}; or swap to ${o} and let the other player place stone ${n + 1}.`),
+    keepOpt: (c, n) => `Keep ${c}, I place stone ${n}`, swapOpt: (o) => `Swap to ${o}`,
+    youFifth: 'How is stone 5 played?', pFifth: (p) => `${p} decides on stone 5`, aiFifth: 'The computer is deciding on stone 5',
+    fifthHint: 'You hold Black. Place stone 5 inside the central 9 × 9 (then White may swap); swap colours first, so the other player places stone 5 as Black; or offer ten fifth stones anywhere and let White pick one.',
+    fifthOpt: { place: 'Place stone 5 in the 9 × 9', swap: 'Swap colours', ten: 'Offer ten fifth stones' },
+    youOffer: (k) => `Offer a fifth stone (${k} of 10)`, pOffer: (p, k) => `${p} offers a fifth stone (${k} of 10)`, aiOffer: 'The computer is offering fifth stones',
+    offerHint: 'Put a candidate fifth stone on any empty point. A point that mirrors one already offered is not allowed. White will pick one of the ten.',
+    youPick5: 'Pick a fifth stone', pPick5: (p) => `${p} picks the fifth stone`, aiPick5: 'The computer is picking the fifth stone',
+    pick5Hint: 'Black has offered ten fifth stones (gold dashed rings). Tap one: it becomes Black\'s fifth stone, and White plays stone 6.',
+    renjuPlay: 'The opening is over; White plays stone 6. Black needs exactly five; for White five or more counts.',
+    banHint: '× marks Black\'s forbidden points (double three, double four or overline). Black may not play there.',
+    offerLog: (c) => `offers ${c}`, pickLog: (c, p) => `Black ${c} (picked by ${p})`,
+    chose: (n, v) => ({ white: `${n} took White`, black: `${n} took Black`, two: `${n} chose to place two more`, keep: `${n} kept colours`, swap: `${n} swapped colours`, place: `${n} will place stone 5 in the 9 × 9`, ten: `${n} will offer ten fifth stones` })[v],
     stop: '. ',
     tapAim: 'Tap once to aim, then tap again to place.', tapAgain: (c) => `Tap ${c} again to place.`,
     winYou: 'You win', winAi: 'Computer wins', winP: (n) => `${n} wins`,
@@ -80,17 +153,34 @@ const T = {
     endSmall: (c, n) => `${c} made five in ${n} moves`,
     look: 'Look at the board',
     restartAsk: 'Restarting clears this game.', restartNo: 'Keep playing', restartYes: 'Restart',
-    cell: { empty: 'empty', 0: 'black stone', 1: 'white stone' }, boardLabel: 'Board',
-    rules: `
+    cell: { empty: 'empty', 0: 'black stone', 1: 'white stone', ban: 'forbidden for Black', offer: 'offered fifth stone' }, boardLabel: 'Board',
+    rules: {
+      free: `
       <ol>
         <li><b>Goal:</b> get five of your stones in a straight line: across, down or diagonal. Six or more also wins.</li>
         <li>Stones go where the lines cross. Once placed, a stone never moves.</li>
+        <li>Black moves first, then you take turns, one stone each.</li>
+        <li>If the board fills up and nobody has five, the game is a draw.</li>
+        <li>"Next game" swaps who plays Black.</li>
+      </ol>`,
+      std: `
+      <ol>
+        <li><b>Goal:</b> exactly five of your stones in a straight line: across, down or diagonal. Six or more does not win, and play goes on.</li>
         <li><b>Opening (Swap2):</b> the opener places three stones: two black, one white.</li>
         <li>The other player picks one of three: play White and place stone 4; play Black, so the opener plays White and places stone 4; or place two more stones (one black, one white) and let the opener pick the colour.</li>
         <li>Once colours are set, White moves first and the players take turns.</li>
-        <li>If the board fills up and nobody has five, the game is a draw.</li>
-        <li>"Next game" swaps who opens.</li>
+        <li>If the board fills up and nobody has five, the game is a draw. "Next game" swaps who opens.</li>
       </ol>`,
+      renju: `
+      <ol>
+        <li><b>Goal:</b> five in a straight line. Black needs exactly five; for White five or more counts.</li>
+        <li><b>Black's forbidden moves:</b> Black may not make two open threes at once (double three), two fours at once (double four), or six or more in a row (overline). A move that makes exactly five wins anyway. Forbidden points are marked × on the board.</li>
+        <li>An open three is a three that one more stone turns into a four with both ends open. If that extra stone would itself be forbidden, it is not an open three.</li>
+        <li><b>Opening (Taraguchi-10):</b> stone 1 (Black) goes on the centre, h8; stone 2 (White) inside the central 3 × 3; stone 3 (Black) inside 5 × 5; stone 4 (White) inside 7 × 7. After each of the first three, the other player may swap colours.</li>
+        <li><b>Stone 5:</b> the player holding Black places it inside 9 × 9 (then White may swap), swaps colours first, or offers ten fifth stones anywhere (no two mirroring each other) and lets White pick one.</li>
+        <li>White then plays stone 6 and the players take turns. If the board fills up and nobody has five, the game is a draw.</li>
+      </ol>`,
+    },
   },
 };
 
@@ -101,6 +191,9 @@ let mode = store.get('mode', 'ai');
 let level = store.get('level', 'normal');
 if (!['ai', 'pvp'].includes(mode)) mode = 'ai';
 if (!['easy', 'normal', 'hard'].includes(level)) level = 'normal';
+// Casual play is the default: people expect Black and White to take turns from the first stone.
+let rule = store.get('rule', 'free');
+if (!E.RULES.includes(rule)) rule = 'free';
 
 const HUMAN = 0;      // vs computer, the person is player 1 (left on the scoreboard)
 let opener = 0;       // player 1 opens game 1; "Next game" swaps
@@ -167,7 +260,7 @@ function setCursor(i, focus) {
 const stoneEls = new Map();
 function syncStones() {
   for (const m of state.moves) {
-    if (m.t !== 'stone' || stoneEls.has(m.i)) continue;
+    if ((m.t !== 'stone' && m.t !== 'pick') || stoneEls.has(m.i)) continue;
     const el = document.createElement('div');
     el.className = 'stone at new ' + (m.color === BLACK ? 'b' : 'w');
     el.innerHTML = '<i></i>';
@@ -205,7 +298,7 @@ const ai = new AIClient(new URL('./ai-worker.js', import.meta.url), onAiReply);
 function newGame() {
   ai.cancel();
   busy = false;
-  state = E.initialState(opener);
+  state = E.initialState(opener, rule);
   counted = false; overlayHidden = false; hover = -1; aim = -1;
   stonesL.innerHTML = ''; winSvg.innerHTML = '';
   stoneEls.clear();
@@ -261,8 +354,10 @@ function render() {
   applyStatic(L, lang);
   setSeg('modeSeg', mode); setSeg('levelSeg', level);
   $('levelRow').hidden = mode !== 'ai';
-  $('fairNote').innerHTML = L.fair;
-  $('rulesBody').innerHTML = L.rules;
+  setSeg('ruleSeg', rule);
+  $('tag').textContent = L.tag[rule];
+  $('fairNote').innerHTML = L.fair[rule];
+  $('rulesBody').innerHTML = L.rules[rule];
   cellsL.setAttribute('aria-label', L.boardLabel);
   const a = E.actor(state);
   boardEl.classList.toggle('turn-0', a === 0);
@@ -273,9 +368,10 @@ function render() {
     left: { name: name(0), pts: score[0], on: !over() && a === 0, orb: orb(0) },
     right: { name: name(1), pts: score[1], on: !over() && a === 1, orb: orb(1) },
     roundBold: L.round(gameNo),
-    roundSmall: L.opens(name(opener)),
+    roundSmall: L.opens[rule](name(opener)),
   });
   for (const [id, p] of [['sbMint', 0], ['sbCoral', 1]]) $(id).title = state.colorOf ? L.color[state.colorOf[p]] : '';
+  computeBanned();
   renderStatusLine();
   renderChoices();
   renderMoves();
@@ -295,9 +391,12 @@ function renderStatusLine() {
     renderStatus({ side: null, end: true, msg, ply: L.endPly(state.stones), sub: state.winner === null ? L.drawEnd : '' });
     return;
   }
-  const ph = state.phase;
+  const ph = state.phase, n = state.stones + 1;
+  const turnC = L.color[state.turn ?? 0], otherC = L.color[1 - (state.turn ?? 0)];
+  const lastM = state.moves[state.moves.length - 1];
   if (ai) {
-    msg = { open3: L.aiOpen, swap: L.aiChoose, open2: L.aiTwo, pick: L.aiPick, play: L.aiMove }[ph];
+    msg = { open3: L.aiOpen, swap: L.aiChoose, open2: L.aiTwo, pick: L.aiPick, play: L.aiMove, tplace: L.aiPlace(n),
+      tswap: L.aiSwapQ, tfifth: L.aiFifth, toffer: L.aiOffer, tpick: L.aiPick5 }[ph];
   } else if (ph === 'open3') {
     msg = you ? L.youOpen : L.pOpen(name(a));
     sub = L.open3Hint(state.placed + 1, L.color[col]);
@@ -310,22 +409,57 @@ function renderStatusLine() {
   } else if (ph === 'pick') {
     msg = you ? L.youPick : L.pPick(name(a));
     sub = L.pickHint;
+  } else if (ph === 'tplace') {
+    msg = you ? L.youPlace(n, turnC) : L.pPlace(name(a), n, turnC);
+    sub = L.zoneHint(n, 2 * state.stones + 1);
+  } else if (ph === 'tswap') {
+    msg = you ? L.youSwapQ : L.pSwapQ(name(a));
+    sub = L.swapQ(state.stones, turnC, otherC);
+  } else if (ph === 'tfifth') {
+    msg = you ? L.youFifth : L.pFifth(name(a));
+    sub = L.fifthHint;
+  } else if (ph === 'toffer') {
+    msg = you ? L.youOffer(state.offers.length + 1) : L.pOffer(name(a), state.offers.length + 1);
+    sub = L.offerHint;
+  } else if (ph === 'tpick') {
+    msg = you ? L.youPick5 : L.pPick5(name(a));
+    sub = L.pick5Hint;
   } else {
     msg = you ? L.yourMove(L.color[col]) : L.pMove(name(a), L.color[col]);
-    const lastM = state.moves[state.moves.length - 1];
-    if (lastM && lastM.t === 'choice') sub = L.chose(name(lastM.player), lastM.v) + L.stop + L.playHint;
+    if (rule === 'free') { if (state.stones === 0) sub = L.freeHint; }
+    else if (rule === 'std') { if (lastM && lastM.t === 'choice') sub = L.chose(name(lastM.player), lastM.v) + L.stop + L.playHint; }
+    else if (state.stones === 5 && lastM && lastM.t !== 'stone') sub = L.renjuPlay;
+    if (rule === 'renju' && state.turn === BLACK && banned.length) sub = (sub ? sub + (lang === 'zh' ? '' : ' ') : '') + L.banHint;
   }
-  if (!ai && col !== null) {
+  if (ai && ph !== 'play') {
+    // while the computer works through the opening, keep the rule of the step in view
+    sub = ph === 'tplace' ? L.zoneHint(n, 2 * state.stones + 1) : '';
+  }
+  if (!ai && col !== null && ph !== 'tpick') {
     if (aim >= 0) sub = L.tapAgain(E.cellName(aim));
     else if (coarse && state.stones === 0) sub += (lang === 'zh' ? '' : ' ') + L.tapAim;
   }
-  renderStatus({ side: col, end: false, msg, thinking: ai, ply: col !== null ? L.stoneN(state.stones + 1) : '', sub });
+  const showN = col !== null && ph !== 'toffer' && ph !== 'tpick';
+  renderStatus({ side: col, end: false, msg, thinking: ai, ply: showN ? L.stoneN(n) : '', sub });
+}
+
+function choiceLabel(v) {
+  const L = T[lang], ph = state.phase;
+  if (ph === 'swap') return L.opt[v];
+  if (ph === 'pick') return L.pickOpt[v];
+  if (ph === 'tswap') return v === 'keep' ? L.keepOpt(L.color[state.turn], state.stones + 1) : L.swapOpt(L.color[1 - state.turn]);
+  return L.fifthOpt[v];
+}
+function choiceIcon(v) {
+  const ph = state.phase;
+  if (ph === 'tswap') return v === 'keep' ? (state.turn === BLACK ? 'mini b' : 'mini w') : (state.turn === BLACK ? 'mini w' : 'mini b');
+  if (ph === 'tfifth') return { place: 'mini b', swap: 'mini w', ten: 'mini pair' }[v];
+  return { white: 'mini w', black: 'mini b', two: 'mini pair' }[v];
 }
 
 function renderChoices() {
-  const L = T[lang];
   const box = $('choices');
-  const show = !over() && !busy && !isAiTurn() && (state.phase === 'swap' || state.phase === 'pick');
+  const show = !over() && !busy && !isAiTurn() && E.legalChoices(state).length > 0;
   const appearing = show && box.hidden;
   box.hidden = !show;
   box.innerHTML = '';
@@ -340,14 +474,12 @@ function renderChoices() {
       }
     });
   }
-  const icon = { white: 'mini w', black: 'mini b', two: 'mini pair' };
-  const opts = state.phase === 'swap' ? L.opt : L.pickOpt;
   for (const v of E.legalChoices(state)) {
     const b = document.createElement('button');
     b.type = 'button';
     b.className = 'ga-btn';
     b.dataset.v = v;
-    b.innerHTML = `<i class="${icon[v]}" aria-hidden="true"></i><span>${opts[v]}</span>`;
+    b.innerHTML = `<i class="${choiceIcon(v)}" aria-hidden="true"></i><span>${choiceLabel(v)}</span>`;
     b.addEventListener('click', () => onChoice(v));
     box.appendChild(b);
   }
@@ -355,15 +487,21 @@ function renderChoices() {
 
 function renderMoves() {
   const L = T[lang];
-  // opening stones also say who placed them, since one player places both colours there
-  const settled = state.moves.findIndex((x) => x.t === 'choice' && x.v !== 'two');
+  // In the pro openings one player may place stones of both colours, so those stones also say who
+  // placed them: up to the Swap2 colour choice, or the first five stones of a renju game.
+  const settled = rule === 'std' ? state.moves.findIndex((x) => x.t === 'choice' && x.v !== 'two') : -1;
+  let stoneCount = 0;
   const rows = state.moves.map((m, k) => {
     if (m.t === 'choice') return { side: 0, choice: true, text: L.chose(name(m.player), m.v) };
-    const opening = settled < 0 || k < settled;
-    return { side: m.color, text: `${L.color[m.color]} ${E.cellName(m.i)}` + (opening ? ` <span class="who">· ${name(m.player)}</span>` : '') };
+    if (m.t === 'offer') return { side: 0, choice: true, text: `${name(m.player)} ${L.offerLog(E.cellName(m.i))}` };
+    stoneCount++;
+    const opening = rule === 'std' ? settled < 0 || k < settled : rule === 'renju' ? stoneCount <= 5 : false;
+    if (m.t === 'pick') return { side: m.color, text: L.pickLog(E.cellName(m.i), name(m.player)) };
+    const text = `${L.color[m.color]} ${E.cellName(m.i)}`;
+    return { side: m.color, text: text + (opening ? ` <span class="who">· ${name(m.player)}</span>` : '') };
   });
   renderLog(rows, () => '');
-  // stone numbers instead of row numbers; the Swap2 choices get a small diamond
+  // stone numbers instead of row numbers; choices and offers get a small diamond
   const lis = $('log').querySelectorAll('li');
   let n = 0;
   rows.forEach((r, k) => {
@@ -373,13 +511,31 @@ function renderMoves() {
   });
 }
 
+// Black's forbidden points near the stones (renju, Black to move); recomputed each render.
+let banned = [];
+function computeBanned() {
+  banned = [];
+  if (rule !== 'renju' || state.phase !== 'play' || state.turn !== BLACK) return;
+  for (let i = 0; i < SIZE; i++) if (state.board[i] === -1 && E.forbiddenAt(state, i)) banned.push(i);
+}
+
 function renderMarks() {
   marksL.innerHTML = '';
   if (state.last >= 0) addMark('mark last', state.last);
+  if (state.phase === 'tplace' && state.stones > 0) {
+    // the square stone n must go in
+    const r = state.stones, z = document.createElement('div');
+    z.className = 'zone';
+    z.style.left = z.style.top = `${((7 - r) / N) * 100}%`;
+    z.style.width = z.style.height = `${((2 * r + 1) / N) * 100}%`;
+    marksL.appendChild(z);
+  }
+  state.offers.forEach((i, k) => { const d = addMark('mark offer', i); d.dataset.k = k + 1; });
+  for (const i of banned) addMark('mark ban', i);
   if (!humanPlaces()) return;
   const col = E.stoneColor(state);
   const at = aim >= 0 ? aim : hover;
-  if (at >= 0 && state.board[at] === -1) {
+  if (at >= 0 && E.canPlace(state, at)) {
     const g = addMark('ghost ' + (col === BLACK ? 'b' : 'w') + (aim >= 0 ? ' aim' : ''), at);
     g.innerHTML = '<i></i>';
   }
@@ -396,10 +552,12 @@ function addMark(cls, i) {
 function renderCells() {
   const L = T[lang];
   const can = humanPlaces();
+  const ban = new Set(banned);
   for (let i = 0; i < SIZE; i++) {
     const b = cellBtns[i], v = state.board[i];
-    b.classList.toggle('act', can && v === -1);
-    b.setAttribute('aria-label', `${E.cellName(i)}, ${v === -1 ? L.cell.empty : L.cell[v]}`);
+    b.classList.toggle('act', can && E.canPlace(state, i));
+    const what = v !== -1 ? L.cell[v] : state.offers.includes(i) ? L.cell.offer : ban.has(i) ? L.cell.ban : L.cell.empty;
+    b.setAttribute('aria-label', `${E.cellName(i)}, ${what}`);
     b.tabIndex = i === cursor ? 0 : -1;
   }
 }
@@ -420,6 +578,14 @@ function renderResult() {
 bindLang((v) => { lang = v; render(); });
 onSeg('modeSeg', (v) => { if (v === mode) return; mode = v; store.set('mode', v); resetMatch(); newGame(); });
 onSeg('levelSeg', (v) => { level = v; store.set('level', v); render(); });
+onSeg('ruleSeg', async (v) => {
+  if (v === rule) return;
+  if (!over() && state.moves.length) {
+    const L = T[lang];
+    if (!(await confirmDialog(L.ruleAsk, L.ruleNo, L.ruleYes))) return;
+  }
+  rule = v; store.set('rule', v); resetMatch(); newGame();
+});
 $('restartBtn').onclick = async () => {
   if (!over() && state.moves.length) {
     const L = T[lang];
@@ -438,6 +604,6 @@ newGame();
 window.__gomoku = {
   get state() { return state; }, get busy() { return busy; }, get score() { return score.slice(); },
   get gameNo() { return gameNo; }, get mode() { return mode; }, get aiStats() { return aiStats.slice(); },
-  get actor() { return E.actor(state); },
+  get actor() { return E.actor(state); }, get rule() { return rule; }, get banned() { return banned.slice(); },
   nextGame,
 };
