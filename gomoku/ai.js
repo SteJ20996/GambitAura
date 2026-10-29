@@ -14,7 +14,11 @@
 //  - Victory by continuous fours (VCF): a chain of fours the opponent must keep blocking.
 //    Normal looks for its own; hard also refuses moves that leave the opponent one.
 //  - Iterative-deepening alpha-beta over the best few candidates, bounded by a node budget.
-import { N, SIZE, BLACK, WHITE } from './engine.js';
+//  - Rules (set per call from the game state): in pro gomoku a five must be exactly five for
+//    both colours; in renju it must be exactly five for Black, and Black never plays a forbidden
+//    point (renju.js). A Black block that would be forbidden is no block at all, which White uses.
+import { N, SIZE, BLACK, WHITE, CENTRE, canPlace, legalChoices } from './engine.js';
+import { forbiddenReason } from './renju.js';
 
 export const LEVELS = {
   // depth 1 plus a wobble in its judgement: it takes wins and blocks fours and open threes, but
@@ -120,6 +124,40 @@ const ZL = new Uint32Array(SIZE * 3), ZH = new Uint32Array(SIZE * 3);
 let hl = 0, hh = 0;
 const hashKey = () => hh * 4294967296 + (hl >>> 0);
 
+// ---------- rules ----------
+// EXACT[c]: colour c (1 black, 2 white) needs exactly five. FORBID: Black's renju restrictions.
+const EXACT = [false, false, false];
+let FORBID = false;
+function setRule(rule) {
+  EXACT[1] = rule === 'std' || rule === 'renju';
+  EXACT[2] = rule === 'std';
+  FORBID = rule === 'renju';
+}
+function runAt(p, c, d) {
+  const r0 = (p / N) | 0, c0 = p % N;
+  let n = 1;
+  for (const sg of [-1, 1]) {
+    let r = r0 + sg * DR[d], cc = c0 + sg * DC[d];
+    while (r >= 0 && r < N && cc >= 0 && cc < N && b[r * N + cc] === c) { n++; r += sg * DR[d]; cc += sg * DC[d]; }
+  }
+  return n;
+}
+// Would colour c win with a stone on the empty point q?
+function winsAt(q, c) {
+  b[q] = c;
+  let win = false;
+  for (let d = 0; d < 4 && !win; d++) { const n = runAt(q, c, d); win = EXACT[c] ? n === 5 : n >= 5; }
+  b[q] = 0;
+  return win;
+}
+// Black may not play q (renju). Cheap test first: only points that make two threats or a long
+// line for Black (by the free-style shapes, which never miss a renju one) are checked in full.
+function blackBanned(q, level) {
+  if (!FORBID || b[q] !== 0) return false;
+  if (level !== undefined && (level < L_33 || level === L_FOUR)) return false;
+  return forbiddenReason(b, q) !== 0;
+}
+
 function make(p, c) {
   b[p] = c; stones++;
   const o = 3 - c;
@@ -171,6 +209,7 @@ function load(board) {
 // Did the stone on p complete five?
 function fiveAt(p) {
   const c = b[p];
+  if (EXACT[c]) { for (let d = 0; d < 4; d++) if (runAt(p, c, d) === 5) return true; return false; }
   for (let k = CW_START[p], e = CW_START[p + 1]; k < e; k++) if (cnt[CW[k] * 3 + c] === 5) return true;
   return false;
 }
@@ -178,12 +217,15 @@ function fiveAt(p) {
 // Distinct empty cells that would give colour c five right now.
 function completions(c) {
   const o = 3 - c, out = [];
+  if (F[c] <= 0) return out;
   for (let w = 0; w < NWIN; w++) {
     if (cnt[w * 3 + c] !== 4 || cnt[w * 3 + o] !== 0) continue;
-    for (let k = 0; k < 5; k++) { const q = WC[w * 5 + k]; if (b[q] === 0 && !out.includes(q)) out.push(q); }
+    for (let k = 0; k < 5; k++) { const q = WC[w * 5 + k]; if (b[q] === 0 && !out.includes(q) && (!EXACT[c] || winsAt(q, c))) out.push(q); }
   }
   return out;
 }
+// Can colour c make five right now?
+const winNow = (c) => F[c] > 0 && (!EXACT[c] || completions(c).length > 0);
 
 // The same, looking only at runs through p (enough right after c played p with no four before).
 function completionsAt(p, c) {
@@ -191,7 +233,7 @@ function completionsAt(p, c) {
   for (let k = CW_START[p], e = CW_START[p + 1]; k < e; k++) {
     const w = CW[k];
     if (cnt[w * 3 + c] !== 4 || cnt[w * 3 + o] !== 0) continue;
-    for (let j = 0; j < 5; j++) { const q = WC[w * 5 + j]; if (b[q] === 0 && !out.includes(q)) out.push(q); }
+    for (let j = 0; j < 5; j++) { const q = WC[w * 5 + j]; if (b[q] === 0 && !out.includes(q) && (!EXACT[c] || winsAt(q, c))) out.push(q); }
   }
   return out;
 }
@@ -251,6 +293,14 @@ function genMoves(c, limit, defend, first) {
   for (let p = 0; p < SIZE; p++) {
     if (b[p] !== 0 || near[p] === 0) continue;
     evalPoint(p);
+    // renju: Black cannot play a forbidden point, so it is neither a move nor a threat to stop
+    if (FORBID && blackBanned(p, PT[1])) {
+      if (c === 1) continue;
+      PT[0] = 0; PT[1] = 0;
+    }
+    // exactly five: a point that only makes six or more is no five (the shape table counts it)
+    if (EXACT[1] && PT[1] === L_FIVE && !winsAt(p, 1)) { PT[0] = SW[2]; PT[1] = 0; }
+    if (EXACT[2] && PT[3] === L_FIVE && !winsAt(p, 2)) { PT[2] = SW[2]; PT[3] = 0; }
     GP[n] = p; GA[n] = PT[ai]; GLA[n] = PT[ai + 1]; GD[n] = PT[di]; GLD[n] = PT[di + 1];
     if (GLA[n] > maxLa) maxLa = GLA[n];
     if (GLD[n] > maxLd) maxLd = GLD[n];
@@ -258,7 +308,8 @@ function genMoves(c, limit, defend, first) {
   }
   genWin = -1;
   if (n === 0) {
-    for (let p = 0; p < SIZE; p++) if (b[p] === 0) return [p];
+    if (b[CENTRE] === 0) return [CENTRE];
+    for (let p = 0; p < SIZE; p++) if (b[p] === 0 && !(c === 1 && blackBanned(p))) return [p];
     return [];
   }
   const idx = [];
@@ -288,6 +339,7 @@ function fourMoves(c) {
   for (let p = 0; p < SIZE; p++) {
     if (b[p] !== 0 || near[p] === 0) continue;
     if (!makesFour(p, c)) continue;
+    if (c === 1 && blackBanned(p)) continue;
     evalPoint(p);
     list.push([p, PT[ai]]);
   }
@@ -306,13 +358,13 @@ const vFail = new Map();
 function vcf(c, depth, ply) {
   if (++vNodes > vBudget) return false;
   const o = 3 - c;
-  if (F[c] > 0) { if (ply === 0) vFirst = completions(c)[0]; return true; }
+  if (winNow(c)) { if (ply === 0) vFirst = completions(c)[0]; return true; }
   if (depth <= 0) return false;
   let moves;
-  if (F[o] > 0) {
-    const cs = completions(o);
-    if (cs.length > 1 || !makesFour(cs[0], c)) return false;
-    moves = cs;
+  const oc = winNow(o) ? completions(o) : [];
+  if (oc.length) {
+    if (oc.length > 1 || !makesFour(oc[0], c) || (c === 1 && blackBanned(oc[0]))) return false;
+    moves = oc;
   } else moves = fourMoves(c);
   if (!moves.length) return false;
   const key = hashKey();   // the attacker is always to move here, and the table is per call
@@ -325,9 +377,12 @@ function vcf(c, depth, ply) {
     if (cs.length >= 2) win = !hasFourMove(o);
     else if (cs.length === 1) {
       const q = cs[0];
-      make(q, o);
-      win = vcf(c, depth - 1, ply + 1);
-      unmake(q);
+      if (o === 1 && blackBanned(q)) win = true;     // Black may not block on a forbidden point
+      else {
+        make(q, o);
+        win = vcf(c, depth - 1, ply + 1);
+        unmake(q);
+      }
     }
     unmake(p);
     if (win) { if (ply === 0) vFirst = p; return true; }
@@ -368,12 +423,13 @@ function negamax(c, depth, alpha, beta, ply) {
   nodes++;
   if (nodes > budget) { aborted = true; return 0; }
   const o = 3 - c;
-  if (F[c] > 0) return WIN - ply;
+  if (winNow(c)) return WIN - ply;
   if (stones >= SIZE) return 0;
-  if (F[o] > 0) {
-    const cs = completions(o);
-    if (cs.length > 1) return -(WIN - ply - 1);
-    const p = cs[0];
+  const oc = winNow(o) ? completions(o) : [];
+  if (oc.length) {
+    if (oc.length > 1) return -(WIN - ply - 1);
+    const p = oc[0];
+    if (c === 1 && blackBanned(p)) return -(WIN - ply - 1);
     make(p, c);
     const sc = -negamax(o, depth - 1, -beta, -alpha, ply + 1);
     unmake(p);
@@ -414,13 +470,16 @@ function think(c, cfg, gameSeed) {
   nodes = 0; budget = cfg.budget; aborted = false; tt.clear(); vSum = 0;
   noiseAmp = cfg.noise; seed = gameSeed >>> 0; beamN = cfg.beam; defendOn = cfg.defend;
   const done = (move, score, depth, why) => ({ move, score, depth, nodes: nodes + vSum, why });
-  if (F[c] > 0) return done(completions(c)[0], WIN, 0, 'five');
-  if (F[o] > 0) {
+  if (winNow(c)) return done(completions(c)[0], WIN, 0, 'five');
+  if (winNow(o)) {
     // block; with two threats we lose anyway, so block the one that helps us most
-    const cs = completions(o);
-    let best = cs[0], bs = -INF;
-    for (const p of cs) { evalPoint(p); const v = PT[c === 1 ? 0 : 2]; if (v > bs) { bs = v; best = p; } }
-    return done(best, cs.length > 1 ? -WIN : 0, 0, 'block');
+    const cs = completions(o).filter((p) => !(c === 1 && blackBanned(p)));
+    if (cs.length) {
+      let best = cs[0], bs = -INF;
+      for (const p of cs) { evalPoint(p); const v = PT[c === 1 ? 0 : 2]; if (v > bs) { bs = v; best = p; } }
+      return done(best, completions(o).length > 1 ? -WIN : 0, 0, 'block');
+    }
+    // the only blocks are forbidden for Black: lost, but play on with the best legal move
   }
   if (cfg.vcf) {
     const m = findVcf(c, cfg.vcf, cfg.vcfBudget);
@@ -537,6 +596,67 @@ function bestWhiteExtra(board, q, gs) {
   return best;
 }
 
+// ---------- Taraguchi-10 (renju) ----------
+// Every stone placed in the opening can be taken over by a swap, so the computer aims for a
+// level position. It checks the ten most level-looking points of the zone with a short search.
+function scoreToMove(board, color, cfg, gs) {
+  load(board);
+  return think(color + 1, cfg, gs).score;
+}
+function zoneCells(s) {
+  const out = [];
+  for (let i = 0; i < SIZE; i++) if (canPlace(s, i)) out.push(i);
+  return out;
+}
+function taraguchiPlace(s, cfg, gameNo, gs) {
+  if (s.stones === 0) return { t: 'stone', i: CENTRE };
+  const col = s.turn + 1, next = 3 - col;
+  load(s.board);
+  const pre = zoneCells(s).map((p) => { make(p, col); const v = evaluate(next); unmake(p); return [p, Math.abs(v)]; });
+  pre.sort((x, y) => x[1] - y[1] || x[0] - y[0]);
+  const q = quick(cfg);
+  const scored = pre.slice(0, 10).map(([p]) => {
+    const bd = s.board.slice(); bd[p] = s.turn;
+    return [p, Math.abs(scoreToMove(bd, next - 1, q, gs))];
+  });
+  const top = Math.min(...scored.map((x) => x[1]));
+  const tied = scored.filter((x) => x[1] <= top + LEVEL_BAND).map((x) => x[0]);
+  return { t: 'stone', i: tied[gameNo % tied.length] };
+}
+// Keep the colour that moves next, or swap to the colour that just moved.
+function taraguchiSwap(s, cfg, gs) {
+  const sc = scoreToMove(s.board, s.turn, quick(cfg), gs);
+  return { t: 'choice', v: sc < -LEVEL_BAND ? 'swap' : 'keep', score: sc };
+}
+// Holding Black after stone 4: swap if Black looks worse, otherwise place stone 5 in the 9 x 9.
+// (The computer never offers ten; that choice is there for people.)
+function taraguchiFifth(s, cfg, gs) {
+  const sc = scoreToMove(s.board, BLACK, quick(cfg), gs);
+  return { t: 'choice', v: sc < -LEVEL_BAND ? 'swap' : 'place', score: sc };
+}
+// Offering ten: White will take the weakest, so offer the strongest points that do not repeat.
+function taraguchiOffer(s) {
+  load(s.board);
+  const list = [];
+  for (let p = 0; p < SIZE; p++) {
+    if (!canPlace(s, p)) continue;
+    make(p, 1); list.push([p, evaluate(2)]); unmake(p);
+  }
+  list.sort((x, y) => x[1] - y[1] || x[0] - y[0]);
+  return { t: 'stone', i: list.length ? list[0][0] : -1 };
+}
+// Picking for White: the offer that leaves White best off.
+function taraguchiPick(s, cfg, gs) {
+  const q = quick(cfg);
+  let best = s.offers[0], bs = -INF;
+  for (const o of s.offers) {
+    const bd = s.board.slice(); bd[o] = BLACK;
+    const sc = scoreToMove(bd, WHITE, q, gs);
+    if (sc > bs) { bs = sc; best = o; }
+  }
+  return { t: 'stone', i: best, score: bs };
+}
+
 // ---------- entry point ----------
 // s: engine state; returns { move, score, depth, nodes }.
 const seedOf = (gameNo) => Math.imul((gameNo | 0) + 1, 0x9e3779b1);
@@ -544,36 +664,66 @@ const seedOf = (gameNo) => Math.imul((gameNo | 0) + 1, 0x9e3779b1);
 export function decide(s, level = 'hard', gameNo = 1) {
   const cfg = LEVELS[level] || LEVELS.hard;
   const gs = seedOf(gameNo);
-  if (s.phase === 'open3') {
-    const cells = openingCells(gameNo - 1);
-    let p = cells[s.placed];
-    if (s.board[p] !== -1) p = s.board.findIndex((v) => v === -1);
-    return { move: { t: 'stone', i: p }, score: 0, depth: 0, nodes: 0 };
-  }
-  if (s.phase === 'swap') {
-    const r = chooseSwap(s.board, cfg, gameNo, gs);
-    return { move: { t: 'choice', v: r.v }, score: r.score, depth: 0, nodes, vals: r.vals };
-  }
-  if (s.phase === 'open2') {
-    if (s.placed === 0) {
-      const pair = bestPair(s.board, cfg, gs);
-      return { move: { t: 'stone', i: pair.b }, score: pair.score, depth: 0, nodes };
+  setRule(s.rule || 'free');
+  return safe(s, choose(s, cfg, gameNo, gs));
+}
+
+function choose(s, cfg, gameNo, gs) {
+  switch (s.phase) {
+    case 'open3': {
+      const cells = openingCells(gameNo - 1);
+      let p = cells[s.placed];
+      if (s.board[p] !== -1) p = s.board.findIndex((v) => v === -1);
+      return { move: { t: 'stone', i: p }, score: 0, depth: 0, nodes: 0 };
     }
-    const w = bestWhiteExtra(s.board, quick(cfg), gs);
-    return { move: { t: 'stone', i: w.p }, score: w.score, depth: 0, nodes };
+    case 'swap': {
+      const r = chooseSwap(s.board, cfg, gameNo, gs);
+      return { move: { t: 'choice', v: r.v }, score: r.score, depth: 0, nodes, vals: r.vals };
+    }
+    case 'open2': {
+      if (s.placed === 0) {
+        const pair = bestPair(s.board, cfg, gs);
+        return { move: { t: 'stone', i: pair.b }, score: pair.score, depth: 0, nodes };
+      }
+      const w = bestWhiteExtra(s.board, quick(cfg), gs);
+      return { move: { t: 'stone', i: w.p }, score: w.score, depth: 0, nodes };
+    }
+    case 'pick': {
+      load(s.board);
+      const s5 = whiteScore(cfg, gs);
+      return { move: { t: 'choice', v: s5 >= 0 ? 'white' : 'black' }, score: s5, depth: 0, nodes };
+    }
+    case 'tplace': return { move: taraguchiPlace(s, cfg, gameNo, gs), score: 0, depth: 0, nodes };
+    case 'tswap': { const m = taraguchiSwap(s, cfg, gs); return { move: m, score: m.score, depth: 0, nodes }; }
+    case 'tfifth': { const m = taraguchiFifth(s, cfg, gs); return { move: m, score: m.score, depth: 0, nodes }; }
+    case 'toffer': return { move: taraguchiOffer(s), score: 0, depth: 0, nodes };
+    case 'tpick': { const m = taraguchiPick(s, cfg, gs); return { move: m, score: m.score, depth: 0, nodes }; }
+    default: {
+      load(s.board);
+      const r = think(s.turn + 1, cfg, gs);
+      return { move: { t: 'stone', i: r.move }, score: r.score, depth: r.depth, nodes: r.nodes, why: r.why };
+    }
   }
-  if (s.phase === 'pick') {
-    load(s.board);
-    const s5 = whiteScore(cfg, gs);
-    return { move: { t: 'choice', v: s5 >= 0 ? 'white' : 'black' }, score: s5, depth: 0, nodes };
-  }
+}
+
+// Never hand back an illegal move: if the search somehow picked one, fall back to the best
+// legal candidate (or any legal point), and to the first legal choice.
+function safe(s, r) {
+  const m = r.move;
+  const choices = legalChoices(s);
+  if (choices.length) return m && m.t === 'choice' && choices.includes(m.v) ? r : { ...r, move: { t: 'choice', v: choices[0] }, why: 'fallback' };
+  if (m && m.t === 'stone' && canPlace(s, m.i)) return r;
   load(s.board);
-  const r = think(s.turn + 1, cfg, gs);
-  return { move: { t: 'stone', i: r.move }, score: r.score, depth: r.depth, nodes: r.nodes, why: r.why };
+  const col = s.phase === 'play' ? s.turn + 1 : 1;
+  const cand = genMoves(col, 40, false, -1).filter((p) => canPlace(s, p));
+  let i = cand.length ? cand[0] : -1;
+  for (let k = 0; k < SIZE && i < 0; k++) if (canPlace(s, k)) i = k;
+  return { ...r, move: { t: 'stone', i }, why: 'fallback' };
 }
 
 // For tests: best move for `color` (0 black, 1 white) on an engine board.
-export function bestMove(board, color, level = 'hard', gameNo = 1) {
+export function bestMove(board, color, level = 'hard', gameNo = 1, rule = 'free') {
+  setRule(rule);
   load(board);
   return think(color + 1, LEVELS[level] || LEVELS.hard, seedOf(gameNo));
 }
