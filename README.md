@@ -108,11 +108,13 @@ DNS for gambitaura.com on Cloudflare (DNS → Records), every record "DNS only" 
 Settings → Pages (in this repository's Settings, not the account's): Source "Deploy from a branch",
 `main`, `/ (root)`. "Enforce HTTPS" turns on by ticking it once GitHub has issued the certificate.
 
-Keep the repository public. GitHub Free cannot publish Pages from a private repository: on
-2026-10-29 the repository was private for a while, merges stopped deploying and gambitaura.com
-showed GitHub's 404 "There isn't a GitHub Pages site here". After making it public again, check
-Settings → Pages (source `main`, `/ (root)`, custom domain `www.gambitaura.com`); the next push
-to `main` starts a new deploy.
+Keep the repository public: the fairness pages point readers to the solvers in it. On 2026-10-29
+the repository was private for a while on GitHub Free, which cannot publish Pages from a private
+repository: merges stopped deploying and gambitaura.com showed GitHub's 404 "There isn't a GitHub
+Pages site here". Making it public again did not bring the site back by itself; Pages had to be
+turned on again in this repository's Settings → Pages (source `main`, `/ (root)`, custom domain
+`www.gambitaura.com`, then "Enforce HTTPS"). The account has been on GitHub Pro since that day,
+which would also allow Pages from a private repository.
 
 Keep the records "DNS only". Cloudflare's dashboard suggests proxying and a www-to-root redirect
 rule; ignore both. Redirect rules only run on proxied records, and a www-to-root rule would loop
