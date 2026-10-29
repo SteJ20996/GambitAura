@@ -165,6 +165,10 @@ of boxes. Do not bring back rainbow gradients, gradient buttons, glossy orbs or 
   5, Coral from rank 1) and a soft tint on the board's outer glow. Selected piece: a steady ring
   plus a ring of light opening outward; tile-move anchor: a steady ring. The result fades in over
   the board in large serif type; the scoreboard is type only, the side to move underlined.
+- Black stones and discs (Gomoku, Reversi; owner, 2026-10-29: "黑棋做得更明顯一些"): a lit ivory
+  rim (1.5px at 50%), a brighter sheen and a faint ring of light around each one, so black reads
+  clearly on the dark board; the Gomoku field is a touch lighter (4% ivory). Do not let black
+  stones sink back into the board.
 - Kept from before: `[hidden]` forced to `display: none` (`.ga-btn`, `.row` set a display);
   `html { overflow-x: clip }` so the hero halo never causes sideways scroll on phones.
 
