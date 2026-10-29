@@ -12,6 +12,7 @@ uses an accepted balancing rule and its page says plainly how fair it is.
 |-------|------|--------|---------------------------------|
 | Original 01 | 借路 Jielu | `jielu/` | Solved: the default v0.5 opening is a draw with perfect play (v0.4 selectable) |
 | Original 02 | 轉環 Zhuanhuan | `zhuanhuan/` | Solved: the spiral opening is a draw with perfect play; 12 of the 16 first moves hold |
+| Original 03 | 光路 Guanglu | `guanglu/` | Solved: the opening is a draw with perfect play; 8 of the 16 first moves hold |
 | Classic | 六角連線 Hex | `hex/` | No draws, so the first player has a forced win; the swap rule takes that edge away |
 | Classic | 黑白棋 Reversi | `reversi/` | 8 × 8 was weakly solved in 2023 (Takizawa): a draw with perfect play |
 | Classic | 五子棋 Gomoku | `gomoku/` | Casual by default (free-style is a first-player win, Allis 1994; Black alternates each game). Pro options: gomoku as at the Gomoku World Championship (Swap2, exactly five) and renju as at the Renju World Championship (Black's forbidden moves, Taraguchi-10 opening) |
@@ -34,7 +35,10 @@ uses an accepted balancing rule and its page says plainly how fair it is.
 - `zhuanhuan/`: Game 02 (`index.html`, `app.js`, `engine.js`, `ai.js`, `ai-worker.js`).
   `zhuanhuan/analysis/`: how its rules and opening were chosen (`index.html`), the solver (`solver.c`)
   and the Node cross-checks (`check_table.mjs`, `probe_ai.mjs`, `table.mjs`).
+- `guanglu/`: Game 03, same files as 轉環. `guanglu/analysis/`: how its rules, light placement and
+  opening were chosen (`index.html`), the solver (`solver.c`) and the same three Node cross-checks.
 - `tests/e2e.cjs`: browser test of the hub, 借路 and its fairness page. `tests/zhuanhuan.cjs`: 轉環.
+  `tests/guanglu.cjs`: 光路.
   `tests/hex.cjs`, `tests/reversi.cjs`, `tests/gomoku.cjs`, `tests/nim.cjs`: one browser test per classic.
 
 No build step: every page is static HTML, CSS and ES modules.
@@ -45,7 +49,7 @@ No build step: every page is static HTML, CSS and ES modules.
 npx http-server -p 8765 -c-1 .
 open http://127.0.0.1:8765/
 node tests/e2e.cjs          # with the server running; screenshots land in tests/out/
-for t in zhuanhuan hex reversi gomoku nim; do node tests/$t.cjs; done
+for t in zhuanhuan guanglu hex reversi gomoku nim; do node tests/$t.cjs; done
 ```
 
 ## Key result
@@ -59,6 +63,13 @@ between equal players. Details and reproduction steps: `jielu/analysis/index.htm
 lose. The first draft (only three on a spoke wins) had no forced wins at all, because turning a ring
 always defends; adding three side by side on a ring fixed that. Details: `zhuanhuan/analysis/index.html`.
 
+光路 Guanglu (Game 03): a 4 × 5 field of two-sided mirrors; a turn flips one mirror that either beam
+passes through, never the one just flipped. All 44,040,192 positions are solved. From the opening
+(every mirror / except d3 e3 a2 b2) neither side can force a win; 8 of the first player's 16 first
+moves lose within 7 moves. Earlier drafts were shallow (any mirror: longest forced win 7 moves) or a
+pure race (own beam only: 5% draws); without the no-flip-back rule every attack is undone at once
+(longest forced win 2). Details: `guanglu/analysis/index.html`.
+
 ## Before changing the rules or the opening
 
 1. `gcc -O3 -march=native -fopenmp -o solver jielu/analysis/solver.c`
@@ -70,6 +81,11 @@ For 轉環: `cd zhuanhuan/analysis && gcc -O3 -march=native -fopenmp -o solver s
 `./solver --perft d1,e2,f3 h1,a2,b3 6` (must match `perft()` in `zhuanhuan/engine.js`),
 `./solver --show d1,e2,f3 h1,a2,b3 --dump table.bin` (about 10 seconds) and
 `node check_table.mjs table.bin 3000`.
+
+For 光路: `cd guanglu/analysis && gcc -O3 -march=native -fopenmp -o solver solver.c`, then
+`./solver --design 11 17 --start 3840 --perft 6` (must match `perft()` in `guanglu/engine.js`),
+`./solver --design 11 17 --start 3840 --dump table.bin` (about 15 seconds, 88 MB) and
+`node check_table.mjs table.bin 3000`. The design and start numbers are `DESIGN` in the engine.
 
 The 借路 solver covers every terrain with four water squares and the pieces anywhere. A change to the
 board size, the number of water squares, the flags or the move rules needs the solver updated first.

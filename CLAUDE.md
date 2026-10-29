@@ -47,8 +47,8 @@ must agree on `perft` and on `replay.mjs`; run both after touching move rules.
 Owner, 2026-10-29: of the two Game 02 concepts (concentric rings; light paths), "兩個都可以保留，先做
 concentric rings". So 轉環 is Game 02 and **light paths** (25 two-sided mirror tiles; a turn flips one
 mirror, not the one just flipped; first to steer your own beam to your target wins; every flip
-changes both beams) is kept as the Game 03 candidate. Name 轉環 Zhuanhuan confirmed by the owner
-on 2026-10-29 ("就用轉環"; 星軌 and 連星 were the alternatives offered).
+changes both beams) is kept as the Game 03 candidate (built as 光路, below). Name 轉環 Zhuanhuan
+confirmed by the owner on 2026-10-29 ("就用轉環"; 星軌 and 連星 were the alternatives offered).
 
 Rules: 3 rings (1 inner, 2 middle, 3 outer) × 8 spokes (a at the top, clockwise), spot = ring*8+ray
 in code, named like `e2`. Three pieces each. A turn: turn a ring that carries at least one of your
@@ -80,12 +80,54 @@ is the viewBox origin, which is the board centre here (50% 50% was the bug). Tur
 the row of buttons under the board; the banned direction is disabled and explained in the status.
 Test: `tests/zhuanhuan.cjs` (31 checks).
 
+## Game 03: 光路 Guanglu (gambitaura#7, 2026-10-29)
+
+Owner, 2026-10-29: "開始做光路，先用求解器檢查" (the light-paths candidate, named 光路 by the owner).
+Rules: a 4 × 5 field (cells a..e, ranks 4 at the top to 1), every cell a two-sided mirror, / or \.
+Light turns 90 degrees at every mirror. Mint's light enters at the middle of the bottom edge (port 11,
+under c1) and must leave through the lowest opening of the left wall (port 17); Coral's is the half
+turn (port 2 above c4, out at port 5 right of e4). A turn flips one mirror that either beam passes
+through (the lit ones), never the one the other side just flipped. After a move: if the mover's
+beam reaches its target the mover wins; else if only the other's does, the other side wins.
+Threefold repetition draws. Never a pass in practice: each beam always lights its entry cell (c1,
+c4), so a flip is always legal (the engine keeps a pass fallback). Opening: every mirror / except d3 e3 a2 b2
+(cfg 3840, half-turn symmetric). Ports: top 0..4, right 5..8, bottom 9..13, left 14..17.
+
+**Solved (2026-10-29).** `guanglu/analysis/solver.c`, 44,040,192 states (2^20 layouts × 21 bans ×
+2), about 10 s on 4 cores. The opening is a draw; 8 of Mint's 16 first moves hold (e4 d3 a2 d2 e2 b1
+c1 d1); d4 loses within 3, e3 within 5, the other six within 7. Rule design was decided by the
+solver on 4 × 4 first: any mirror gives a longest forced win of 7; own beam only gives 5% draws (a
+race); either beam with the no-flip-back ban gives 47, and without the ban every placement is at
+most 2. On 4 × 5 the chosen placement has win 30.1 / loss 12.1 / draw 57.8% and a longest forced win
+of 88. Other placements: top 2nd → left lowest is longest (106) but its best starts let a one-move
+player draw over half the time; top 2nd → right 2nd (98) was the close runner-up; the chosen one has
+more decided positions (42% vs 29%) and light entering mid-edge. Some placements can never be won
+(the beam alternates vertical and horizontal moves and square colours). Of 1,024 half-turn
+symmetric layouts, 36 start with a beam home, 711 are draws, 275 first-player wins, 2 losses; the
+top three of the 196 ranked draw starts are near-identical, 3840 was picked as the easiest to
+remember. Simulated 10% slips: 50.2 / 48.5 / 1.3 (20,000 games, about ±0.7 points); perfect play
+beats a one-move player 98.3% moving first, 98.9% second, in about 25 plies. Cross-checks: perft to
+6 agrees with `engine.js` (16 194 1998 19258 185636 1805468); `check_table.mjs` re-derives 80,985
+table values with 0 mismatches. 5 × 5 (about 1.7 billion states) was not solved, so it does not
+ship. **Any rule, placement or opening change must be re-solved.**
+
+**Code.** `engine.js` (pure rules; `DESIGN = { src, tgt, start }` holds the placement and opening;
+`trace()` follows a beam), `ai.js` (alpha-beta, node budget: easy depth 1, normal depth 2, hard
+80k nodes; keeps the solved result in 62.7 / 96.7 / 99.7% of sampled positions; hard about 0.5 s,
+at most 1.2 s; level with perfect play for 200 plies as either side), `app.js` on `assets/shell.js`.
+The board is one SVG in board units (cells 100 wide, viewBox `-78 -78 656 556`); mirrors turn by a
+cumulative 90 degrees per flip so the animation never spins back; hovering a lit mirror previews
+both beams after the flip (dashed); the banned mirror is dashed; a flip that would make the third
+repetition is marked 和 and asks first. The hub card's mini board and the analysis page's opening
+figure are drawn from `engine.js`, so they follow `DESIGN`. Test: `tests/guanglu.cjs` (27 checks;
+its scripted win and repetition are found with the engine, so they follow the shipped layout).
+
 ## The hub and the classics (gambitaura#5, 2026-10-28)
 
 Owner, 2026-10-28: put several board and strategy games on one site, the homepage as a game hub
 with each game at its own address; the four classics Hex, Reversi, Gomoku and Nim, "然後主要是我們
 自己構思創作平衡的棋類" (the main line stays our own originally designed, balanced games). So the
-hub has two shelves: **原創 Originals** (借路, 轉環, then a Game 03 slot "in the works") above **經典
+hub has two shelves: **原創 Originals** (借路, 轉環, 光路, then a Game 04 slot "in the works") above **經典
 Classics** (four cards with mini boards drawn in the site's style).
 
 Fairness copy must stay honest. A game with no draws always has a forced winner under perfect
@@ -177,7 +219,7 @@ of boxes. Do not bring back rainbow gradients, gradient buttons, glossy orbs or 
 - Copy rules (the owner's, shared with their other sites): plain language for a general reader, no
   em dashes in site copy, short sentences. zh-Hant and English for every string.
 - Test every UI change in headless Chromium: start a static server and run `node tests/e2e.cjs`
-  (41 checks: the hub's game cards, 借路 moves, tile moves, draw dialog and overlay, scoreboard,
+  (44 checks: the hub's game cards, 借路 moves, tile moves, draw dialog and overlay, scoreboard,
   language, phone widths, no console errors) and the test of any classic you touched
   (`tests/<game>.cjs`; `tests/gomoku.cjs` has 151 checks across the three rule sets). Look at the
   screenshots in `tests/out/`.
@@ -194,8 +236,8 @@ of boxes. Do not bring back rainbow gradients, gradient buttons, glossy orbs or 
   tick "Enforce HTTPS". Do not add Cloudflare redirect rules or turn on the proxy (README explains
   why). Cloud sessions cannot reach gambitaura.com, docs.github.com or developers.cloudflare.com
   unless the environment allows them. Play-testing with people still to do.
-- Originals are the main line. 轉環 is Game 02; light paths is the Game 03 candidate, to be solved
-  like the others before it ships. Play-testing 轉環 with people is still to do.
+- Originals are the main line. 轉環 is Game 02 and 光路 is Game 03 (both solved); Game 04 has no
+  concept yet. Play-testing 轉環 and 光路 with people is still to do.
 - Pro rules for the other classics (2026-10-29): Reversi's tournament game is the same game (pro
   events add clocks, which the series leaves out on purpose); Hex already uses the swap rule and
   offers 11 × 11, the classic tournament size, and 13 × 13 (used at the Computer Olympiad and on

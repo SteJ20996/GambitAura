@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="description" content="光路 Guanglu：罡曜 GambitAura 的第三款原創棋。翻轉鏡子，把自己的光送到目標。" />
+<meta name="theme-color" content="#08090c" />
+<title>光路 Guanglu · 罡曜 GambitAura</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Instrument+Sans:wght@400..700&family=Noto+Serif+TC:wght@500;700;900&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../assets/ga.css" />
+<link rel="stylesheet" href="../assets/game.css" />
+<style>
+  /* 光路 only. A field of mirrors; two beams of light, jade and agate. Everything is one SVG in
+     board units: cells are 100 wide, the rim leaves room for the sources and targets. */
+  .board.gl { aspect-ratio: 656 / 556; }
+  .gl .art { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; }
+  .gl .cellbg { fill: rgba(236, 230, 218, .018); stroke: rgba(236, 230, 218, .07); stroke-width: 1; }
+  .gl .frame { fill: none; stroke: rgba(236, 230, 218, .2); stroke-width: 1.2; }
+  .gl .lbl { font-family: var(--display); font-style: italic; font-size: 20px; fill: var(--muted); text-anchor: middle; dominant-baseline: central; }
+
+  /* mirrors: a silver bar; the ones a beam touches are lit and can be flipped */
+  .gl .mir { transform-box: fill-box; transform-origin: 50% 50%; transition: transform .55s cubic-bezier(.3, .7, .2, 1); }
+  .gl .mir .bar { stroke: #8f8a80; stroke-width: 5; stroke-linecap: round; opacity: .55; transition: opacity .4s, stroke .4s; }
+  .gl .mir .edge { stroke: rgba(255, 255, 255, .5); stroke-width: 1.2; stroke-linecap: round; opacity: .35; }
+  .gl .mir.lit .bar { stroke: #e9dfc6; opacity: .95; filter: drop-shadow(0 0 4px rgba(217, 195, 143, .55)); }
+  .gl .mir.lit .edge { opacity: .9; }
+  .gl .mir.ban .bar { stroke-dasharray: 9 7; opacity: .5; filter: none; }
+  .gl .mir.last .bar { stroke: var(--gold); }
+
+  /* beams */
+  .gl .beam { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  .gl .beam.glow { stroke-width: 15; opacity: .16; }
+  .gl .beam.core { stroke-width: 3.4; opacity: .95; }
+  .gl .beam.m { stroke: var(--mint); } .gl .beam.c { stroke: var(--coral); }
+  .gl .beam.m.core { filter: drop-shadow(0 0 6px var(--mint-glow)); }
+  .gl .beam.c.core { filter: drop-shadow(0 0 6px var(--coral-glow)); }
+  .gl .beam.draw { stroke-dasharray: var(--len); stroke-dashoffset: var(--len); animation: beamIn .7s ease-out forwards; }
+  @keyframes beamIn { to { stroke-dashoffset: 0; } }
+  .gl .beam.preview { stroke-width: 2; opacity: .55; stroke-dasharray: 7 7; }
+
+  /* sources and targets on the rim */
+  .gl .src { filter: drop-shadow(0 0 8px currentColor); }
+  .gl .src.m { color: var(--mint); fill: var(--mint); } .gl .src.c { color: var(--coral); fill: var(--coral); }
+  .gl .tgt { fill: none; stroke-width: 2; }
+  .gl .tgt.m { stroke: var(--mint); } .gl .tgt.c { stroke: var(--coral); }
+  .gl .tgt .core { stroke: none; opacity: .25; }
+  .gl .tgt.m .core { fill: var(--mint); } .gl .tgt.c .core { fill: var(--coral); }
+  .gl .tgt.hit .core { opacity: 1; filter: drop-shadow(0 0 12px currentColor); }
+  .gl .tgt .spin { transform-box: fill-box; transform-origin: 50% 50%; animation: tgtSpin 30s linear infinite; }
+  @keyframes tgtSpin { to { transform: rotate(360deg); } }
+
+  .gl .hitbox { fill: transparent; cursor: default; }
+  .gl .hitbox.act { cursor: pointer; }
+  .gl .hitbox.act:hover { fill: rgba(236, 230, 218, .04); }
+  .gl .hitbox:focus { outline: none; }
+  .gl .hitbox:focus-visible { stroke: var(--gold); stroke-width: 1.5; }
+  .gl .tag { font-family: var(--cjk); font-size: 22px; font-weight: 700; fill: var(--gold); text-anchor: middle; dominant-baseline: central; }
+  @media (prefers-reduced-motion: reduce) {
+    .gl .mir { transition: none; }
+    .gl .beam.draw { animation: none; stroke-dashoffset: 0; }
+    .gl .tgt .spin { animation: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="ga-top">
+    <a class="ga-brand" href="../" aria-label="罡曜 GambitAura">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><defs><radialGradient id="gaCore" cx=".5" cy=".45" r=".55"><stop offset="0" stop-color="#fffaf0"/><stop offset=".55" stop-color="#ecdcb4"/><stop offset="1" stop-color="#c9ad74"/></radialGradient><radialGradient id="gaHalo" cx=".5" cy=".5" r=".5"><stop offset=".3" stop-color="#d9c38f" stop-opacity=".28"/><stop offset="1" stop-color="#d9c38f" stop-opacity="0"/></radialGradient></defs><circle cx="32" cy="32" r="30" fill="url(#gaHalo)"/><circle cx="32" cy="32" r="22" fill="none" stroke="#d9c38f" stroke-width="1.4" opacity=".7"/><circle cx="32" cy="32" r="15" fill="none" stroke="#d9c38f" stroke-width="1" stroke-dasharray="1.5 3.5" opacity=".6"/><circle cx="32" cy="32" r="7" fill="url(#gaCore)"/></svg>
+      <span class="ga-lock" aria-hidden="true"><span class="ga-zh">罡曜</span><span class="ga-word">Gambit<b>Aura</b></span></span>
+      <span class="ga-crumb">· Game 03</span>
+    </a>
+    <div class="ga-langs" role="group" aria-label="Language">
+      <button class="ga-chip" data-lang="zh" aria-pressed="true">中文</button>
+      <button class="ga-chip" data-lang="en" aria-pressed="false">EN</button>
+    </div>
+  </header>
+
+  <main class="game">
+    <section class="stage">
+      <div class="col title-row">
+        <div class="title"><h1>光路</h1><span class="latin">Guanglu</span></div>
+        <span class="opening-tag" id="tag"></span>
+      </div>
+
+      <div class="col ga-card score" id="score">
+        <div class="side-box mint" id="sbMint"><span class="orb"></span><span class="who" id="whoMint"></span><span class="pts" id="ptsMint">0</span></div>
+        <div class="round" id="round"></div>
+        <div class="side-box coral" id="sbCoral"><span class="orb"></span><span class="who" id="whoCoral"></span><span class="pts" id="ptsCoral">0</span></div>
+      </div>
+
+      <div class="col">
+        <div class="board gl" id="board">
+          <div class="mist mist-0" aria-hidden="true"></div>
+          <div class="mist mist-1" aria-hidden="true"></div>
+          <svg class="art" id="art" viewBox="-78 -78 656 556" role="group" aria-label="board">
+            <g id="cells"></g>
+            <g id="beams"></g>
+            <g id="mirrors"></g>
+            <g id="ports"></g>
+            <g id="preview"></g>
+            <g id="hits"></g>
+          </svg>
+          <div class="overlay" id="overlay" aria-live="polite">
+            <div>
+              <div class="big" id="ovBig"></div>
+              <div class="small" id="ovSmall"></div>
+              <div class="btns">
+                <button class="ga-btn primary" id="ovNext"></button>
+                <button class="ga-btn" id="ovLook"></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col ga-card status" id="status" aria-live="polite">
+        <span class="msg" id="msg"></span>
+        <span class="ply" id="ply"></span>
+        <span class="sub" id="sub"></span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <div class="ga-card">
+        <span class="ga-label" data-i18n="setup">Setup</span>
+        <div class="row"><span data-i18n="mode">Mode</span>
+          <div class="ga-seg" id="modeSeg">
+            <button data-v="ai" data-i18n="modeAi">vs computer</button>
+            <button data-v="pvp" data-i18n="modePvp">Two players</button>
+          </div>
+        </div>
+        <div class="row" id="levelRow"><span data-i18n="level">Computer</span>
+          <div class="ga-seg" id="levelSeg">
+            <button data-v="easy" data-i18n="easy">Easy</button>
+            <button data-v="normal" data-i18n="normal">Normal</button>
+            <button data-v="hard" data-i18n="hard">Hard</button>
+          </div>
+        </div>
+        <p class="note" id="note"></p>
+        <div class="btns">
+          <button class="ga-btn" id="restartBtn" data-i18n="restart">Restart</button>
+          <button class="ga-btn primary" id="nextBtn" data-i18n="next" hidden>Next game</button>
+        </div>
+      </div>
+
+      <div class="ga-card">
+        <span class="ga-label" data-i18n="moves">Moves</span>
+        <ol class="log" id="log"></ol>
+        <p class="empty" id="logEmpty" data-i18n="noMoves">No moves yet.</p>
+      </div>
+
+      <div class="ga-card">
+        <details class="rules" id="rules">
+          <summary data-i18n="rulesTitle">How to play</summary>
+          <div id="rulesBody"></div>
+        </details>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="ga-foot">
+    <span data-i18n="footer1">No dice, no timer, nothing hidden.</span>
+    <a href="analysis/" data-i18n="footer2">How we checked fairness</a>
+    <a href="../" data-i18n="footer3">All games</a>
+  </footer>
+</div>
+
+<dialog id="drawDlg">
+  <p id="drawText"></p>
+  <div class="btns">
+    <button class="ga-btn" id="drawCancel"></button>
+    <button class="ga-btn primary" id="drawOk"></button>
+  </div>
+</dialog>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<meta name="description" content="罡曜 GambitAura：小棋盤、不靠運氣的雙人策略棋。原創的借路與轉環，以及六角連線、黑白棋、五子棋、取石子。" />
+<meta name="description" content="罡曜 GambitAura：小棋盤、不靠運氣的雙人策略棋。原創的借路、轉環與光路，以及六角連線、黑白棋、五子棋、取石子。" />
 <meta name="theme-color" content="#08090c" />
 <title>罡曜 GambitAura</title>
 <link rel="icon" href="favicon.svg" type="image/svg+xml" />
@@ -206,7 +206,24 @@
         </div>
       </div>
     </div>
-    <div class="soon"><em>Game 03</em><b data-t="g2">In the works</b><span data-t="g2s">The next original game is being designed. Once its rules are final, it is solved before it goes live.</span></div>
+    <div class="ga-card game second">
+      <div class="mini">
+        <svg viewBox="0 0 250 250" role="img" aria-label="光路 Guanglu"><rect width="250" height="250" fill="url(#bg)"/><g id="mGl"></g></svg>
+      </div>
+      <div>
+        <div class="num">Game 03</div>
+        <h2>光路<small>Guanglu</small></h2>
+        <p data-t="gl1">A field of two-sided mirrors and two beams of light. On your turn, flip one mirror that a beam passes through. Every flip can bend both beams. First to bring its own light home wins.</p>
+        <div class="meta">
+          <span data-t="glc1">4 × 5 mirrors</span><span data-t="c2">2 players</span><span class="ok" data-t="c4">Solved: no forced win</span>
+        </div>
+        <div class="links">
+          <a class="ga-btn primary" href="guanglu/" data-t="glplay">Play Guanglu</a>
+          <a class="ga-btn" href="guanglu/analysis/" data-t="check">How we check fairness</a>
+        </div>
+      </div>
+    </div>
+    <div class="soon"><em>Game 04</em><b data-t="g2">In the works</b><span data-t="g2s">The next original game is being designed. Once its rules are final, it is solved before it goes live.</span></div>
   </section>
 
   <section class="shelf" id="classics">
@@ -386,6 +403,8 @@
       jielu1: '每方兩枚棋子，各有一面要抵達的旗。輪到你時，走一格，或把一塊地板搬進水裡。你替自己鋪的路，對手也可以借來走。',
       zh1: '每方三枚棋子，排成螺旋。輪到你時，轉一個環，或走一步。轉環會帶著環上所有棋子一起轉，對方的也一樣。先讓三枚連成一線的人獲勝。',
       zc1: '3 環 × 8 輻', zc3: '每方三枚棋子', zplay: '開始玩轉環',
+      gl1: '一片雙面鏡，兩道光。輪到你時，翻轉一面光正經過的鏡子。每翻一面，兩道光都可能改道。先把自己的光送到目標的人獲勝。',
+      glc1: '4 × 5 鏡陣', glplay: '開始玩光路',
       c2: '雙人', c3: '每方兩枚棋子', c4: '已完整求解：雙方都無必勝',
       f1: '資訊公開', f1s: '雙方看得到全部。同樣的局面，同樣的選擇。',
       f2: '不靠運氣', f2s: '沒有骰子、洗牌或計時。只有棋步決定勝負。',
@@ -406,6 +425,8 @@
       jielu1: 'Two pieces each, one flag to reach. On your turn, step one square or lift a floor tile and drop it into the water. Every road you build can also be borrowed by the other side.',
       zh1: 'Three pieces each, set out in a spiral. On your turn, turn a ring or step a piece. A turn carries every piece on that ring, the other side\'s too. First to line up three wins.',
       zc1: '3 rings × 8 spokes', zc3: '3 pieces each', zplay: 'Play Zhuanhuan',
+      gl1: 'A field of two-sided mirrors and two beams of light. On your turn, flip one mirror that a beam passes through. Every flip can bend both beams. First to bring its own light home wins.',
+      glc1: '4 × 5 mirrors', glplay: 'Play Guanglu',
       c2: '2 players', c3: '2 pieces each', c4: 'Solved: no forced win',
       f1: 'Open information', f1s: 'Both players see everything. Same position, same options.',
       f2: 'No luck', f2s: 'No dice, no shuffles, no timer. Only the moves decide.',
@@ -438,6 +459,38 @@
     });
   });
   apply(getLang());
+</script>
+<script type="module">
+  // 光路 mini board: drawn from the game's own engine, so it always shows the shipped layout.
+  import { R, C, DESIGN, beams, trace, portSide, portIndex } from './guanglu/engine.js';
+  const g = document.getElementById('mGl');
+  const s = 40, x0 = (250 - C * s) / 2, y0 = (250 - R * s) / 2, out = 16;
+  const ctr = (i) => [x0 + (i % C) * s + s / 2, y0 + Math.floor(i / C) * s + s / 2];
+  const port = (p) => {
+    const k = portIndex(p), side = portSide(p);
+    if (side === 'top') return [[x0 + k * s + s / 2, y0 - out], [x0 + k * s + s / 2, y0]];
+    if (side === 'bottom') return [[x0 + k * s + s / 2, y0 + R * s + out], [x0 + k * s + s / 2, y0 + R * s]];
+    if (side === 'left') return [[x0 - out, y0 + k * s + s / 2], [x0, y0 + k * s + s / 2]];
+    return [[x0 + C * s + out, y0 + k * s + s / 2], [x0 + C * s, y0 + k * s + s / 2]];
+  };
+  let h = `<rect x="${x0}" y="${y0}" width="${C * s}" height="${R * s}" fill="rgba(236,230,218,.02)" stroke="rgba(236,230,218,.18)"/>`;
+  const bm = beams(DESIGN.start);
+  const lit = bm[0].mask | bm[1].mask;
+  for (let i = 0; i < R * C; i++) {
+    const [x, y] = ctr(i), d = (DESIGN.start >> i) & 1 ? -1 : 1, on = (lit >> i) & 1;
+    h += `<path d="M${x - 12} ${y + 12 * d}L${x + 12} ${y - 12 * d}" stroke="${on ? '#e9dfc6' : '#7d786f'}" stroke-width="2.6" stroke-linecap="round" opacity="${on ? 0.95 : 0.55}"/>`;
+  }
+  [[1, '#ec9a82'], [0, '#8fd3bf']].forEach(([side, col]) => {
+    const t = trace(DESIGN.start, DESIGN.src[side]);
+    const [o1, e1] = port(DESIGN.src[side]), [o2, e2] = port(t.exit);
+    const pts = [o1, e1, ...t.steps.map((st) => ctr(st.i)), e2, o2].map((p) => p.map((v) => v.toFixed(1)).join(',')).join(' ');
+    h += `<polyline points="${pts}" fill="none" stroke="${col}" stroke-width="7" opacity=".18" stroke-linejoin="round"/>`;
+    h += `<polyline points="${pts}" fill="none" stroke="${col}" stroke-width="1.8" stroke-linejoin="round"/>`;
+    h += `<circle cx="${o1[0]}" cy="${o1[1]}" r="4.5" fill="${col}"/>`;
+    const [tg] = port(DESIGN.tgt[side]);
+    h += `<circle cx="${tg[0]}" cy="${tg[1]}" r="7" fill="none" stroke="${col}" stroke-dasharray="2 2.5"/><circle cx="${tg[0]}" cy="${tg[1]}" r="3" fill="${col}" opacity=".4"/>`;
+  });
+  g.innerHTML = h;
 </script>
 </body>
 </html>

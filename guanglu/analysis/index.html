@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="光路 Guanglu 公平性檢查：規則怎麼定出來、光源放在哪裡、開局為什麼是和棋、電腦對手有多強。" />
+<title>光路 公平性檢查 · 罡曜 GambitAura</title>
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Instrument+Sans:wght@400..700&family=Noto+Serif+TC:wght@500;700;900&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../../assets/ga.css" />
+<meta name="theme-color" content="#08090c" />
+<style>
+  .wrap { max-width: 840px; margin: 0 auto; }
+  body { line-height: 1.75; }
+  h1 { font-family: var(--cjk); font-weight: 900; font-size: clamp(1.7rem, 5vw, 2.5rem); line-height: 1.2; letter-spacing: .02em; }
+  html[lang="en"] h1 { font-family: var(--display); font-weight: 600; letter-spacing: .01em; font-size: clamp(2rem, 6vw, 3rem); }
+  .meta { font-family: var(--mono); font-size: .74rem; color: var(--muted); margin: 10px 0 24px; }
+  h2 { font-family: var(--cjk); font-weight: 700; font-size: 1.2rem; letter-spacing: .06em; margin: 42px 0 12px; padding-left: 14px; border-left: 1px solid var(--gold); }
+  html[lang="en"] h2 { font-family: var(--display); font-size: 1.45rem; letter-spacing: .02em; }
+  h3 { font-size: 1rem; margin: 20px 0 6px; color: var(--ink); }
+  p, li { color: var(--body); }
+  p + p { margin-top: 10px; }
+  ul, ol { margin: 8px 0 8px 1.3em; }
+  li { margin: 5px 0; }
+  b, strong { color: var(--ink); }
+  .summary { padding: 18px 22px; border-left: 1px solid var(--gold); }
+  .summary li { margin: 9px 0; }
+  .tablewrap { overflow-x: auto; margin: 10px 0; border-radius: 12px; border: 1px solid var(--edge); }
+  table { border-collapse: collapse; width: 100%; font-size: .9rem; background: rgba(16, 18, 24, .6); }
+  th, td { padding: 8px 11px; border-bottom: 1px solid var(--edge); text-align: left; vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
+  th { font-weight: 600; color: var(--muted); font-size: .78rem; font-family: var(--mono); letter-spacing: .04em; }
+  td.num { font-family: var(--mono); white-space: nowrap; }
+  tr.pick td { background: rgba(217, 195, 143, .08); color: var(--ink); }
+  tr.pick td:first-child { box-shadow: inset 3px 0 0 var(--gold); }
+  code { font-family: var(--mono); font-size: .86em; color: var(--ink); background: rgba(255, 255, 255, .06); padding: 1px 5px; border-radius: 5px; }
+  pre { font-family: var(--mono); font-size: .8rem; background: rgba(8, 11, 18, .85); border: 1px solid var(--edge); border-radius: 12px; padding: 13px 15px; overflow-x: auto; line-height: 1.6; color: var(--body); }
+  .note { font-size: .88rem; color: var(--muted); }
+  figure.start { margin: 14px auto 6px; max-width: 420px; }
+  figure.start svg { display: block; width: 100%; height: auto; }
+  figure.start figcaption { font-size: .82rem; color: var(--muted); text-align: center; margin-top: 4px; }
+  [data-l] { display: none; }
+  html[lang="zh-Hant"] [data-l="zh"], html[lang="en"] [data-l="en"] { display: block; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="ga-top">
+    <a class="ga-brand" href="../../" aria-label="罡曜 GambitAura">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><defs><radialGradient id="gaCore" cx=".5" cy=".45" r=".55"><stop offset="0" stop-color="#fffaf0"/><stop offset=".55" stop-color="#ecdcb4"/><stop offset="1" stop-color="#c9ad74"/></radialGradient><radialGradient id="gaHalo" cx=".5" cy=".5" r=".5"><stop offset=".3" stop-color="#d9c38f" stop-opacity=".28"/><stop offset="1" stop-color="#d9c38f" stop-opacity="0"/></radialGradient></defs><circle cx="32" cy="32" r="30" fill="url(#gaHalo)"/><circle cx="32" cy="32" r="22" fill="none" stroke="#d9c38f" stroke-width="1.4" opacity=".7"/><circle cx="32" cy="32" r="15" fill="none" stroke="#d9c38f" stroke-width="1" stroke-dasharray="1.5 3.5" opacity=".6"/><circle cx="32" cy="32" r="7" fill="url(#gaCore)"/></svg>
+      <span class="ga-lock" aria-hidden="true"><span class="ga-zh">罡曜</span><span class="ga-word">Gambit<b>Aura</b></span></span>
+    </a>
+    <div class="ga-langs" role="group" aria-label="Language">
+      <button class="ga-chip" data-lang="zh" aria-pressed="true">中文</button>
+      <button class="ga-chip" data-lang="en" aria-pressed="false">EN</button>
+    </div>
+  </header>
+
+<!-- ======================= 中文 ======================= -->
+<article data-l="zh">
+  <h1>光路：規則設計與公平性檢查</h1>
+  <p class="meta">2026-10-29 · 罡曜第三款原創棋 · <a href="../">回到遊戲</a></p>
+
+  <div class="ga-card summary">
+    <ul>
+      <li><b>開局是和棋。</b>電腦把所有 44,040,192 個局面都算過：從這個開局，雙方都下最好時，沒有人能強迫取勝。先走的一方第一手有 16 種翻法，8 種保持均勢，8 種會輸，最快的一種讓對手 3 手內獲勝。</li>
+      <li><b>前幾版不夠好，所以改了。</b>任何鏡子都能翻的時候，最長的強制勝利只有 7 手。只能翻自己的光經過的鏡子時，95% 的局面早已有一方必勝，下起來像比誰快。最後改成「只能翻任一道光經過的鏡子」，再加上「不能馬上翻回」。少了後面這條，任何一步都能被馬上翻回去，最長的強制勝利只剩 2 手。棋盤從 4 × 4 加到 4 × 5 以後，最長的強制勝利是 88 手。</li>
+      <li><b>雙方程度相近時，勝負接近一半一半。</b>模擬中雙方每步有 10% 機會隨機走錯：先手勝 50.2%，後手勝 48.5%，和棋 1.3%。</li>
+      <li><b>值得學。</b>只會看一步的玩家對上完美下法，不論先後手，都輸掉約 98% 到 99% 的對局，平均撐 25 手左右。</li>
+    </ul>
+  </div>
+
+  <h2>1. 怎麼檢查的</h2>
+  <p>棋盤有 20 格，每格一面鏡子，只有 / 和 \ 兩種方向，所以鏡子的擺法有 2<sup>20</sup> = 1,048,576 種。再記下上一手翻了哪一面（這一手不能翻它），以及輪到誰，共 44,040,192 個局面。電腦從光已經抵達目標的局面往回推，一層一層標出每個局面在雙方都下最好時的結果：輪到的一方會贏、會輸，或沒有人能強迫取勝（和棋）。這種做法叫逆推分析（retrograde analysis）。4 核心約 10 秒完成。</p>
+  <h3>交叉檢查</h3>
+  <ol>
+    <li><b>兩套程式數走法：</b>網頁上的規則引擎（JavaScript）和求解器（C）分開撰寫，連追蹤光線的程式也各寫一份。從開局數到第 6 手的所有走法序列（16、194、1,998、19,258、185,636、1,805,468）完全相同。</li>
+    <li><b>逐一驗算：</b>由 JavaScript 引擎在 3,000 盤隨機對局中走到的 80,985 個局面，自己產生每一步的後續局面，再檢查表裡的結果是否正好由後續局面推得出來（包括幾手之內分出勝負）。0 個不一致。</li>
+  </ol>
+
+  <h2>2. 規則怎麼定出來</h2>
+  <p>每一版都用同一個求解器算完整張表，再看兩件事：有多少局面已經有一方能強迫取勝，以及最長的強制勝利有幾手。最長的強制勝利很短，代表棋下幾步就結束，沒有計畫可言；幾乎每個局面都已有一方必勝，代表棋只是在比誰快。</p>
+  <div class="tablewrap"><table>
+    <tr><th>規則版本</th><th>輪到者必勝</th><th>輪到者必敗</th><th>和棋</th><th>最長強制勝利</th></tr>
+    <tr><td>4 × 4，任何鏡子都能翻</td><td class="num">56.4%</td><td class="num">5.1%</td><td class="num">38.5%</td><td class="num">7 手</td></tr>
+    <tr><td>4 × 4，只能翻自己的光經過的鏡子</td><td class="num">63.1%</td><td class="num">31.7%</td><td class="num">5.2%</td><td class="num">35 手</td></tr>
+    <tr><td>4 × 4，任一道光經過的鏡子，可以馬上翻回</td><td class="num">18.5%</td><td class="num">0.4%</td><td class="num">81.1%</td><td class="num">2 手</td></tr>
+    <tr><td>4 × 4，任一道光經過的鏡子，不能馬上翻回</td><td class="num">23.2%</td><td class="num">4.5%</td><td class="num">72.4%</td><td class="num">47 手</td></tr>
+    <tr class="pick"><td>採用：4 × 5，任一道光經過的鏡子，不能馬上翻回</td><td class="num">30.1%</td><td class="num">12.1%</td><td class="num">57.8%</td><td class="num">88 手</td></tr>
+  </table></div>
+  <p class="note">每一版都列出強制勝利最長的光源位置（「可以馬上翻回」那一版，每一種位置都不超過 2 手，表中用和下一列相同的位置）。比例只算還沒分出勝負、沒有禁翻鏡子的局面。「必勝」包含下一手就能讓光抵達的局面。</p>
+  <p>關鍵在「任一道光」。只能動自己那道光時，很難擋住對手；能翻對手的光經過的鏡子，就能把它的光引開，防守才有意義。可是能擋也就能馬上擋回去：如果剛翻過的鏡子可以立刻翻回，任何進攻都會被一步抵銷。「不能馬上翻回」沿用借路「不能馬上搬回」和轉環「不能馬上轉回」的想法，讓一手棋的效果至少留到下一回合。</p>
+  <p>棋盤沒有再加到 5 × 5：那會有大約 17 億個局面，這台電腦無法完整求解，而罡曜的原創棋只上線完整求解過的規則。</p>
+
+  <h2>3. 光從哪裡進、從哪裡出</h2>
+  <p>棋盤四周有 18 個開口。一方選一個入口和一個目標，另一方的入口和目標是它轉半圈。下表是幾種代表性的位置，都用光從上邊射入的那一方來描述（開口從左數、從上數）。最後一欄：在每種位置裡挑出排名最前的三個和棋開局，讓完美下法對上只會看一步的玩家，看完美下法贏幾成。這一欄低，代表下得淺也不太會輸。</p>
+  <div class="tablewrap"><table>
+    <tr><th>入口 → 目標</th><th>輪到者必勝</th><th>必敗</th><th>和棋</th><th>最長強制勝利</th><th>完美下法勝看一步的玩家</th></tr>
+    <tr><td>上邊第 2 個 → 左邊最下</td><td class="num">17.9%</td><td class="num">6.4%</td><td class="num">75.7%</td><td class="num">106 手</td><td class="num">34% 到 47%</td></tr>
+    <tr><td>上邊第 2 個 → 右邊第 2 個</td><td class="num">22.9%</td><td class="num">5.8%</td><td class="num">71.3%</td><td class="num">98 手</td><td class="num">95% 到 99%</td></tr>
+    <tr class="pick"><td>採用：上邊正中 → 右邊最上</td><td class="num">30.1%</td><td class="num">12.1%</td><td class="num">57.8%</td><td class="num">88 手</td><td class="num">98% 到 99%</td></tr>
+    <tr><td>上邊第 2 個 → 上邊第 5 個</td><td class="num">18.5%</td><td class="num">6.9%</td><td class="num">74.5%</td><td class="num">86 手</td><td class="num">56% 到 74%</td></tr>
+    <tr><td>上邊正中 → 右邊第 3 個</td><td class="num">37.3%</td><td class="num">10.7%</td><td class="num">52.0%</td><td class="num">74 手</td><td class="num">100%，約 16 手結束</td></tr>
+    <tr><td>上邊第 2 個 → 下邊第 2 個（直線穿過）</td><td class="num">25.1%</td><td class="num">5.1%</td><td class="num">69.7%</td><td class="num">46 手</td><td class="num">90% 到 96%</td></tr>
+  </table></div>
+  <ul>
+    <li>強制勝利最長的是第一列（106 手），但它最好的開局太寬容：20 種第一手有 19 種都安全，只看一步的玩家有一半以上能和完美下法下成和棋。</li>
+    <li>「上邊正中 → 右邊第 3 個」完全一面倒，但棋太短，約 16 手就結束。直線穿過的配置，最長的強制勝利只有 46 手。</li>
+    <li>採用的位置和第二列很接近（88 手對 98 手，看一步的玩家都很少撐得住）。選它有兩個理由：已經分出勝負的局面比較多（42% 對 29%），也就是「怎麼走都一樣」的局面比較少；而且光從一邊的正中射入，最容易看清楚。在遊戲裡，薄荷的光從下邊正中射入，目標是左邊最下的開口；珊瑚的是它轉半圈。</li>
+  </ul>
+  <p class="note">有些位置根本不能用。每面鏡子都讓光轉 90 度，所以光一定是上下、左右輪流走；它每走一格，所在格子的棋盤顏色也輪流換。因此從同一個入口出發，有些開口光永遠到不了。目標放在這些開口，任何局面都分不出勝負。</p>
+
+  <h2>4. 開局怎麼選</h2>
+  <p>開局限定為公平的形狀：鏡子的擺法轉半圈後不變。兩道光的入口和目標本來就互為轉半圈，所以先手和後手面對的是同一個棋盤。這樣的擺法有 1,024 種，其中 36 種一開始就有光抵達目標。其餘 988 種：711 種是和棋，275 種先手必勝，2 種先手必敗。</p>
+  <p>我們只留第一手至少有 5 種翻法、而且有安全也有陷阱的和棋開局，共 196 種，先依第一手的數目、再依陷阱的多寡排序，再模擬前幾名。模擬中雙方都下最好的走法，但每步有一定機會改成隨機走一步。</p>
+  <div class="tablewrap"><table>
+    <tr><th>開局（\ 的位置，其餘是 /）</th><th>第一手保持均勢</th><th>10% 失誤：先手／後手／和</th><th>平均手數</th><th>完美下法勝看一步的玩家（先手／後手）</th></tr>
+    <tr class="pick"><td class="num">d3 e3 a2 b2</td><td class="num">8 / 16</td><td class="num">50.2 / 48.5 / 1.3</td><td class="num">53</td><td class="num">98.3% / 98.9%</td></tr>
+    <tr><td class="num">c3 d3 e3 a2 b2 c2</td><td class="num">8 / 16</td><td class="num">49.9 / 49.0 / 1.1</td><td class="num">50</td><td class="num">98.8% / 98.8%</td></tr>
+    <tr><td class="num">a4 d3 e3 a2 b2 e1</td><td class="num">8 / 16</td><td class="num">49.7 / 49.0 / 1.3</td><td class="num">53</td><td class="num">98.3% / 98.6%</td></tr>
+  </table></div>
+  <p class="note">每個開局模擬 20,000 盤，抽樣誤差約正負 0.7 個百分點；把整個棋盤轉半圈重算一次，數字最多差 0.5 個百分點。先手勝率高出後手 1 到 2 個百分點，大約在這個誤差的邊緣。20% 失誤時是 51.1 / 48.8 / 0.1。</p>
+  <p>前三名的數字幾乎一樣。選第一個，是因為它最好記：只有四面鏡子是 \，其餘都是 /。</p>
+  <figure class="start">
+    <svg id="startBoard" viewBox="-80 -80 660 560" role="img" aria-label="開局"></svg>
+    <figcaption>開局：薄荷的光從下方射入，目標在左下；珊瑚的光從上方射入，目標在右上。發亮的鏡子是光經過、可以翻的。</figcaption>
+  </figure>
+  <h3>第一手</h3>
+  <div class="tablewrap"><table>
+    <tr><th>薄荷先翻</th><th>結果</th></tr>
+    <tr><td class="num">d4</td><td>輸：珊瑚 3 手內獲勝</td></tr>
+    <tr><td class="num">e3</td><td>輸：珊瑚 5 手內獲勝</td></tr>
+    <tr><td class="num">b4 c4 a3 b3 b2 a1</td><td>輸：珊瑚 7 手內獲勝</td></tr>
+    <tr><td class="num">e4 d3 a2 d2 e2 b1 c1 d1</td><td>保持和棋</td></tr>
+  </table></div>
+  <p class="note">a4、c3、c2、e1 這四面一開始沒有光經過，不能翻。</p>
+
+  <h2>5. 看得深有沒有用</h2>
+  <p>一個只看一步的玩家：能馬上讓自己的光抵達就翻，不翻會讓對方下一手抵達的鏡子，其餘隨機。它對上完美下法各 4,000 盤：完美下法執先手勝 98.3%，執後手勝 98.9%，其餘是和棋，平均在 25 手左右分出勝負。代表勝負常常來自兩三步以外的組合，例如一手同時改變兩道光。</p>
+
+  <h2>6. 電腦對手</h2>
+  <p>電腦用 alpha-beta 搜尋，搜尋量固定（不看時間），所以同一個局面永遠回同一手。下表用完整的結果表打分：隨機抽 300 個輪到電腦、而且還沒輸定的局面，看它的一手有沒有保住原本的結果（必勝仍是必勝，和棋至少還是和棋）。</p>
+  <div class="tablewrap"><table>
+    <tr><th>難度</th><th>保住結果</th><th>每步時間（Node）</th></tr>
+    <tr><td>簡單</td><td class="num">62.7%</td><td class="num">不到 1 毫秒</td></tr>
+    <tr><td>普通</td><td class="num">96.7%</td><td class="num">不到 1 毫秒</td></tr>
+    <tr><td>困難</td><td class="num" id="zhHard">99.7%</td><td class="num" id="zhHardT">約 0.5 秒，最多 1.2 秒</td></tr>
+  </table></div>
+  <p class="note">困難難度對上完美下法，執薄荷或執珊瑚都撐滿 200 手的測試沒有輸。它仍不是完美對手：每 300 步裡約有 1 步會讓原本的結果變差。</p>
+
+  <h2>7. 限制</h2>
+  <ul>
+    <li>模擬裡的失誤是隨機翻一面鏡子，和真人的失誤不同。「只看一步的玩家」也只是新手的粗略替身。光路對真人是否耐玩，仍要靠真人試玩。</li>
+    <li>模擬沒有套用三次重複判和，改用 300 手上限。</li>
+    <li>選位置和開局時看的是我們挑的幾個數字（最長強制勝利、已分出勝負的比例、看一步的玩家撐不撐得住、模擬勝率）。換一組標準，排名可能不同。</li>
+    <li>只解了 4 × 5。更大的棋盤可能更耐玩，但目前沒辦法完整求解，所以不上線。</li>
+    <li>「和棋」是指雙方都下最好時的結果，不代表實戰常常和棋。</li>
+  </ul>
+
+  <h2>8. 重現</h2>
+  <pre>cd guanglu/analysis
+gcc -O3 -march=native -fopenmp -o solver solver.c
+./solver --design 11 17 --start 3840 --perft 6           # must match perft() in ../engine.js
+./solver --design 11 17 --start 3840 --dump table.bin    # value of every first move; writes the table (88 MB)
+node check_table.mjs table.bin 3000                      # independent check with the JavaScript engine
+node probe_ai.mjs table.bin 300                          # computer player against the table
+./solver --design 11 17 --minmoves 5 --top 3             # rank the fair draw starts, simulations
+./solver --design 1 17 --minmoves 5 --top 3              # another design (top 2nd -> left lowest)
+./solver --rc 4 4 --mv 0 --scan                          # the first draft: any mirror, 4 x 4</pre>
+</article>
+
+<!-- ======================= English ======================= -->
+<article data-l="en">
+  <h1>Guanglu: how the rules were made, and how fair they are</h1>
+  <p class="meta">2026-10-29 · GambitAura original game 03 · <a href="../">Back to the game</a></p>
+
+  <div class="ga-card summary">
+    <ul>
+      <li><b>The opening is a draw.</b> A computer worked through all 44,040,192 positions: from this start, with best play on both sides, nobody can force a win. The first player has 16 first moves; 8 keep the balance and 8 lose, the quickest within 3 moves.</li>
+      <li><b>The early drafts fell short, so the rules changed.</b> When any mirror could be flipped, the longest forced win was only 7 moves. When you could flip only mirrors on your own beam, 95% of positions were already won for one side, and games became a race. The final rule: flip a mirror that either beam passes through, and never flip straight back. Without that last part, every move can be undone at once, and the longest forced win drops to 2 moves. Going from a 4 × 4 board to 4 × 5 made the longest forced win 88 moves.</li>
+      <li><b>Between equal players, results are close to even.</b> In simulated games where each move has a 10% chance of being random, the first player wins 50.2%, the second 48.5%, and 1.3% are draws.</li>
+      <li><b>It rewards thinking ahead.</b> A player who looks only one move ahead loses about 98% to 99% of games against perfect play, moving first or second, lasting about 25 moves.</li>
+    </ul>
+  </div>
+
+  <h2>1. How it was checked</h2>
+  <p>The board has 20 cells, each with a mirror set one of two ways, / or \, so there are 2<sup>20</sup> = 1,048,576 mirror layouts. Add which mirror was just flipped (it may not be flipped on this move) and whose turn it is, and there are 44,040,192 positions. Starting from positions where a beam already reaches its target, the computer works backwards, marking every position with its result under best play: the side to move wins, loses, or nobody can force a win (a draw). This is called retrograde analysis. It takes about 10 seconds on 4 cores.</p>
+  <h3>Cross-checks</h3>
+  <ol>
+    <li><b>Two programs count moves:</b> the rules engine on the page (JavaScript) and the solver (C) were written separately, down to the code that traces the light. They agree on every move sequence from the opening to depth 6 (16, 194, 1,998, 19,258, 185,636, 1,805,468).</li>
+    <li><b>Every value re-derived:</b> for 80,985 positions reached in 3,000 random games, the JavaScript engine generated each position's next positions itself, and the table's result had to follow exactly from theirs, including how many moves until the end. 0 mismatches.</li>
+  </ol>
+
+  <h2>2. How the rules were chosen</h2>
+  <p>Each version was solved in full. Two numbers matter: how many positions are already a forced win for one side, and how long the longest forced win is. If the longest forced win is short, games end in a few moves and there is no room for a plan. If almost every position is already won, the game is only a race.</p>
+  <div class="tablewrap"><table>
+    <tr><th>Rules</th><th>Side to move wins</th><th>Side to move loses</th><th>Draw</th><th>Longest forced win</th></tr>
+    <tr><td>4 × 4, any mirror may be flipped</td><td class="num">56.4%</td><td class="num">5.1%</td><td class="num">38.5%</td><td class="num">7 moves</td></tr>
+    <tr><td>4 × 4, only mirrors on your own beam</td><td class="num">63.1%</td><td class="num">31.7%</td><td class="num">5.2%</td><td class="num">35 moves</td></tr>
+    <tr><td>4 × 4, mirrors on either beam, flipping straight back allowed</td><td class="num">18.5%</td><td class="num">0.4%</td><td class="num">81.1%</td><td class="num">2 moves</td></tr>
+    <tr><td>4 × 4, mirrors on either beam, no flipping straight back</td><td class="num">23.2%</td><td class="num">4.5%</td><td class="num">72.4%</td><td class="num">47 moves</td></tr>
+    <tr class="pick"><td>Chosen: 4 × 5, mirrors on either beam, no flipping straight back</td><td class="num">30.1%</td><td class="num">12.1%</td><td class="num">57.8%</td><td class="num">88 moves</td></tr>
+  </table></div>
+  <p class="note">Each row shows the source and target places with the longest forced win (with flipping straight back allowed, no placement goes past 2 moves; the row uses the same places as the next one). Shares count only positions that are not decided yet and have no banned mirror. "Wins" includes positions where a beam can be brought home at once.</p>
+  <p>The key is "either beam". If you can only move your own light, you can hardly stop the other side. Once you can flip a mirror on the other beam, you can bend it away, and defence starts to matter. But a block can also be undone at once: if the mirror just flipped could be flipped straight back, every attack would be cancelled in one move. "No flipping straight back" follows Jielu's "no moving a tile straight back" and Zhuanhuan's "no turning straight back". It makes every move last at least until the next turn.</p>
+  <p>The board did not grow to 5 × 5. That would be about 1.7 billion positions, too many to solve in full on this computer, and GambitAura only ships original rules that have been solved.</p>
+
+  <h2>3. Where the light comes in and goes out</h2>
+  <p>The rim has 18 openings. One side gets an entry and a target, and the other side's are the same turned half way round. The table shows some typical placements, described for the side whose light comes in at the top (openings counted from the left, or from the top). The last column: for each placement we took its three top-ranked draw starts and played perfect play against a player who looks only one move ahead. A low number means shallow play rarely loses.</p>
+  <div class="tablewrap"><table>
+    <tr><th>Entry → target</th><th>Side to move wins</th><th>Loses</th><th>Draw</th><th>Longest forced win</th><th>Perfect play beats one-move lookahead</th></tr>
+    <tr><td>Top 2nd → left lowest</td><td class="num">17.9%</td><td class="num">6.4%</td><td class="num">75.7%</td><td class="num">106 moves</td><td class="num">34% to 47%</td></tr>
+    <tr><td>Top 2nd → right 2nd</td><td class="num">22.9%</td><td class="num">5.8%</td><td class="num">71.3%</td><td class="num">98 moves</td><td class="num">95% to 99%</td></tr>
+    <tr class="pick"><td>Chosen: top middle → right highest</td><td class="num">30.1%</td><td class="num">12.1%</td><td class="num">57.8%</td><td class="num">88 moves</td><td class="num">98% to 99%</td></tr>
+    <tr><td>Top 2nd → top 5th</td><td class="num">18.5%</td><td class="num">6.9%</td><td class="num">74.5%</td><td class="num">86 moves</td><td class="num">56% to 74%</td></tr>
+    <tr><td>Top middle → right 3rd</td><td class="num">37.3%</td><td class="num">10.7%</td><td class="num">52.0%</td><td class="num">74 moves</td><td class="num">100%, over in about 16 moves</td></tr>
+    <tr><td>Top 2nd → bottom 2nd (straight across)</td><td class="num">25.1%</td><td class="num">5.1%</td><td class="num">69.7%</td><td class="num">46 moves</td><td class="num">90% to 96%</td></tr>
+  </table></div>
+  <ul>
+    <li>The first row has the longest forced win (106 moves), but its best starts are too forgiving: 19 of 20 first moves are safe, and a one-move player holds perfect play to a draw more than half the time.</li>
+    <li>"Top middle → right 3rd" is completely one-sided, but games are too short, about 16 moves. Straight across gives a longest forced win of only 46 moves.</li>
+    <li>The chosen placement is close to the second row (88 moves against 98, and a one-move player rarely survives either). It was chosen for two reasons. More positions are already decided (42% against 29%), so fewer positions where nothing you do matters. And light coming in at the middle of an edge is the easiest to follow. In the game, Mint's light enters at the middle of the bottom edge and its target is the lowest opening on the left; Coral's is the same turned half way round.</li>
+  </ul>
+  <p class="note">Some placements cannot work at all. Every mirror turns the light 90 degrees, so the light always alternates between up-down and left-right moves, and the colour of its square on a chessboard pattern alternates too. So from a given entry, some openings can never be reached. With the target on one of those, no position can ever be won.</p>
+
+  <h2>4. How the opening was chosen</h2>
+  <p>Openings were limited to fair shapes: the mirror layout looks the same turned half way round. The entries and targets already are a half turn of each other, so both players face the same board. There are 1,024 such layouts, and in 36 of them a beam already reaches its target. Of the other 988, 711 are draws, 275 are first-player wins and 2 are first-player losses.</p>
+  <p>We kept the draws where the first player has at least 5 moves, some safe and some traps: 196 starts. They were ranked by the number of first moves, then by how many traps, and the top ones were simulated. In the simulation both sides play best moves, but each move has a set chance of being random instead.</p>
+  <div class="tablewrap"><table>
+    <tr><th>Start (cells with \, the rest /)</th><th>First moves that hold</th><th>10% slips: first / second / draw</th><th>Mean length</th><th>Perfect play beats one-move lookahead (first / second)</th></tr>
+    <tr class="pick"><td class="num">d3 e3 a2 b2</td><td class="num">8 / 16</td><td class="num">50.2 / 48.5 / 1.3</td><td class="num">53</td><td class="num">98.3% / 98.9%</td></tr>
+    <tr><td class="num">c3 d3 e3 a2 b2 c2</td><td class="num">8 / 16</td><td class="num">49.9 / 49.0 / 1.1</td><td class="num">50</td><td class="num">98.8% / 98.8%</td></tr>
+    <tr><td class="num">a4 d3 e3 a2 b2 e1</td><td class="num">8 / 16</td><td class="num">49.7 / 49.0 / 1.3</td><td class="num">53</td><td class="num">98.3% / 98.6%</td></tr>
+  </table></div>
+  <p class="note">Each start was simulated over 20,000 games, so sampling error is about plus or minus 0.7 points; running it again with the whole board turned half way round moved the numbers by up to 0.5 points. The first player's 1 to 2 point lead is about at the edge of that error. With 20% slips: 51.1 / 48.8 / 0.1.</p>
+  <p>The top three are nearly the same. The first was chosen because it is the easiest to remember: four mirrors are \, all the others are /.</p>
+  <figure class="start">
+    <svg id="startBoardEn" viewBox="-80 -80 660 560" role="img" aria-label="Opening"></svg>
+    <figcaption>The opening: Mint's light comes in from the bottom, its target is at the lower left; Coral's comes in from the top, its target is at the upper right. Lit mirrors are on a beam and can be flipped.</figcaption>
+  </figure>
+  <h3>The first move</h3>
+  <div class="tablewrap"><table>
+    <tr><th>Mint flips</th><th>Result</th></tr>
+    <tr><td class="num">d4</td><td>Loses: Coral wins within 3 moves</td></tr>
+    <tr><td class="num">e3</td><td>Loses: Coral wins within 5 moves</td></tr>
+    <tr><td class="num">b4 c4 a3 b3 b2 a1</td><td>Loses: Coral wins within 7 moves</td></tr>
+    <tr><td class="num">e4 d3 a2 d2 e2 b1 c1 d1</td><td>Keeps the draw</td></tr>
+  </table></div>
+  <p class="note">No beam passes a4, c3, c2 or e1 at the start, so those cannot be flipped.</p>
+
+  <h2>5. Does thinking ahead pay?</h2>
+  <p>A player who looks one move ahead brings its light home when it can, avoids flips that let the other side do so next move, and otherwise flips at random. Against perfect play, over 4,000 games each way, perfect play won 98.3% moving first and 98.9% moving second; the rest were draws, and decided games took about 25 moves. Wins often come from plans two or three moves deep, such as one flip that moves both beams.</p>
+
+  <h2>6. The computer player</h2>
+  <p>The computer uses alpha-beta search with a fixed amount of search (not a clock), so a position always gets the same reply. It was scored against the full table: in 300 random positions where the computer is to move and not already lost, did its move keep the result (a win stays a win, a draw stays at least a draw)?</p>
+  <div class="tablewrap"><table>
+    <tr><th>Level</th><th>Keeps the result</th><th>Time per move (Node)</th></tr>
+    <tr><td>Easy</td><td class="num">62.7%</td><td class="num">under 1 ms</td></tr>
+    <tr><td>Normal</td><td class="num">96.7%</td><td class="num">under 1 ms</td></tr>
+    <tr><td>Hard</td><td class="num" id="enHard">99.7%</td><td class="num" id="enHardT">about 0.5 s, at most 1.2 s</td></tr>
+  </table></div>
+  <p class="note">Playing against perfect play, as Mint or as Coral, Hard lasted the full 200-move test without losing. It is still not a perfect player: about 1 move in 300 makes its result worse.</p>
+
+  <h2>7. Limits</h2>
+  <ul>
+    <li>A simulated slip is a random flip, unlike human mistakes, and the one-move player is only a rough stand-in for a beginner. Whether Guanglu holds up for people still needs play-testing.</li>
+    <li>The simulation does not apply the threefold-repetition draw; it stops at 300 moves instead.</li>
+    <li>Placements and openings were picked by numbers we chose (longest forced win, share of decided positions, how the one-move player fares, simulated results). Other measures could rank them differently.</li>
+    <li>Only 4 × 5 was solved. A larger board might play better, but it cannot be solved in full yet, so it does not ship.</li>
+    <li>"Draw" means the result under best play on both sides. It does not mean real games are often drawn.</li>
+  </ul>
+
+  <h2>8. Reproduce</h2>
+  <pre>cd guanglu/analysis
+gcc -O3 -march=native -fopenmp -o solver solver.c
+./solver --design 11 17 --start 3840 --perft 6           # must match perft() in ../engine.js
+./solver --design 11 17 --start 3840 --dump table.bin    # value of every first move; writes the table (88 MB)
+node check_table.mjs table.bin 3000                      # independent check with the JavaScript engine
+node probe_ai.mjs table.bin 300                          # computer player against the table
+./solver --design 11 17 --minmoves 5 --top 3             # rank the fair draw starts, simulations
+./solver --design 1 17 --minmoves 5 --top 3              # another design (top 2nd -> left lowest)
+./solver --rc 4 4 --mv 0 --scan                          # the first draft: any mirror, 4 x 4</pre>
+</article>
+
+  <footer class="ga-foot">
+    <a href="../">光路 Guanglu</a>
+    <a href="../../">GambitAura</a>
+  </footer>
+</div>
+<script>
+  function getLang() {
+    try { var v = localStorage.getItem('ga-jielu-lang'); if (v) return v; } catch (e) {}
+    return (navigator.language || '').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en';
+  }
+  function apply(l) {
+    if (l !== 'zh' && l !== 'en') l = 'zh';
+    document.documentElement.lang = l === 'zh' ? 'zh-Hant' : 'en';
+    document.title = l === 'zh' ? '光路 公平性檢查 · 罡曜 GambitAura' : 'Guanglu fairness check · GambitAura';
+    document.querySelectorAll('[data-lang]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-lang') === l)); });
+  }
+  document.querySelectorAll('[data-lang]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var l = b.getAttribute('data-lang');
+      try { localStorage.setItem('ga-jielu-lang', l); } catch (e) {}
+      apply(l);
+    });
+  });
+  apply(getLang());
+</script>
+<script type="module">
+  // The opening, drawn from the game's own engine so it always shows the shipped layout.
+  import { R, C, DESIGN, beams, trace, portSide, portIndex, cellName } from '../engine.js';
+  const S = 100, OUT = 34;
+  const ctr = (i) => [(i % C) * S + S / 2, Math.floor(i / C) * S + S / 2];
+  const port = (p) => {
+    const k = portIndex(p), side = portSide(p);
+    if (side === 'top') return [[k * S + S / 2, -OUT], [k * S + S / 2, 0]];
+    if (side === 'bottom') return [[k * S + S / 2, R * S + OUT], [k * S + S / 2, R * S]];
+    if (side === 'left') return [[-OUT, k * S + S / 2], [0, k * S + S / 2]];
+    return [[C * S + OUT, k * S + S / 2], [C * S, k * S + S / 2]];
+  };
+  const pts = (a) => a.map((p) => p.map((v) => v.toFixed(1)).join(',')).join(' ');
+  let h = `<rect x="0" y="0" width="${C * S}" height="${R * S}" fill="rgba(236,230,218,.02)" stroke="rgba(236,230,218,.2)" stroke-width="1.2"/>`;
+  for (let c = 1; c < C; c++) h += `<line x1="${c * S}" y1="0" x2="${c * S}" y2="${R * S}" stroke="rgba(236,230,218,.07)"/>`;
+  for (let r = 1; r < R; r++) h += `<line x1="0" y1="${r * S}" x2="${C * S}" y2="${r * S}" stroke="rgba(236,230,218,.07)"/>`;
+  const lbl = 'font-family="Cormorant Garamond, serif" font-style="italic" font-size="20" fill="#8e897f" text-anchor="middle" dominant-baseline="central"';
+  for (let c = 0; c < C; c++) h += `<text x="${c * S + S / 2}" y="-64" ${lbl}>${'abcde'[c]}</text>`;
+  for (let r = 0; r < R; r++) h += `<text x="-66" y="${r * S + S / 2}" ${lbl}>${R - r}</text>`;
+  const bm = beams(DESIGN.start);
+  const lit = bm[0].mask | bm[1].mask;
+  [[0, '#8fd3bf'], [1, '#ec9a82']].forEach(([side, col]) => {
+    const t = trace(DESIGN.start, DESIGN.src[side]);
+    const [o1, e1] = port(DESIGN.src[side]), [o2, e2] = port(t.exit);
+    const p = pts([o1, e1, ...t.steps.map((st) => ctr(st.i)), e2, o2]);
+    h += `<polyline points="${p}" fill="none" stroke="${col}" stroke-width="14" opacity=".16" stroke-linejoin="round" stroke-linecap="round"/>`;
+    h += `<polyline points="${p}" fill="none" stroke="${col}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>`;
+  });
+  for (let i = 0; i < R * C; i++) {
+    const [x, y] = ctr(i), d = (DESIGN.start >> i) & 1 ? -1 : 1, on = (lit >> i) & 1;
+    h += `<path d="M${x - 30} ${y + 30 * d}L${x + 30} ${y - 30 * d}" stroke="${on ? '#e9dfc6' : '#7d786f'}" stroke-width="5" stroke-linecap="round" opacity="${on ? 0.95 : 0.5}"><title>${cellName(i)}</title></path>`;
+  }
+  [[0, '#8fd3bf'], [1, '#ec9a82']].forEach(([side, col]) => {
+    const [o1] = port(DESIGN.src[side]), [tg] = port(DESIGN.tgt[side]);
+    h += `<circle cx="${o1[0]}" cy="${o1[1]}" r="9" fill="${col}"/>`;
+    h += `<circle cx="${tg[0]}" cy="${tg[1]}" r="16" fill="none" stroke="${col}" stroke-width="2" stroke-dasharray="3 4"/><circle cx="${tg[0]}" cy="${tg[1]}" r="7" fill="${col}" opacity=".35"/>`;
+  });
+  for (const id of ['startBoard', 'startBoardEn']) document.getElementById(id).innerHTML = h;
+</script>
+</body>
+</html>
