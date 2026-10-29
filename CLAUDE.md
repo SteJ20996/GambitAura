@@ -231,6 +231,9 @@ of boxes. Do not bring back rainbow gradients, gradient buttons, glossy orbs or 
 
 - v0.5 opening adoption and the matching mechanics-doc update (§2 table, §4/§5.1 examples, §5.3 and
   §7.2 wording, §11).
+- Keep the repository public (2026-10-29): on GitHub Free, Pages cannot publish from a private
+  repository. While it was private, the 光路 merge did not deploy and gambitaura.com showed GitHub's
+  404 "There isn't a GitHub Pages site here". README's hosting section says what to check after.
 - Hosting (2026-10-28): DNS records in place (DNS only), gambitaura.com verified on the account,
   Pages built from `main` with CNAME `www.gambitaura.com`. Waiting for GitHub's certificate, then
   tick "Enforce HTTPS". Do not add Cloudflare redirect rules or turn on the proxy (README explains
