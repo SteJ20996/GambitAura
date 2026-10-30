@@ -207,12 +207,53 @@ piece shrinks into the hole, and the whole SVG leans 5 degrees the way it tilts;
 piece, then a dot. Hub card and analysis figure come from `engine.js`. Test: `tests/qingpan.cjs`
 (27 checks; its lines are found with the engine).
 
+## Game 06: 潮汐 Chaoxi (gambitaura#12, 2026-10-30)
+
+Owner, 2026-10-30: "先把潮汐做出來". Rules: 5 × 5, cell = row*5+col, row 0 = rank 5. Heights (`HEIGHTS`):
+rank 5 shore 33333, rank 4 21323, rank 3 10101 (the channel), rank 2 32312, rank 1 shore 33333; rocks
+c4 e4 a2 c2 never flood. Tide `TIDE` 0 1 2 3 2 1, one step after every move; a square is water while
+its height is below the tide. Two pieces each. A turn: step one piece N E S W onto an empty square
+that is dry now; a piece standing in water cannot move until it is dry again; a side with no move
+passes (the page auto-plays it). Win: a piece on the far-shore middle (Mint c5 = 2, Coral c1 = 22).
+Threefold repetition draws (a position includes the tide step). Opening: Mint d1 e1, Coral a5 b5,
+tide step 0 (`START`); half-turn symmetric terrain and start, so Coral-first is the same game.
+
+**Solved (2026-10-30).** `chaoxi/analysis/solver.c`, 910,800 reachable states (300 · 253 × 6 × 2;
+the table indexes 26^4 · 6 · 2 with 26 = off board, unused here), about 2 s. Win 54.2 / loss 36.1 /
+draw 9.7%, longest forced win 98. Opening a draw; 2 of 3 first moves hold (d1-c1, e1-e2); d1-d2
+loses within 39 (two moves later the tide reaches 2 and traps it). Rules and terrain came from a
+search: 3 tide cycles × 8 rule sets (flooded piece swept off the board vs stranded, push or not,
+any far-row square vs far middle) × 200 random half-turn symmetric terrains = 4,800 solves; "good" =
+longest ≥ 60 and ≥ 5 fair home starts with traps. Stranded + far middle + no push + 0 1 2 3 2 1 won
+(49 good, best 214); swept off peaked at 77, push made every family shallower, other cycles ≤ 88.
+Of the 49, three balanced candidates: 31202/13031/20213 (115, games about 110 plies), the channel
+21323/10101/32312 (98, 12 fair starts, 79 plies, chosen: reads at a glance) and 02322/01310/22320 (a
+dry causeway, 81, tide matters less). On the channel, flood 0 gives 15, win 0 gives no fair start,
+push 64 with no traps, no move = lose 77, cycles 0121 / 1232 give 48 / 47. 20,000-game slips 50.0 /
+49.4 / 0.6, about 79 plies; a one-move player loses 100% (about 40 plies when perfect moves first,
+23 second). Cross-checks: perft to 10 (3 9 30 70 196 868 5110 28466 86924 173130) agrees with
+`engine.js`; `check_table.mjs` re-derives 246,035 values with 0 mismatches. The page says plainly
+that "stuck in water" resembles 日影's "frozen in shade". **Any rule, terrain or opening change must
+be re-solved.**
+
+**Code.** `engine.js` (pure rules; pieces kept sorted within each side; `hashKey()` is the solver's
+index), `ai.js` (alpha-beta, node budget: easy depth 2, normal depth 4, hard 150k nodes; keeps the
+solved result in 87.0 / 89.0 / 99.3%; hard about 0.12 s, at most 0.2 s; held perfect play in 4
+games: 2 still level at 200 plies, 2 repetition draws), `app.js` on `assets/shell.js`. One SVG,
+viewBox `-60 -60 620 720`: ground shaded by height with the height in each corner (drawn above the
+water), water as a cool wash on squares below the tide, dashed outlines on squares that flood after
+this move, rocks outlined, and a tide gauge under the board (six bars, now and next, plus "潮位 2，
+上漲中；下一手 3"). Pieces in water get a teal veil and the status names them. Test:
+`tests/chaoxi.cjs` (28 checks; win and stranded lines by breadth-first search; the repetition uses a
+12-move cycle of shore moves, since a 6-move cycle is impossible: each piece needs an even number
+of steps and the tide needs a multiple of 6).
+
 ## The hub and the classics (gambitaura#5, 2026-10-28)
 
 Owner, 2026-10-28: put several board and strategy games on one site, the homepage as a game hub
 with each game at its own address; the four classics Hex, Reversi, Gomoku and Nim, "然後主要是我們
 自己構思創作平衡的棋類" (the main line stays our own originally designed, balanced games). So the
-hub has two shelves: **原創 Originals** (借路, 轉環, 光路, 日影, 傾盤, then a Game 06 slot "in the works") above **經典
+hub has two shelves: **原創 Originals** (借路, 轉環, 光路, 日影, 傾盤, 潮汐, then a Game 07 slot "in the works") above **經典
 Classics** (four cards with mini boards drawn in the site's style).
 
 Fairness copy must stay honest. A game with no draws always has a forced winner under perfect
@@ -306,7 +347,7 @@ of boxes. Do not bring back rainbow gradients, gradient buttons, glossy orbs or 
   and no proposal or suggestion wording in site copy (owner, 2026-10-29): the games are presented
   as they are, and design history says "the original opening" or "the first rules".
 - Test every UI change in headless Chromium: start a static server and run `node tests/e2e.cjs`
-  (73 checks: the hub's game cards, a guard against version numbers and proposal wording on every
+  (80 checks: the hub's game cards, a guard against version numbers and proposal wording on every
   original game's pages, 借路 moves, tile moves, draw dialog and overlay, scoreboard, language, phone
   widths, no console errors) and the test of any classic you touched
   (`tests/<game>.cjs`; `tests/gomoku.cjs` has 151 checks across the three rule sets). Look at the
@@ -330,11 +371,12 @@ of boxes. Do not bring back rainbow gradients, gradient buttons, glossy orbs or 
   tick "Enforce HTTPS". Do not add Cloudflare redirect rules or turn on the proxy (README explains
   why). Cloud sessions cannot reach gambitaura.com, docs.github.com or developers.cloudflare.com
   unless the environment allows them. Play-testing with people still to do.
-- Originals are the main line. 轉環, 光路, 日影 and 傾盤 are Games 02 to 05 (all solved).
+- Originals are the main line. 轉環, 光路, 日影, 傾盤 and 潮汐 are Games 02 to 06 (all solved).
   Play-testing them with people is still to do; for 傾盤, watch whether strong play falls into
-  quick repetition draws (it did in computer games) and whether its sharpness puts beginners off.
+  quick repetition draws (it did in computer games) and whether its sharpness puts beginners off;
+  for 潮汐, whether the tide gauge and dashed "floods next" squares are enough to plan with.
   Concepts offered on 2026-10-29 and not tried yet: 換位 (swap on a full board, connect your
-  edges), 秤 (balance beam; beware a mirror strategy), 潮汐 (tide floods low squares on a schedule).
+  edges), 秤 (balance beam; beware a mirror strategy).
 - Pro rules for the other classics (2026-10-29): Reversi's tournament game is the same game (pro
   events add clocks, which the series leaves out on purpose); Hex already uses the swap rule and
   offers 11 × 11, the classic tournament size, and 13 × 13 (used at the Computer Olympiad and on

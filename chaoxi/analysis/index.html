@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="潮汐 Chaoxi 公平性檢查：規則和地形怎麼定出來、開局為什麼是和棋、電腦對手有多強。" />
+<title>潮汐 公平性檢查 · 罡曜 GambitAura</title>
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Instrument+Sans:wght@400..700&family=Noto+Serif+TC:wght@500;700;900&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../../assets/ga.css" />
+<meta name="theme-color" content="#08090c" />
+<style>
+  .wrap { max-width: 840px; margin: 0 auto; }
+  body { line-height: 1.75; }
+  h1 { font-family: var(--cjk); font-weight: 900; font-size: clamp(1.7rem, 5vw, 2.5rem); line-height: 1.2; letter-spacing: .02em; }
+  html[lang="en"] h1 { font-family: var(--display); font-weight: 600; letter-spacing: .01em; font-size: clamp(2rem, 6vw, 3rem); }
+  .meta { font-family: var(--mono); font-size: .74rem; color: var(--muted); margin: 10px 0 24px; }
+  h2 { font-family: var(--cjk); font-weight: 700; font-size: 1.2rem; letter-spacing: .06em; margin: 42px 0 12px; padding-left: 14px; border-left: 1px solid var(--gold); }
+  html[lang="en"] h2 { font-family: var(--display); font-size: 1.45rem; letter-spacing: .02em; }
+  h3 { font-size: 1rem; margin: 20px 0 6px; color: var(--ink); }
+  p, li { color: var(--body); }
+  p + p { margin-top: 10px; }
+  ul, ol { margin: 8px 0 8px 1.3em; }
+  li { margin: 5px 0; }
+  b, strong { color: var(--ink); }
+  .summary { padding: 18px 22px; border-left: 1px solid var(--gold); }
+  .summary li { margin: 9px 0; }
+  .tablewrap { overflow-x: auto; margin: 10px 0; border-radius: 12px; border: 1px solid var(--edge); }
+  table { border-collapse: collapse; width: 100%; font-size: .9rem; background: rgba(16, 18, 24, .6); }
+  th, td { padding: 8px 11px; border-bottom: 1px solid var(--edge); text-align: left; vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
+  th { font-weight: 600; color: var(--muted); font-size: .78rem; font-family: var(--mono); letter-spacing: .04em; }
+  td.num { font-family: var(--mono); white-space: nowrap; }
+  tr.pick td { background: rgba(217, 195, 143, .08); color: var(--ink); }
+  tr.pick td:first-child { box-shadow: inset 3px 0 0 var(--gold); }
+  code { font-family: var(--mono); font-size: .86em; color: var(--ink); background: rgba(255, 255, 255, .06); padding: 1px 5px; border-radius: 5px; }
+  pre { font-family: var(--mono); font-size: .8rem; background: rgba(8, 11, 18, .85); border: 1px solid var(--edge); border-radius: 12px; padding: 13px 15px; overflow-x: auto; line-height: 1.6; color: var(--body); }
+  .note { font-size: .88rem; color: var(--muted); }
+  figure.start { margin: 14px auto 6px; max-width: 420px; }
+  figure.start svg { display: block; width: 100%; height: auto; }
+  figure.start figcaption { font-size: .82rem; color: var(--muted); text-align: center; margin-top: 4px; }
+  [data-l] { display: none; }
+  html[lang="zh-Hant"] [data-l="zh"], html[lang="en"] [data-l="en"] { display: block; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="ga-top">
+    <a class="ga-brand" href="../../" aria-label="罡曜 GambitAura">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><defs><radialGradient id="gaCore" cx=".5" cy=".45" r=".55"><stop offset="0" stop-color="#fffaf0"/><stop offset=".55" stop-color="#ecdcb4"/><stop offset="1" stop-color="#c9ad74"/></radialGradient><radialGradient id="gaHalo" cx=".5" cy=".5" r=".5"><stop offset=".3" stop-color="#d9c38f" stop-opacity=".28"/><stop offset="1" stop-color="#d9c38f" stop-opacity="0"/></radialGradient></defs><circle cx="32" cy="32" r="30" fill="url(#gaHalo)"/><circle cx="32" cy="32" r="22" fill="none" stroke="#d9c38f" stroke-width="1.4" opacity=".7"/><circle cx="32" cy="32" r="15" fill="none" stroke="#d9c38f" stroke-width="1" stroke-dasharray="1.5 3.5" opacity=".6"/><circle cx="32" cy="32" r="7" fill="url(#gaCore)"/></svg>
+      <span class="ga-lock" aria-hidden="true"><span class="ga-zh">罡曜</span><span class="ga-word">Gambit<b>Aura</b></span></span>
+    </a>
+    <div class="ga-langs" role="group" aria-label="Language">
+      <button class="ga-chip" data-lang="zh" aria-pressed="true">中文</button>
+      <button class="ga-chip" data-lang="en" aria-pressed="false">EN</button>
+    </div>
+  </header>
+
+<!-- ======================= 中文 ======================= -->
+<article data-l="zh">
+  <h1>潮汐：規則設計與公平性檢查</h1>
+  <p class="meta">2026-10-30 · 罡曜第六款原創棋 · <a href="../">回到遊戲</a></p>
+
+  <div class="ga-card summary">
+    <ul>
+      <li><b>開局是和棋。</b>電腦把所有 910,800 個局面都算過：從這個開局，雙方都下最好時，沒有人能強迫取勝。地形和開局轉半圈後完全相同，潮水對雙方也一樣，所以誰先走都一樣。先走的一方有 3 種第一手，2 種保持均勢；另一種（d1→d2）會讓對手強迫取勝，但還要再走 39 手。</li>
+      <li><b>規則是比出來的。</b>我們試了兩種「被淹」的規則、能不能推人、兩種勝利條件和三種潮汐週期，每一種都配上 200 張隨機地形，共解了 4,800 次。「被沖走、要重新上岸」的規則最長的強制勝利不到 80 手；「困在水裡、等退潮」最深，最長到 214 手。</li>
+      <li><b>雙方程度相近時，勝負接近一半一半。</b>模擬中雙方每步有 10% 機會隨機走錯：先手勝 50.0%，後手勝 49.4%，和棋 0.6%，一盤平均約 79 手。</li>
+      <li><b>值得學。</b>只看一步的玩家對上完美下法全部輸掉。勝負常常取決於算準潮水：什麼時候過海峽，什麼時候在岩石上等。</li>
+    </ul>
+  </div>
+
+  <h2>1. 怎麼檢查的</h2>
+  <p>棋盤有 25 格，雙方各 2 枚棋子的擺法有 300 × 253 = 75,900 種，再乘上潮汐週期的 6 個位置和輪到誰，共 910,800 個局面。電腦從已經有棋子抵達對岸的局面往回推，一層一層標出每個局面在雙方都下最好時的結果：輪到的一方會贏、會輸，或沒有人能強迫取勝（和棋）。這種做法叫逆推分析（retrograde analysis）。4 核心約 2 秒完成。</p>
+  <h3>交叉檢查</h3>
+  <ol>
+    <li><b>兩套程式數走法：</b>網頁上的規則引擎（JavaScript）和求解器（C）分開撰寫。從開局數到第 10 手的所有走法序列完全相同：3、9、30、70、196、868、5,110、28,466、86,924、173,130。</li>
+    <li><b>逐一驗算：</b>由 JavaScript 引擎在 3,000 盤隨機對局中走到的 246,035 個局面，自己產生每一步的後續局面，再檢查表裡的結果是否正好由後續局面推得出來（包括幾手之內分出勝負）。0 個不一致。</li>
+  </ol>
+
+  <h2>2. 規則怎麼定出來</h2>
+  <p>每一種規則組合都配上同一批 200 張隨機地形（轉半圈對稱，兩邊的岸固定是 3）。下表是每種組合裡最好的結果。「好地形」是指最長的強制勝利至少 60 手，而且至少 5 個公平的開局第一手有對有錯。</p>
+  <div class="tablewrap"><table>
+    <tr><th>被淹的棋子</th><th>勝利條件</th><th>推人</th><th>最長強制勝利（最好的地形）</th><th>好地形</th></tr>
+    <tr><td>被沖走，要花一手重新上岸</td><td>對岸任何一格</td><td>不行</td><td class="num">77 手</td><td class="num">5 / 200</td></tr>
+    <tr><td>被沖走，要花一手重新上岸</td><td>對岸正中格</td><td>不行</td><td class="num">75 手</td><td class="num">1 / 200</td></tr>
+    <tr><td>被沖走，要花一手重新上岸</td><td>對岸正中格</td><td>可以</td><td class="num">46 手</td><td class="num">0 / 200</td></tr>
+    <tr><td>困在原地，等退潮</td><td>對岸任何一格</td><td>不行</td><td class="num">124 手</td><td class="num">16 / 200</td></tr>
+    <tr><td>困在原地，等退潮</td><td>對岸正中格</td><td>可以</td><td class="num">107 手</td><td class="num">2 / 200</td></tr>
+    <tr class="pick"><td>採用：困在原地，等退潮</td><td>對岸正中格</td><td>不行</td><td class="num">214 手</td><td class="num">49 / 200</td></tr>
+  </table></div>
+  <p class="note">潮汐週期都是 0、1、2、3、2、1。另外兩種週期（0、1、2、1 和 1、2、3、2）在採用的規則下，最好的地形只有 88 手和 86 手，好地形也只有 5 張和 2 張。</p>
+  <p>「被沖走」聽起來最像潮水，可是每次漲潮都把棋盤清空一次，誰也走不遠，棋很淺。「困在水裡」把潮水變成時機的問題：走進低地很快，但要算好潮水什麼時候回來。推人的規則反而讓棋變淺，因為防守一方隨時可以把對手推下水。</p>
+
+  <h2>3. 地形怎麼選</h2>
+  <p>49 張好地形，我們再檢查每張的公平開局在模擬中是否接近五五波（雙方每步有 10% 機會隨機走錯）。下面是三張候選（只列中間三列，第 5 列和第 1 列是岸）：</p>
+  <div class="tablewrap"><table>
+    <tr><th>地形（第 4、3、2 列）</th><th>最長強制勝利</th><th>公平的開局</th><th>最好的開局：先手／後手</th><th>平均手數</th></tr>
+    <tr><td class="num">31202 · 13031 · 20213</td><td class="num">115 手</td><td class="num">32</td><td class="num">48.1 / 47.9</td><td class="num">約 110</td></tr>
+    <tr class="pick"><td class="num">21323 · 10101 · 32312（海峽）</td><td class="num">98 手</td><td class="num">12</td><td class="num">50.0 / 49.3</td><td class="num">約 79</td></tr>
+    <tr><td class="num">02322 · 01310 · 22320（中央堤道）</td><td class="num">81 手</td><td class="num">60</td><td class="num">49.9 / 50.0</td><td class="num">約 58</td></tr>
+  </table></div>
+  <p>選「海峽」：中間一整列是低地（0 和 1），潮位 2 以上就全被淹；四塊岩石（c4、e4、a2、c2）永遠不會淹。整張地形一眼就看得懂：過海峽要算時機，岩石是等退潮的地方。第一張更深，但對局拖到 110 手左右；第三張的中間有一條永遠不淹的堤道，潮水的影響比較小。</p>
+
+  <h2>4. 開局怎麼選</h2>
+  <p>在海峽地形上，雙方棋子都在自己岸邊、位置互為轉半圈、而且是和棋的開局有 12 個（潮汐週期的每個位置分開算），其中 9 個第一手有對有錯。採用的是薄荷 d1、e1，珊瑚 a5、b5，從潮位 0 開始：它在模擬中最接近五五波（50.0 對 49.4，誤差約正負 0.7 個百分點），而且從退潮開始，第一手時棋盤上還沒有水，最容易看懂。</p>
+  <figure class="start">
+    <svg id="startBoard" viewBox="-60 -60 620 620" role="img" aria-label="開局"></svg>
+    <figcaption>開局：數字是地勢；潮位 0，還沒有水。薄荷 d1、e1，目標 c5；珊瑚 a5、b5，目標 c1。</figcaption>
+  </figure>
+  <h3>第一手</h3>
+  <div class="tablewrap"><table>
+    <tr><th>薄荷先走</th><th>結果</th></tr>
+    <tr><td class="num">d1→c1</td><td>和棋</td></tr>
+    <tr><td class="num">e1→e2</td><td>和棋</td></tr>
+    <tr><td class="num">d1→d2</td><td>輸：珊瑚 39 手內強迫取勝</td></tr>
+  </table></div>
+  <p class="note">d1→d2 走進地勢 1 的格子：兩手之後潮位到 2，那枚棋子就被困住了。</p>
+
+  <h2>5. 看得深有沒有用</h2>
+  <p>一個只看一步的玩家：能馬上抵達對岸就走，不走會讓對方下一手獲勝的棋，其餘隨機。它對上完美下法各 4,000 盤，全部輸掉：完美下法先走時平均約 40 手結束，後走時約 23 手。只看一步，看不到潮水兩三手後會把哪一枚棋子困住。</p>
+
+  <h2>6. 電腦對手</h2>
+  <p>電腦用 alpha-beta 搜尋，搜尋量固定（不看時間），所以同一個局面永遠回同一手。下表用完整的結果表打分：隨機抽 300 個輪到電腦、而且還沒輸定的局面，看它的一手有沒有保住原本的結果（必勝仍是必勝，和棋至少還是和棋）。</p>
+  <div class="tablewrap"><table>
+    <tr><th>難度</th><th>保住結果</th><th>每步時間（Node）</th></tr>
+    <tr><td>簡單</td><td class="num">87.0%</td><td class="num">不到 1 毫秒</td></tr>
+    <tr><td>普通</td><td class="num">89.0%</td><td class="num">不到 5 毫秒</td></tr>
+    <tr><td>困難</td><td class="num">99.3%</td><td class="num">約 0.1 秒，最多 0.2 秒</td></tr>
+  </table></div>
+  <p class="note">困難難度對上完美下法下了四盤（執薄荷或珊瑚、先走或後走）：兩盤到 200 手仍然沒有分出勝負，兩盤以三次重複和棋。它仍不是完美對手。</p>
+
+  <h2>7. 限制</h2>
+  <ul>
+    <li>「站在水裡不能動」和日影「站在影子裡不能動」很像。不同的是，日影的影子由塔決定，潮汐的水由固定的時間表和地形決定，誰也改變不了。</li>
+    <li>地形是從 200 張隨機地形裡挑的，不是所有可能的地形都試過；也許還有更好的。</li>
+    <li>海峽地形上公平的開局不多（60 個裡 12 個），所以開局的位置和潮位都不能隨便換。</li>
+    <li>模擬裡的失誤是隨機走一步，和真人的失誤不同。模擬沒有套用三次重複判和，改用 300 手上限。真人對局要試玩才知道。</li>
+    <li>「和棋」是指雙方都下最好時的結果，不代表實戰常常和棋。</li>
+  </ul>
+
+  <h2>8. 重現</h2>
+  <pre>cd chaoxi/analysis
+gcc -O3 -march=native -fopenmp -o solver solver.c
+./solver --start d1,e1 --phase 0 --perft 10      # must match perft() in ../engine.js
+./solver --start d1,e1 --phase 0                 # every first move, simulations
+./solver --dump table.bin                        # the table (11 MB)
+node check_table.mjs table.bin 3000              # independent check with the JavaScript engine
+node probe_ai.mjs table.bin 300                  # computer player against the table
+./solver --top 8                                 # the fair starts on this terrain
+./solver --scan 200 --seed 7                     # the terrain search for the chosen rules
+./solver --flood 0                               # swept off the board instead of stranded</pre>
+</article>
+
+<!-- ======================= English ======================= -->
+<article data-l="en">
+  <h1>Chaoxi: how the rules were made, and how fair they are</h1>
+  <p class="meta">2026-10-30 · GambitAura original game 06 · <a href="../">Back to the game</a></p>
+
+  <div class="ga-card summary">
+    <ul>
+      <li><b>The opening is a draw.</b> A computer worked through all 910,800 positions: from this start, with best play on both sides, nobody can force a win. The terrain and the opening look the same turned half way round, and the tide is the same for both, so it makes no difference who moves first. The first player has 3 first moves; 2 keep the balance, and the other (d1 to d2) lets the opponent force a win, though it takes another 39 moves.</li>
+      <li><b>The rules won a contest.</b> We tried two flooding rules, pushing or not, two ways to win and three tide cycles, each on 200 random terrains: 4,800 solves in all. "Swept away, step back on shore" never gave a forced win longer than about 80 moves; "stuck until the tide falls" went deepest, up to 214.</li>
+      <li><b>Between equal players, results are close to even.</b> In simulated games where each move has a 10% chance of being random, the first player wins 50.0%, the second 49.4%, and 0.6% are draws, in about 79 moves.</li>
+      <li><b>It rewards thinking ahead.</b> A player who looks only one move ahead lost every game against perfect play. Games turn on reading the tide: when to cross the channel, and when to wait on a rock.</li>
+    </ul>
+  </div>
+
+  <h2>1. How it was checked</h2>
+  <p>The board has 25 squares, so two pieces each can stand in 300 × 253 = 75,900 ways. Times the 6 steps of the tide cycle and whose turn it is, there are 910,800 positions. Starting from positions where a piece has reached the far shore, the computer works backwards, marking every position with its result under best play: the side to move wins, loses, or nobody can force a win (a draw). This is called retrograde analysis. It takes about 2 seconds on 4 cores.</p>
+  <h3>Cross-checks</h3>
+  <ol>
+    <li><b>Two programs count moves:</b> the rules engine on the page (JavaScript) and the solver (C) were written separately. They agree on every move sequence from the opening to depth 10: 3, 9, 30, 70, 196, 868, 5,110, 28,466, 86,924, 173,130.</li>
+    <li><b>Every value re-derived:</b> for 246,035 positions reached in 3,000 random games, the JavaScript engine generated each position's next positions itself, and the table's result had to follow exactly from theirs, including how many moves until the end. 0 mismatches.</li>
+  </ol>
+
+  <h2>2. How the rules were chosen</h2>
+  <p>Every combination of rules was tried on the same 200 random terrains (the same turned half way round, with both shores fixed at 3). The table shows the best of each. A "good terrain" has a longest forced win of at least 60 moves and at least 5 fair starts where some first moves hold and some lose.</p>
+  <div class="tablewrap"><table>
+    <tr><th>A flooded piece</th><th>Win</th><th>Pushing</th><th>Longest forced win (best terrain)</th><th>Good terrains</th></tr>
+    <tr><td>is swept away; stepping back on shore takes a move</td><td>any far-shore square</td><td>no</td><td class="num">77 moves</td><td class="num">5 / 200</td></tr>
+    <tr><td>is swept away; stepping back on shore takes a move</td><td>far-shore middle</td><td>no</td><td class="num">75 moves</td><td class="num">1 / 200</td></tr>
+    <tr><td>is swept away; stepping back on shore takes a move</td><td>far-shore middle</td><td>yes</td><td class="num">46 moves</td><td class="num">0 / 200</td></tr>
+    <tr><td>is stuck until the tide falls</td><td>any far-shore square</td><td>no</td><td class="num">124 moves</td><td class="num">16 / 200</td></tr>
+    <tr><td>is stuck until the tide falls</td><td>far-shore middle</td><td>yes</td><td class="num">107 moves</td><td class="num">2 / 200</td></tr>
+    <tr class="pick"><td>Chosen: is stuck until the tide falls</td><td>far-shore middle</td><td>no</td><td class="num">214 moves</td><td class="num">49 / 200</td></tr>
+  </table></div>
+  <p class="note">The tide cycle here is 0, 1, 2, 3, 2, 1. With the chosen rules, the other two cycles (0, 1, 2, 1 and 1, 2, 3, 2) reached only 88 and 86 moves on their best terrains, with 5 and 2 good terrains.</p>
+  <p>"Swept away" sounds most like a tide, but every high tide clears the board, nobody gets far, and the game stays shallow. "Stuck in water" turns the tide into a question of timing: low ground is the quick way, but you have to know when the water comes back. Pushing made the game shallower, because a defender could always push the attacker into the water.</p>
+
+  <h2>3. How the terrain was chosen</h2>
+  <p>For the 49 good terrains we also checked whether their fair starts play close to even in simulation (every move has a 10% chance of being random). Three candidates (the middle three ranks only; ranks 5 and 1 are shores):</p>
+  <div class="tablewrap"><table>
+    <tr><th>Terrain (ranks 4, 3, 2)</th><th>Longest forced win</th><th>Fair starts</th><th>Best start: first / second</th><th>Mean length</th></tr>
+    <tr><td class="num">31202 · 13031 · 20213</td><td class="num">115 moves</td><td class="num">32</td><td class="num">48.1 / 47.9</td><td class="num">about 110</td></tr>
+    <tr class="pick"><td class="num">21323 · 10101 · 32312 (the channel)</td><td class="num">98 moves</td><td class="num">12</td><td class="num">50.0 / 49.3</td><td class="num">about 79</td></tr>
+    <tr><td class="num">02322 · 01310 · 22320 (a causeway)</td><td class="num">81 moves</td><td class="num">60</td><td class="num">49.9 / 50.0</td><td class="num">about 58</td></tr>
+  </table></div>
+  <p>We chose the channel. The whole middle rank is low (0 and 1) and floods whenever the tide is 2 or more, while four rocks (c4, e4, a2, c2) never flood. The map reads at a glance: crossing the channel is about timing, and the rocks are where you wait for the tide. The first terrain goes deeper, but games drag to about 110 moves; the third has a causeway down the middle that never floods, so the tide matters less.</p>
+
+  <h2>4. How the opening was chosen</h2>
+  <p>On the channel terrain, 12 starts have both sides' pieces on their own shore, a half turn apart, and are draws (each step of the tide counts as its own start); in 9 of them some first moves hold and some lose. The chosen one is Mint d1 and e1, Coral a5 and b5, starting at tide 0. It plays the closest to even in simulation (50.0 against 49.4, good to about plus or minus 0.7 points), and starting at low tide means there is no water yet on move one, which is the easiest to read.</p>
+  <figure class="start">
+    <svg id="startBoardEn" viewBox="-60 -60 620 620" role="img" aria-label="Opening"></svg>
+    <figcaption>The opening: the numbers are heights; the tide is 0, so there is no water yet. Mint on d1 and e1 aims for c5; Coral on a5 and b5 aims for c1.</figcaption>
+  </figure>
+  <h3>The first move</h3>
+  <div class="tablewrap"><table>
+    <tr><th>Mint moves first</th><th>Result</th></tr>
+    <tr><td class="num">d1→c1</td><td>Draw</td></tr>
+    <tr><td class="num">e1→e2</td><td>Draw</td></tr>
+    <tr><td class="num">d1→d2</td><td>Loses: Coral forces a win within 39 moves</td></tr>
+  </table></div>
+  <p class="note">d1 to d2 steps onto height 1: two moves later the tide reaches 2 and that piece is stuck.</p>
+
+  <h2>5. Does thinking ahead pay?</h2>
+  <p>A player who looks one move ahead reaches the far shore when it can, avoids moves that let the other side win next move, and otherwise moves at random. Against perfect play, over 4,000 games each way, it lost every game: in about 40 moves when perfect play moved first and about 23 when it moved second. Looking one move ahead cannot see which piece the tide will trap two or three moves later.</p>
+
+  <h2>6. The computer player</h2>
+  <p>The computer uses alpha-beta search with a fixed amount of search (not a clock), so a position always gets the same reply. It was scored against the full table: in 300 random positions where the computer is to move and not already lost, did its move keep the result (a win stays a win, a draw stays at least a draw)?</p>
+  <div class="tablewrap"><table>
+    <tr><th>Level</th><th>Keeps the result</th><th>Time per move (Node)</th></tr>
+    <tr><td>Easy</td><td class="num">87.0%</td><td class="num">under 1 ms</td></tr>
+    <tr><td>Normal</td><td class="num">89.0%</td><td class="num">under 5 ms</td></tr>
+    <tr><td>Hard</td><td class="num">99.3%</td><td class="num">about 0.1 s, at most 0.2 s</td></tr>
+  </table></div>
+  <p class="note">Hard played four games against perfect play (as Mint or Coral, moving first or second): two were still undecided after 200 moves, and two ended in a threefold-repetition draw. It is still not a perfect player.</p>
+
+  <h2>7. Limits</h2>
+  <ul>
+    <li>"A piece in water cannot move" is close to Riying's "a tower in shade cannot move". The difference is that in Riying the towers cast the shade, while in Chaoxi a fixed schedule and the terrain decide where the water is, and nobody can change them.</li>
+    <li>The terrain was picked from 200 random terrains, not from every possible one; there may be a better one.</li>
+    <li>The channel terrain has few fair starts (12 of 60), so neither the placement nor the starting tide can be changed freely.</li>
+    <li>A simulated slip is a random move, unlike human mistakes. The simulation does not apply the threefold-repetition draw; it stops at 300 moves instead. How people play it still needs play-testing.</li>
+    <li>"Draw" means the result under best play on both sides. It does not mean real games are often drawn.</li>
+  </ul>
+
+  <h2>8. Reproduce</h2>
+  <pre>cd chaoxi/analysis
+gcc -O3 -march=native -fopenmp -o solver solver.c
+./solver --start d1,e1 --phase 0 --perft 10      # must match perft() in ../engine.js
+./solver --start d1,e1 --phase 0                 # every first move, simulations
+./solver --dump table.bin                        # the table (11 MB)
+node check_table.mjs table.bin 3000              # independent check with the JavaScript engine
+node probe_ai.mjs table.bin 300                  # computer player against the table
+./solver --top 8                                 # the fair starts on this terrain
+./solver --scan 200 --seed 7                     # the terrain search for the chosen rules
+./solver --flood 0                               # swept off the board instead of stranded</pre>
+</article>
+
+  <footer class="ga-foot">
+    <a href="../">潮汐 Chaoxi</a>
+    <a href="../../">GambitAura</a>
+  </footer>
+</div>
+<script>
+  function getLang() {
+    try { var v = localStorage.getItem('ga-jielu-lang'); if (v) return v; } catch (e) {}
+    return (navigator.language || '').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en';
+  }
+  function apply(l) {
+    if (l !== 'zh' && l !== 'en') l = 'zh';
+    document.documentElement.lang = l === 'zh' ? 'zh-Hant' : 'en';
+    document.title = l === 'zh' ? '潮汐 公平性檢查 · 罡曜 GambitAura' : 'Chaoxi fairness check · GambitAura';
+    document.querySelectorAll('[data-lang]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-lang') === l)); });
+  }
+  document.querySelectorAll('[data-lang]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var l = b.getAttribute('data-lang');
+      try { localStorage.setItem('ga-jielu-lang', l); } catch (e) {}
+      apply(l);
+    });
+  });
+  apply(getLang());
+</script>
+<script type="module">
+  // The opening, drawn from the game's own engine so it always shows the shipped start.
+  import { R, C, START, HEIGHTS, TARGET } from '../engine.js';
+  const S = 100, fill = ['#0c0f14', '#151920', '#1f242c', '#2c323b'];
+  const ctr = (i) => [(i % C) * S + S / 2, Math.floor(i / C) * S + S / 2];
+  const lbl = 'font-family="Cormorant Garamond, serif" font-style="italic" font-size="20" fill="#8e897f" text-anchor="middle" dominant-baseline="central"';
+  let h = '';
+  for (let i = 0; i < R * C; i++) {
+    const [x, y] = ctr(i);
+    h += `<rect x="${x - 50}" y="${y - 50}" width="100" height="100" fill="${fill[HEIGHTS[i]]}" stroke="rgba(236,230,218,.07)"/>`;
+    h += `<text x="${x - 41}" y="${y - 30}" font-family="Cormorant Garamond, serif" font-style="italic" font-size="17" fill="rgba(236,230,218,.45)">${HEIGHTS[i]}</text>`;
+  }
+  h += `<rect x="0" y="0" width="${C * S}" height="${R * S}" fill="none" stroke="rgba(236,230,218,.22)" stroke-width="1.4"/>`;
+  for (let c = 0; c < C; c++) h += `<text x="${c * S + S / 2}" y="-24" ${lbl}>${'abcde'[c]}</text>`;
+  for (let r = 0; r < R; r++) h += `<text x="-24" y="${r * S + S / 2}" ${lbl}>${R - r}</text>`;
+  [['#8fd3bf', 0], ['#ec9a82', 1]].forEach(([col, side]) => { const [x, y] = ctr(TARGET[side]); h += `<circle cx="${x}" cy="${y}" r="38" fill="none" stroke="${col}" stroke-width="2" stroke-dasharray="3 6"/>`; });
+  START.pieces.forEach((cell, t) => {
+    const [x, y] = ctr(cell), col = t < 2 ? '#8fd3bf' : '#ec9a82', deep = t < 2 ? '#4f9a86' : '#b4644f';
+    h += `<circle cx="${x}" cy="${y}" r="30" fill="${col}" stroke="rgba(255,255,255,.35)"/><circle cx="${x}" cy="${y}" r="15" fill="none" stroke="${deep}" stroke-width="2"/>`;
+  });
+  for (const id of ['startBoard', 'startBoardEn']) document.getElementById(id).innerHTML = h;
+</script>
+</body>
+</html>

@@ -30,6 +30,9 @@ const cell = (n) => (n.charCodeAt(1) - 49) * 5 + (n.charCodeAt(0) - 65);
   ok(await page.locator('a[href="qingpan/"]').count() >= 1, 'hub links Game 05, 傾盤');
   ok(await page.locator('#mQp circle').count() >= 10, '傾盤 mini board drawn from its engine (pieces, holes)');
   ok((await page.request.get(BASE + 'qingpan/')).ok() && (await page.request.get(BASE + 'qingpan/analysis/')).ok(), '傾盤 and its fairness page are served');
+  ok(await page.locator('a[href="chaoxi/"]').count() >= 1, 'hub links Game 06, 潮汐');
+  ok(await page.locator('#mCx rect').count() >= 25, '潮汐 mini board drawn from its engine (terrain, water)');
+  ok((await page.request.get(BASE + 'chaoxi/')).ok() && (await page.request.get(BASE + 'chaoxi/analysis/')).ok(), '潮汐 and its fairness page are served');
   for (const g of ['hex/', 'reversi/', 'gomoku/', 'nim/']) {
     ok(await page.locator(`a.classic[href="${g}"]`).count() === 1, 'hub card for ' + g);
     const r = await page.request.get(BASE + g);
@@ -163,7 +166,7 @@ const cell = (n) => (n.charCodeAt(1) - 49) * 5 + (n.charCodeAt(0) - 65);
   ok(await page.isVisible('article[data-l="en"] h1'), 'analysis page switches to English');
   // owner, 2026-10-29: no version numbers or proposal wording anywhere a player reads
   const BANNED = /v0\.\d|提案|建議|原版|[Pp]ropos|[Ss]uggest(ed|ion)|[Vv]ersion/;
-  for (const u of ['', 'jielu/', 'jielu/analysis/', 'zhuanhuan/', 'zhuanhuan/analysis/', 'guanglu/', 'guanglu/analysis/', 'riying/', 'riying/analysis/', 'qingpan/', 'qingpan/analysis/']) {
+  for (const u of ['', 'jielu/', 'jielu/analysis/', 'zhuanhuan/', 'zhuanhuan/analysis/', 'guanglu/', 'guanglu/analysis/', 'riying/', 'riying/analysis/', 'qingpan/', 'qingpan/analysis/', 'chaoxi/', 'chaoxi/analysis/']) {
     for (const l of ['zh', 'en']) {
       await page.goto(BASE + u);
       await page.evaluate((l) => localStorage.setItem('ga-jielu-lang', l), l);
