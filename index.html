@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<meta name="description" content="罡曜 GambitAura：小棋盤、不靠運氣的雙人策略棋。原創的借路、轉環、光路、日影與傾盤，以及六角連線、黑白棋、五子棋、取石子。" />
+<meta name="description" content="罡曜 GambitAura：小棋盤、不靠運氣的雙人策略棋。原創的借路、轉環、光路、日影、傾盤與潮汐，以及六角連線、黑白棋、五子棋、取石子。" />
 <meta name="theme-color" content="#08090c" />
 <title>罡曜 GambitAura</title>
 <link rel="icon" href="favicon.svg" type="image/svg+xml" />
@@ -257,7 +257,24 @@
         </div>
       </div>
     </div>
-    <div class="soon"><em>Game 06</em><b data-t="g2">In the works</b><span data-t="g2s">The next original game is being designed. Once its rules are final, it is solved before it goes live.</span></div>
+    <div class="ga-card game second">
+      <div class="mini">
+        <svg viewBox="0 0 250 250" role="img" aria-label="潮汐 Chaoxi"><rect width="250" height="250" fill="url(#bg)"/><g id="mCx"></g></svg>
+      </div>
+      <div>
+        <div class="num">Game 06</div>
+        <h2>潮汐<small>Chaoxi</small></h2>
+        <p data-t="cx1">The tide rises and falls on a fixed schedule, and low ground goes under water. Move one piece one square onto dry land; a piece caught by the water waits for it to fall. First to reach the middle of the far shore wins.</p>
+        <div class="meta">
+          <span data-t="cxc1">5 × 5 · tide 0 1 2 3 2 1</span><span data-t="c2">2 players</span><span data-t="c3">2 pieces each</span><span class="ok" data-t="c4">Solved: no forced win</span>
+        </div>
+        <div class="links">
+          <a class="ga-btn primary" href="chaoxi/" data-t="cxplay">Play Chaoxi</a>
+          <a class="ga-btn" href="chaoxi/analysis/" data-t="check">How we check fairness</a>
+        </div>
+      </div>
+    </div>
+    <div class="soon"><em>Game 07</em><b data-t="g2">In the works</b><span data-t="g2s">The next original game is being designed. Once its rules are final, it is solved before it goes live.</span></div>
   </section>
 
   <section class="shelf" id="classics">
@@ -443,6 +460,8 @@
       ryc1: '5 × 5 · 太陽 8 個位置', ryc3: '每方兩座塔', ryplay: '開始玩日影',
       qp1: '傾斜棋盤，雙方所有棋子一起滑動；或把一枚棋子走一格。讓自己的棋子落進自己的洞就贏，對方的洞對你來說就像石柱。',
       qpc1: '5 × 5 · 兩根石柱', qpc3: '每方三枚棋子', qpplay: '開始玩傾盤',
+      cx1: '潮水照固定的時間漲落，低地會被淹。輪到你時，把一枚棋子走到乾地上；被潮水困住的棋子要等退潮。先抵達對岸正中格的人獲勝。',
+      cxc1: '5 × 5 · 潮位 0 1 2 3 2 1', cxplay: '開始玩潮汐',
       c2: '雙人', c3: '每方兩枚棋子', c4: '已完整求解：雙方都無必勝',
       f1: '資訊公開', f1s: '雙方看得到全部。同樣的局面，同樣的選擇。',
       f2: '不靠運氣', f2s: '沒有骰子、洗牌或計時。只有棋步決定勝負。',
@@ -469,6 +488,8 @@
       ryc1: '5 × 5 · 8 sun places', ryc3: '2 towers each', ryplay: 'Play Riying',
       qp1: 'Tilt the board and every piece slides, yours and the other side\'s. Or step one piece one square. Drop one of your pieces into your own hole to win; the other side\'s hole stops you like a pillar.',
       qpc1: '5 × 5 · 2 pillars', qpc3: '3 pieces each', qpplay: 'Play Qingpan',
+      cx1: 'The tide rises and falls on a fixed schedule, and low ground goes under water. Move one piece one square onto dry land; a piece caught by the water waits for it to fall. First to reach the middle of the far shore wins.',
+      cxc1: '5 × 5 · tide 0 1 2 3 2 1', cxplay: 'Play Chaoxi',
       c2: '2 players', c3: '2 pieces each', c4: 'Solved: no forced win',
       f1: 'Open information', f1s: 'Both players see everything. Same position, same options.',
       f2: 'No luck', f2s: 'No dice, no shuffles, no timer. Only the moves decide.',
@@ -572,6 +593,26 @@
   });
   // the tilt arrows around the board
   [[125, y0 - 14, 0], [x0 + C * s + 14, 125, 90], [125, y0 + R * s + 14, 180], [x0 - 14, 125, 270]].forEach(([x, y, a]) => { h += `<path d="M-6 3 L0 -3 L6 3" transform="translate(${x} ${y}) rotate(${a})" fill="none" stroke="rgba(217,195,143,.6)" stroke-width="1.6" stroke-linecap="round"/>`; });
+  g.innerHTML = h;
+</script>
+<script type="module">
+  // 潮汐 mini board: the terrain at half tide and the opening, drawn from the game's own engine.
+  import { R, C, START, HEIGHTS, TARGET, wet } from './chaoxi/engine.js';
+  const g = document.getElementById('mCx');
+  const s = 38, x0 = (250 - C * s) / 2, y0 = (250 - R * s) / 2, fill = ['#0c0f14', '#151920', '#1f242c', '#2c323b'];
+  const ctr = (i) => [x0 + (i % C) * s + s / 2, y0 + Math.floor(i / C) * s + s / 2];
+  let h = '';
+  for (let i = 0; i < R * C; i++) {
+    const [x, y] = ctr(i);
+    h += `<rect x="${x - s / 2}" y="${y - s / 2}" width="${s}" height="${s}" fill="${fill[HEIGHTS[i]]}" stroke="rgba(236,230,218,.06)"/>`;
+    if (wet(i, 2)) h += `<rect x="${x - s / 2}" y="${y - s / 2}" width="${s}" height="${s}" fill="#3a6f7d" opacity=".45"/>`;
+  }
+  h += `<rect x="${x0}" y="${y0}" width="${C * s}" height="${R * s}" fill="none" stroke="rgba(236,230,218,.2)"/>`;
+  [['#8fd3bf', 0], ['#ec9a82', 1]].forEach(([col, side]) => { const [x, y] = ctr(TARGET[side]); h += `<circle cx="${x}" cy="${y}" r="14" fill="none" stroke="${col}" stroke-dasharray="2 2.5"/>`; });
+  START.pieces.forEach((cell, t) => {
+    const [x, y] = ctr(cell), col = t < 2 ? '#8fd3bf' : '#ec9a82', deep = t < 2 ? '#4f9a86' : '#b4644f';
+    h += `<circle cx="${x}" cy="${y}" r="11.5" fill="${col}"/><circle cx="${x}" cy="${y}" r="5.5" fill="none" stroke="${deep}" stroke-width="1.4"/>`;
+  });
   g.innerHTML = h;
 </script>
 </body>

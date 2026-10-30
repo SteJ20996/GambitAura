@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="description" content="潮汐 Chaoxi：罡曜 GambitAura 的第六款原創棋。潮水照固定的時間漲落，算準時機才過得了海峽。" />
+<meta name="theme-color" content="#08090c" />
+<title>潮汐 Chaoxi · 罡曜 GambitAura</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Instrument+Sans:wght@400..700&family=Noto+Serif+TC:wght@500;700;900&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../assets/ga.css" />
+<link rel="stylesheet" href="../assets/game.css" />
+<style>
+  /* 潮汐 only. One SVG in board units: cells are 100 wide; the tide gauge sits under the board. */
+  .board.cx { aspect-ratio: 620 / 720; }
+  .cx .art { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; }
+  .cx .ground { stroke: rgba(236, 230, 218, .07); stroke-width: 1; }
+  .cx .ground.h0 { fill: #0c0f14; } .cx .ground.h1 { fill: #151920; }
+  .cx .ground.h2 { fill: #1f242c; } .cx .ground.h3 { fill: #2c323b; }
+  .cx .rock { fill: none; stroke: rgba(236, 230, 218, .08); stroke-width: 1; }
+  .cx .hnum { font-family: var(--display); font-style: italic; font-size: 17px; fill: rgba(236, 230, 218, .42); }
+  .cx .frame { fill: none; stroke: rgba(236, 230, 218, .22); stroke-width: 1.4; }
+  .cx .lbl { font-family: var(--display); font-style: italic; fill: var(--muted); text-anchor: middle; dominant-baseline: central; }
+
+  /* water: a cool wash over every square below the tide; dashed: floods after this move */
+  .cx .water { fill: url(#gWater); opacity: 0; transition: opacity .6s ease; }
+  .cx .water.on { opacity: 1; }
+  .cx .soon { fill: none; stroke: #8ab8c8; stroke-width: 1.6; stroke-dasharray: 5 5; opacity: 0; transition: opacity .4s; }
+  .cx .soon.on { opacity: .8; }
+
+  /* targets */
+  .cx .tgt { fill: none; stroke-width: 2; }
+  .cx .tgt.m { stroke: var(--mint); } .cx .tgt.c { stroke: var(--coral); }
+  .cx .tgt .core { stroke: none; opacity: .2; }
+  .cx .tgt.m .core { fill: var(--mint); } .cx .tgt.c .core { fill: var(--coral); }
+  .cx .tgt.hit .core { opacity: .9; }
+  .cx .tgt .spin { transform-box: fill-box; transform-origin: 50% 50%; animation: tgtSpin 30s linear infinite; }
+  @keyframes tgtSpin { to { transform: rotate(360deg); } }
+
+  /* pieces */
+  .cx .piece { transition: transform .45s cubic-bezier(.3, .7, .2, 1); }
+  .cx .piece .body { stroke: rgba(255, 255, 255, .35); stroke-width: 1.2; }
+  .cx .piece.m .body { fill: url(#gMint); filter: drop-shadow(0 0 7px var(--mint-glow)); }
+  .cx .piece.c .body { fill: url(#gCoral); filter: drop-shadow(0 0 7px var(--coral-glow)); }
+  .cx .piece .ring { fill: none; stroke-width: 2; opacity: .7; }
+  .cx .piece.m .ring { stroke: #4f9a86; } .cx .piece.c .ring { stroke: #b4644f; }
+  .cx .piece .veil { fill: #0b2a33; opacity: 0; transition: opacity .5s; }
+  .cx .piece.wet .veil { opacity: .55; }
+  .cx .piece.wet .body { filter: none; }
+  .cx .piece .sel { fill: none; stroke: var(--gold); stroke-width: 2; opacity: 0; }
+  .cx .piece.selected .sel { opacity: 1; }
+  .cx .piece.last .body { stroke: var(--gold); }
+
+  /* the tide gauge: the six steps of the cycle, now and next */
+  .cx .gbar { fill: rgba(138, 184, 200, .22); transition: fill .4s; }
+  .cx .gbar.now { fill: #8ab8c8; }
+  .cx .gbar.next { fill: rgba(138, 184, 200, .45); }
+  .cx .gbase { stroke: rgba(236, 230, 218, .18); stroke-width: 1; }
+  .cx .gtext { font-family: var(--sans); font-size: 17px; fill: var(--body); dominant-baseline: central; }
+  .cx .gnow { fill: none; stroke: var(--gold); stroke-width: 1.4; transition: transform .5s cubic-bezier(.3, .7, .2, 1); }
+
+  .cx .dot { fill: var(--gold); opacity: .8; pointer-events: none; }
+  .cx .hitbox { fill: transparent; cursor: default; }
+  .cx .hitbox.act { cursor: pointer; }
+  .cx .hitbox.act:hover { fill: rgba(236, 230, 218, .05); }
+  .cx .hitbox:focus { outline: none; }
+  .cx .hitbox:focus-visible { stroke: var(--gold); stroke-width: 1.5; }
+  .cx .tag { font-family: var(--cjk); font-size: 22px; font-weight: 700; fill: var(--gold); text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+  @media (prefers-reduced-motion: reduce) {
+    .cx .piece, .cx .water, .cx .gnow { transition: none; }
+    .cx .tgt .spin { animation: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="ga-top">
+    <a class="ga-brand" href="../" aria-label="罡曜 GambitAura">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><defs><radialGradient id="gaCore" cx=".5" cy=".45" r=".55"><stop offset="0" stop-color="#fffaf0"/><stop offset=".55" stop-color="#ecdcb4"/><stop offset="1" stop-color="#c9ad74"/></radialGradient><radialGradient id="gaHalo" cx=".5" cy=".5" r=".5"><stop offset=".3" stop-color="#d9c38f" stop-opacity=".28"/><stop offset="1" stop-color="#d9c38f" stop-opacity="0"/></radialGradient></defs><circle cx="32" cy="32" r="30" fill="url(#gaHalo)"/><circle cx="32" cy="32" r="22" fill="none" stroke="#d9c38f" stroke-width="1.4" opacity=".7"/><circle cx="32" cy="32" r="15" fill="none" stroke="#d9c38f" stroke-width="1" stroke-dasharray="1.5 3.5" opacity=".6"/><circle cx="32" cy="32" r="7" fill="url(#gaCore)"/></svg>
+      <span class="ga-lock" aria-hidden="true"><span class="ga-zh">罡曜</span><span class="ga-word">Gambit<b>Aura</b></span></span>
+      <span class="ga-crumb">· Game 06</span>
+    </a>
+    <div class="ga-langs" role="group" aria-label="Language">
+      <button class="ga-chip" data-lang="zh" aria-pressed="true">中文</button>
+      <button class="ga-chip" data-lang="en" aria-pressed="false">EN</button>
+    </div>
+  </header>
+
+  <main class="game">
+    <section class="stage">
+      <div class="col title-row">
+        <div class="title"><h1>潮汐</h1><span class="latin">Chaoxi</span></div>
+        <span class="opening-tag" id="tag"></span>
+      </div>
+
+      <div class="col ga-card score" id="score">
+        <div class="side-box mint" id="sbMint"><span class="orb"></span><span class="who" id="whoMint"></span><span class="pts" id="ptsMint">0</span></div>
+        <div class="round" id="round"></div>
+        <div class="side-box coral" id="sbCoral"><span class="orb"></span><span class="who" id="whoCoral"></span><span class="pts" id="ptsCoral">0</span></div>
+      </div>
+
+      <div class="col">
+        <div class="board cx" id="board">
+          <div class="mist mist-0" aria-hidden="true"></div>
+          <div class="mist mist-1" aria-hidden="true"></div>
+          <svg class="art" id="art" viewBox="-60 -60 620 720" role="group" aria-label="board">
+            <defs>
+              <radialGradient id="gMint" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#e6fbf4"/><stop offset=".45" stop-color="#8fd3bf"/><stop offset="1" stop-color="#3f7f70"/></radialGradient>
+              <radialGradient id="gCoral" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#fff0e9"/><stop offset=".45" stop-color="#ec9a82"/><stop offset="1" stop-color="#9a4f3c"/></radialGradient>
+              <linearGradient id="gWater" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4f8796" stop-opacity=".5"/><stop offset=".55" stop-color="#2f5f6d" stop-opacity=".55"/><stop offset="1" stop-color="#21434e" stop-opacity=".6"/></linearGradient>
+            </defs>
+            <g id="cells"></g>
+            <g id="water"></g>
+            <g id="nums"></g>
+            <g id="targets"></g>
+            <g id="pieces"></g>
+            <g id="dots"></g>
+            <g id="hits"></g>
+            <g id="gauge"></g>
+          </svg>
+          <div class="overlay" id="overlay" aria-live="polite">
+            <div>
+              <div class="big" id="ovBig"></div>
+              <div class="small" id="ovSmall"></div>
+              <div class="btns">
+                <button class="ga-btn primary" id="ovNext"></button>
+                <button class="ga-btn" id="ovLook"></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col ga-card status" id="status" aria-live="polite">
+        <span class="msg" id="msg"></span>
+        <span class="ply" id="ply"></span>
+        <span class="sub" id="sub"></span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <div class="ga-card">
+        <span class="ga-label" data-i18n="setup">Setup</span>
+        <div class="row"><span data-i18n="mode">Mode</span>
+          <div class="ga-seg" id="modeSeg">
+            <button data-v="ai" data-i18n="modeAi">vs computer</button>
+            <button data-v="pvp" data-i18n="modePvp">Two players</button>
+          </div>
+        </div>
+        <div class="row" id="levelRow"><span data-i18n="level">Computer</span>
+          <div class="ga-seg" id="levelSeg">
+            <button data-v="easy" data-i18n="easy">Easy</button>
+            <button data-v="normal" data-i18n="normal">Normal</button>
+            <button data-v="hard" data-i18n="hard">Hard</button>
+          </div>
+        </div>
+        <p class="note" id="note"></p>
+        <div class="btns">
+          <button class="ga-btn" id="restartBtn" data-i18n="restart">Restart</button>
+          <button class="ga-btn primary" id="nextBtn" data-i18n="next" hidden>Next game</button>
+        </div>
+      </div>
+
+      <div class="ga-card">
+        <span class="ga-label" data-i18n="moves">Moves</span>
+        <ol class="log" id="log"></ol>
+        <p class="empty" id="logEmpty" data-i18n="noMoves">No moves yet.</p>
+      </div>
+
+      <div class="ga-card">
+        <details class="rules" id="rules">
+          <summary data-i18n="rulesTitle">How to play</summary>
+          <div id="rulesBody"></div>
+        </details>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="ga-foot">
+    <span data-i18n="footer1">No dice, no timer, nothing hidden.</span>
+    <a href="analysis/" data-i18n="footer2">How we checked fairness</a>
+    <a href="../" data-i18n="footer3">All games</a>
+  </footer>
+</div>
+
+<dialog id="drawDlg">
+  <p id="drawText"></p>
+  <div class="btns">
+    <button class="ga-btn" id="drawCancel"></button>
+    <button class="ga-btn primary" id="drawOk"></button>
+  </div>
+</dialog>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
