@@ -167,12 +167,52 @@ previews (dashed) the shade the other side will face after the move. The hub car
 page's figure are drawn from `engine.js`. Test: `tests/riying.cjs` (29 checks; its lines are found
 with the engine: a target win, a line to a tower stuck in shade, an 8-move cycle for the repetition).
 
+## Game 05: 傾盤 Qingpan (gambitaura#11, 2026-10-30)
+
+Owner, 2026-10-29: "上線 然後做另外一個" (after 日影, build the other solved concept). Rules: 5 × 5,
+cell = row*5+col, row 0 = rank 5. Pillars b5 d1 (cells 1, 23). Holes: Mint's a4 (5), Coral's e2
+(19), a half turn apart. Three pieces each (25-bit masks). A turn: tilt N/E/S/W (every piece of
+both sides slides until the edge, a pillar, a piece or the other side's hole; a piece that slides
+onto its own hole falls in) or step one own piece one square (empty square or its own hole). A tilt
+must move something; no tilting straight back the way the other side just tilted (a step clears the
+ban; "no same way twice" never matters, a repeat tilt moves nothing). After a move: a mover's piece
+fell in → mover wins; else the other side's → the other side wins (`reason` 'hole' or 'gift').
+Threefold repetition draws; a side with no move passes (the page auto-plays it). Opening: Mint c2 d2
+c1, Coral c4 b4 c5 (`START`), half-turn symmetric, so Coral-first is the same game.
+
+**Solved (2026-10-30).** `qingpan/analysis/solver.c`, 10,852,800 states (C(21,3)·C(18,3) piece
+layouts × 5 bans × 2), about 5 s. Win 81.3 / loss 7.9 / draw 10.8%, longest forced win 49. The
+opening is a draw; 3 of 8 first moves hold (tilt up, c2-c3, d2-d3); tilt right loses at once, left
+within 3, down within 5, c2-b2 and c1-b1 within 13. Design scan (1,280 combinations: 10 pillar
+layouts × 8 hole places × 2 or 3 pieces × steps on/off × 4 bans): first layout (4 pillars, holes at
+edge middles) had every natural start a draw with no wrong first move; tilt-only with 4 pillars
+reached 49 too but games ran about 126 plies with a 1 to 5 point first-player deficit; the chosen
+layout tilt-only: 0.8% draws; without the ban: longest 10; two pieces each: 17. Starts: half-turn
+symmetric draws with Mint in ranks 1-2, ≥ 4 first moves, some losing: 5; c2 d2 c1 is the most even
+(50.2 / 49.8 over 20,000 slip games, 28 plies) and asks most on move one. A one-move player loses
+99.8% to 99.9% within about 10 plies. Cross-checks: perft to 6 (8 57 438 3419 26045 193795) agrees
+with `engine.js`; `check_table.mjs` re-derives 230,437 values (20,000 games) with 0 mismatches.
+**Any rule, layout or opening change must be re-solved.** (An early note said 5,426,400 states:
+that was the 4-pillar count, 19 free squares; the shipped board has 21.)
+
+**Code.** `engine.js` (pure rules; `tilt()` returns masks, falls and each piece's path for drawing;
+`hashKey()` is the solver's index: colex ranks of each side's pieces over the 21 free squares),
+`ai.js` (alpha-beta, node budget: easy depth 2, normal depth 4, hard 150k nodes; keeps the solved
+result in 95.3 / 98.3 / 100%; hard about 0.17 s, at most 0.5 s; depth 1 kept only 37%, so easy
+looks two moves; hard drew all 4 games against perfect play by repetition), `app.js` on
+`assets/shell.js`. One SVG, viewBox `-110 -110 720 720`; four tilt arrows outside the edges (off
+and dashed when banned or useless; arrow keys work too); hovering an arrow draws dashed ghosts where
+each piece would slide; pieces are persistent SVG groups moved along the engine's paths, a fallen
+piece shrinks into the hole, and the whole SVG leans 5 degrees the way it tilts; steps are select a
+piece, then a dot. Hub card and analysis figure come from `engine.js`. Test: `tests/qingpan.cjs`
+(27 checks; its lines are found with the engine).
+
 ## The hub and the classics (gambitaura#5, 2026-10-28)
 
 Owner, 2026-10-28: put several board and strategy games on one site, the homepage as a game hub
 with each game at its own address; the four classics Hex, Reversi, Gomoku and Nim, "然後主要是我們
 自己構思創作平衡的棋類" (the main line stays our own originally designed, balanced games). So the
-hub has two shelves: **原創 Originals** (借路, 轉環, 光路, 日影, then a Game 05 slot "in the works") above **經典
+hub has two shelves: **原創 Originals** (借路, 轉環, 光路, 日影, 傾盤, then a Game 06 slot "in the works") above **經典
 Classics** (four cards with mini boards drawn in the site's style).
 
 Fairness copy must stay honest. A game with no draws always has a forced winner under perfect
@@ -266,7 +306,7 @@ of boxes. Do not bring back rainbow gradients, gradient buttons, glossy orbs or 
   and no proposal or suggestion wording in site copy (owner, 2026-10-29): the games are presented
   as they are, and design history says "the original opening" or "the first rules".
 - Test every UI change in headless Chromium: start a static server and run `node tests/e2e.cjs`
-  (66 checks: the hub's game cards, a guard against version numbers and proposal wording on every
+  (73 checks: the hub's game cards, a guard against version numbers and proposal wording on every
   original game's pages, 借路 moves, tile moves, draw dialog and overlay, scoreboard, language, phone
   widths, no console errors) and the test of any classic you touched
   (`tests/<game>.cjs`; `tests/gomoku.cjs` has 151 checks across the three rule sets). Look at the
@@ -290,13 +330,10 @@ of boxes. Do not bring back rainbow gradients, gradient buttons, glossy orbs or 
   tick "Enforce HTTPS". Do not add Cloudflare redirect rules or turn on the proxy (README explains
   why). Cloud sessions cannot reach gambitaura.com, docs.github.com or developers.cloudflare.com
   unless the environment allows them. Play-testing with people still to do.
-- Originals are the main line. 轉環, 光路 and 日影 are Games 02 to 04 (all solved). Play-testing them
-  with people is still to do. Game 05 candidate: 傾盤 Qingpan (tilt), solved but not built:
-  `lab/qingpan/solver.c` holds the solver and the chosen design in its header (pillars b5 d1, holes
-  a4 / e2, 3 pieces each, tilt or step, no tilting straight back, start c2 d2 c1; longest forced
-  win 49; 10% slips 50.2 / 49.8; very sharp: the side to move wins 81% of positions, games about 28
-  plies). Novelty search found no whole-board tilt game (Slipe and Deblockle slide single pieces).
-  Other concepts offered on 2026-10-29 and not tried: 換位 (swap on a full board, connect your
+- Originals are the main line. 轉環, 光路, 日影 and 傾盤 are Games 02 to 05 (all solved).
+  Play-testing them with people is still to do; for 傾盤, watch whether strong play falls into
+  quick repetition draws (it did in computer games) and whether its sharpness puts beginners off.
+  Concepts offered on 2026-10-29 and not tried yet: 換位 (swap on a full board, connect your
   edges), 秤 (balance beam; beware a mirror strategy), 潮汐 (tide floods low squares on a schedule).
 - Pro rules for the other classics (2026-10-29): Reversi's tournament game is the same game (pro
   events add clocks, which the series leaves out on purpose); Hex already uses the swap rule and

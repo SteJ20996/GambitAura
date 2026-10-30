@@ -14,6 +14,7 @@ uses an accepted balancing rule and its page says plainly how fair it is.
 | Original 02 | 轉環 Zhuanhuan | `zhuanhuan/` | Solved: the spiral opening is a draw with perfect play; 12 of the 16 first moves hold |
 | Original 03 | 光路 Guanglu | `guanglu/` | Solved: the opening is a draw with perfect play; 8 of the 16 first moves hold |
 | Original 04 | 日影 Riying | `riying/` | Solved: the opening is a draw whoever moves first; 2 of the 5 first moves hold |
+| Original 05 | 傾盤 Qingpan | `qingpan/` | Solved: the opening is a draw with perfect play; 3 of the 8 first moves hold |
 | Classic | 六角連線 Hex | `hex/` | No draws, so the first player has a forced win; the swap rule takes that edge away |
 | Classic | 黑白棋 Reversi | `reversi/` | 8 × 8 was weakly solved in 2023 (Takizawa): a draw with perfect play |
 | Classic | 五子棋 Gomoku | `gomoku/` | Casual by default (free-style is a first-player win, Allis 1994; Black alternates each game). Pro options: gomoku as at the Gomoku World Championship (Swap2, exactly five) and renju as at the Renju World Championship (Black's forbidden moves, Taraguchi-10 opening) |
@@ -40,10 +41,11 @@ uses an accepted balancing rule and its page says plainly how fair it is.
   opening were chosen (`index.html`), the solver (`solver.c`) and the same three Node cross-checks.
 - `riying/`: Game 04, same files as 轉環. `riying/analysis/`: how its rules and opening were chosen
   (`index.html`), the solver (`solver.c`) and the same three Node cross-checks.
-- `lab/qingpan/solver.c`: 傾盤, a solved Game 05 candidate (not built, not linked from the site).
+- `qingpan/`: Game 05, same files as 轉環. `qingpan/analysis/`: how its rules, board and opening were
+  chosen (`index.html`), the solver (`solver.c`) and the same three Node cross-checks.
 - `tests/e2e.cjs`: browser test of the hub, 借路 and its fairness page, plus a guard against version
   numbers and proposal wording on every original game's pages. `tests/zhuanhuan.cjs`: 轉環.
-  `tests/guanglu.cjs`: 光路. `tests/riying.cjs`: 日影.
+  `tests/guanglu.cjs`: 光路. `tests/riying.cjs`: 日影. `tests/qingpan.cjs`: 傾盤.
   `tests/hex.cjs`, `tests/reversi.cjs`, `tests/gomoku.cjs`, `tests/nim.cjs`: one browser test per classic.
 
 No build step: every page is static HTML, CSS and ES modules.
@@ -54,7 +56,7 @@ No build step: every page is static HTML, CSS and ES modules.
 npx http-server -p 8765 -c-1 .
 open http://127.0.0.1:8765/
 node tests/e2e.cjs          # with the server running; screenshots land in tests/out/
-for t in zhuanhuan guanglu riying hex reversi gomoku nim; do node tests/$t.cjs; done
+for t in zhuanhuan guanglu riying qingpan hex reversi gomoku nim; do node tests/$t.cjs; done
 ```
 
 ## Key result
@@ -82,6 +84,13 @@ force a win, whoever moves first. Earlier drafts were a race (any far-row square
 no fair start) or fair only in theory (a side with no move passed: every fair start gave one side
 9 or more points in simulated games). Details: `riying/analysis/index.html`.
 
+傾盤 Qingpan (Game 05): tilt the 5 × 5 board (every piece of both sides slides) or step one piece;
+drop a piece into your own hole to win. All 10,852,800 positions are solved. From the opening (Mint
+c2 d2 c1, Coral c4 b4 c5) neither side can force a win; 3 of the first player's 8 first moves hold.
+Of 1,280 board and rule combinations, tilt-only games either dragged on or had almost no draws, and
+without the no-tilt-back rule the longest forced win is 10 moves. A sharp game: the side to move
+wins in 81% of positions. Details: `qingpan/analysis/index.html`.
+
 ## Before changing the rules or the opening
 
 1. `gcc -O3 -march=native -fopenmp -o solver jielu/analysis/solver.c`
@@ -103,6 +112,11 @@ For 日影: `cd riying/analysis && gcc -O3 -march=native -fopenmp -o solver solv
 `./solver --start a1,d1 --sunat S --perft 6` (must match `perft()` in `riying/engine.js` for both
 first players), `./solver --dump table.bin` (about 5 seconds, 12 MB) and
 `node check_table.mjs table.bin 3000`. The opening is `START` in the engine.
+
+For 傾盤: `cd qingpan/analysis && gcc -O3 -march=native -fopenmp -o solver solver.c`, then
+`./solver --start c2,d2,c1 --perft 6` (must match `perft()` in `qingpan/engine.js`),
+`./solver --dump table.bin` (about 5 seconds, 35 MB) and `node check_table.mjs table.bin 20000`.
+The pillars, holes and opening are `PILLARS`, `HOLES` and `START` in the engine.
 
 The 借路 solver covers every terrain with four water squares and the pieces anywhere. A change to the
 board size, the number of water squares, the flags or the move rules needs the solver updated first.

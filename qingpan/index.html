@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="description" content="傾盤 Qingpan：罡曜 GambitAura 的第五款原創棋。傾斜棋盤，雙方所有棋子一起滑動。" />
+<meta name="theme-color" content="#08090c" />
+<title>傾盤 Qingpan · 罡曜 GambitAura</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Instrument+Sans:wght@400..700&family=Noto+Serif+TC:wght@500;700;900&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../assets/ga.css" />
+<link rel="stylesheet" href="../assets/game.css" />
+<style>
+  /* 傾盤 only. One SVG in board units: cells are 100 wide; the four tilt arrows sit outside the
+     board's edges. The board itself leans a little the way it is tilted. */
+  .board.qp { aspect-ratio: 1 / 1; }
+  .qp .art { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; transition: transform .35s cubic-bezier(.3, .7, .2, 1); }
+  .qp .art.lean-0 { transform: perspective(1400px) rotateX(5deg); }
+  .qp .art.lean-1 { transform: perspective(1400px) rotateY(5deg); }
+  .qp .art.lean-2 { transform: perspective(1400px) rotateX(-5deg); }
+  .qp .art.lean-3 { transform: perspective(1400px) rotateY(-5deg); }
+  .qp .cellbg { fill: rgba(236, 230, 218, .03); stroke: rgba(236, 230, 218, .08); stroke-width: 1; }
+  .qp .frame { fill: none; stroke: rgba(236, 230, 218, .22); stroke-width: 1.4; }
+  .qp .lbl { font-family: var(--display); font-style: italic; fill: var(--muted); text-anchor: middle; dominant-baseline: central; }
+
+  /* pillars: carved stone; holes: dark wells ringed in their side's colour */
+  .qp .pillar { fill: url(#gStone); stroke: rgba(236, 230, 218, .22); stroke-width: 1.2; filter: drop-shadow(0 6px 8px rgba(0, 0, 0, .55)); }
+  .qp .pillar-top { fill: none; stroke: rgba(255, 255, 255, .08); stroke-width: 1; }
+  .qp .well { fill: url(#gWell); }
+  .qp .hole { fill: none; stroke-width: 2; }
+  .qp .hole.m { stroke: var(--mint); } .qp .hole.c { stroke: var(--coral); }
+  .qp .hole .spin { transform-box: fill-box; transform-origin: 50% 50%; animation: holeSpin 30s linear infinite; }
+  .qp .hole.hit .glow { opacity: .9; }
+  .qp .hole .glow { opacity: 0; transition: opacity .5s; }
+  .qp .hole.m .glow { fill: var(--mint); } .qp .hole.c .glow { fill: var(--coral); }
+  @keyframes holeSpin { to { transform: rotate(360deg); } }
+
+  /* pieces */
+  .qp .piece { transition: transform .45s cubic-bezier(.3, .7, .2, 1), opacity .35s .3s; }
+  .qp .piece .body { stroke: rgba(255, 255, 255, .35); stroke-width: 1.2; }
+  .qp .piece.m .body { fill: url(#gMint); filter: drop-shadow(0 0 7px var(--mint-glow)); }
+  .qp .piece.c .body { fill: url(#gCoral); filter: drop-shadow(0 0 7px var(--coral-glow)); }
+  .qp .piece .ring { fill: none; stroke-width: 2; opacity: .7; }
+  .qp .piece.m .ring { stroke: #4f9a86; } .qp .piece.c .ring { stroke: #b4644f; }
+  .qp .piece .sel { fill: none; stroke: var(--gold); stroke-width: 2; opacity: 0; }
+  .qp .piece.selected .sel { opacity: 1; }
+  .qp .piece.gone { opacity: 0; }
+  .qp .piece.gone .body { transform: scale(.4); transition: transform .35s .25s; }
+
+  /* tilt arrows */
+  .qp .arrow { cursor: pointer; }
+  .qp .arrow .pad { fill: rgba(236, 230, 218, .03); stroke: rgba(236, 230, 218, .16); stroke-width: 1.2; transition: fill .2s, stroke .2s; }
+  .qp .arrow .chev { fill: none; stroke: var(--ink); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; opacity: .85; }
+  .qp .arrow:hover .pad, .qp .arrow:focus-visible .pad { fill: rgba(217, 195, 143, .12); stroke: var(--gold); }
+  .qp .arrow:focus { outline: none; }
+  .qp .arrow.off { cursor: default; }
+  .qp .arrow.off .pad { fill: transparent; stroke-dasharray: 4 5; }
+  .qp .arrow.off .chev { opacity: .22; }
+  .qp .arrow.off:hover .pad { fill: transparent; stroke: rgba(236, 230, 218, .16); }
+  .qp .arrow .tag { font-family: var(--cjk); font-size: 20px; font-weight: 700; fill: var(--gold); text-anchor: middle; dominant-baseline: central; }
+
+  .qp .ghost { fill: none; stroke-width: 2; stroke-dasharray: 5 5; opacity: .85; }
+  .qp .ghost.m { stroke: var(--mint); } .qp .ghost.c { stroke: var(--coral); }
+  .qp .dot { fill: var(--gold); opacity: .8; pointer-events: none; }
+  .qp .hitbox { fill: transparent; cursor: default; }
+  .qp .hitbox.act { cursor: pointer; }
+  .qp .hitbox.act:hover { fill: rgba(236, 230, 218, .05); }
+  .qp .hitbox:focus { outline: none; }
+  .qp .hitbox:focus-visible { stroke: var(--gold); stroke-width: 1.5; }
+  .qp .tag { font-family: var(--cjk); font-size: 22px; font-weight: 700; fill: var(--gold); text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+  @media (prefers-reduced-motion: reduce) {
+    .qp .art, .qp .piece, .qp .piece.gone .body { transition: none; }
+    .qp .hole .spin { animation: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="ga-top">
+    <a class="ga-brand" href="../" aria-label="罡曜 GambitAura">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><defs><radialGradient id="gaCore" cx=".5" cy=".45" r=".55"><stop offset="0" stop-color="#fffaf0"/><stop offset=".55" stop-color="#ecdcb4"/><stop offset="1" stop-color="#c9ad74"/></radialGradient><radialGradient id="gaHalo" cx=".5" cy=".5" r=".5"><stop offset=".3" stop-color="#d9c38f" stop-opacity=".28"/><stop offset="1" stop-color="#d9c38f" stop-opacity="0"/></radialGradient></defs><circle cx="32" cy="32" r="30" fill="url(#gaHalo)"/><circle cx="32" cy="32" r="22" fill="none" stroke="#d9c38f" stroke-width="1.4" opacity=".7"/><circle cx="32" cy="32" r="15" fill="none" stroke="#d9c38f" stroke-width="1" stroke-dasharray="1.5 3.5" opacity=".6"/><circle cx="32" cy="32" r="7" fill="url(#gaCore)"/></svg>
+      <span class="ga-lock" aria-hidden="true"><span class="ga-zh">罡曜</span><span class="ga-word">Gambit<b>Aura</b></span></span>
+      <span class="ga-crumb">· Game 05</span>
+    </a>
+    <div class="ga-langs" role="group" aria-label="Language">
+      <button class="ga-chip" data-lang="zh" aria-pressed="true">中文</button>
+      <button class="ga-chip" data-lang="en" aria-pressed="false">EN</button>
+    </div>
+  </header>
+
+  <main class="game">
+    <section class="stage">
+      <div class="col title-row">
+        <div class="title"><h1>傾盤</h1><span class="latin">Qingpan</span></div>
+        <span class="opening-tag" id="tag"></span>
+      </div>
+
+      <div class="col ga-card score" id="score">
+        <div class="side-box mint" id="sbMint"><span class="orb"></span><span class="who" id="whoMint"></span><span class="pts" id="ptsMint">0</span></div>
+        <div class="round" id="round"></div>
+        <div class="side-box coral" id="sbCoral"><span class="orb"></span><span class="who" id="whoCoral"></span><span class="pts" id="ptsCoral">0</span></div>
+      </div>
+
+      <div class="col">
+        <div class="board qp" id="board">
+          <div class="mist mist-0" aria-hidden="true"></div>
+          <div class="mist mist-1" aria-hidden="true"></div>
+          <svg class="art" id="art" viewBox="-110 -110 720 720" role="group" aria-label="board">
+            <defs>
+              <radialGradient id="gMint" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#e6fbf4"/><stop offset=".45" stop-color="#8fd3bf"/><stop offset="1" stop-color="#3f7f70"/></radialGradient>
+              <radialGradient id="gCoral" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#fff0e9"/><stop offset=".45" stop-color="#ec9a82"/><stop offset="1" stop-color="#9a4f3c"/></radialGradient>
+              <linearGradient id="gStone" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3a3f49"/><stop offset=".55" stop-color="#262a32"/><stop offset="1" stop-color="#1a1d23"/></linearGradient>
+              <radialGradient id="gWell" cx=".5" cy=".42" r=".6"><stop offset="0" stop-color="#000"/><stop offset=".7" stop-color="#05070a"/><stop offset="1" stop-color="#151820"/></radialGradient>
+            </defs>
+            <g id="tray">
+              <g id="cells"></g>
+              <g id="holes"></g>
+              <g id="ghosts"></g>
+              <g id="pieces"></g>
+              <g id="dots"></g>
+              <g id="hits"></g>
+            </g>
+            <g id="arrows"></g>
+          </svg>
+          <div class="overlay" id="overlay" aria-live="polite">
+            <div>
+              <div class="big" id="ovBig"></div>
+              <div class="small" id="ovSmall"></div>
+              <div class="btns">
+                <button class="ga-btn primary" id="ovNext"></button>
+                <button class="ga-btn" id="ovLook"></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col ga-card status" id="status" aria-live="polite">
+        <span class="msg" id="msg"></span>
+        <span class="ply" id="ply"></span>
+        <span class="sub" id="sub"></span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <div class="ga-card">
+        <span class="ga-label" data-i18n="setup">Setup</span>
+        <div class="row"><span data-i18n="mode">Mode</span>
+          <div class="ga-seg" id="modeSeg">
+            <button data-v="ai" data-i18n="modeAi">vs computer</button>
+            <button data-v="pvp" data-i18n="modePvp">Two players</button>
+          </div>
+        </div>
+        <div class="row" id="levelRow"><span data-i18n="level">Computer</span>
+          <div class="ga-seg" id="levelSeg">
+            <button data-v="easy" data-i18n="easy">Easy</button>
+            <button data-v="normal" data-i18n="normal">Normal</button>
+            <button data-v="hard" data-i18n="hard">Hard</button>
+          </div>
+        </div>
+        <p class="note" id="note"></p>
+        <div class="btns">
+          <button class="ga-btn" id="restartBtn" data-i18n="restart">Restart</button>
+          <button class="ga-btn primary" id="nextBtn" data-i18n="next" hidden>Next game</button>
+        </div>
+      </div>
+
+      <div class="ga-card">
+        <span class="ga-label" data-i18n="moves">Moves</span>
+        <ol class="log" id="log"></ol>
+        <p class="empty" id="logEmpty" data-i18n="noMoves">No moves yet.</p>
+      </div>
+
+      <div class="ga-card">
+        <details class="rules" id="rules">
+          <summary data-i18n="rulesTitle">How to play</summary>
+          <div id="rulesBody"></div>
+        </details>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="ga-foot">
+    <span data-i18n="footer1">No dice, no timer, nothing hidden.</span>
+    <a href="analysis/" data-i18n="footer2">How we checked fairness</a>
+    <a href="../" data-i18n="footer3">All games</a>
+  </footer>
+</div>
+
+<dialog id="drawDlg">
+  <p id="drawText"></p>
+  <div class="btns">
+    <button class="ga-btn" id="drawCancel"></button>
+    <button class="ga-btn primary" id="drawOk"></button>
+  </div>
+</dialog>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>

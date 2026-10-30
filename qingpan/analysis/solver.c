@@ -1,24 +1,28 @@
-// 傾盤 Qingpan (tilt): a Game 05 candidate, solved but not built (2026-10-29). Not linked from the site.
-// Board R x C with fixed pillars and two holes (Mint's target and Coral's, a half turn apart). Each
-// side has K pieces. A turn: tilt the board N/E/S/W (every piece of both sides slides until it meets
-// the edge, a pillar, a piece or the other side's hole; a piece that slides into its own hole falls
-// in) or, with --step 1, step one own piece one square (into an empty square, or into its own hole).
-// After a move: if a mover's piece fell in, the mover wins; else if the other side's did, the other
-// side wins. --ban: bit 1 bans tilting the same way the other side just tilted, bit 2 the reverse
-// way. --nullt 0: a tilt must move something. A side with no move passes.
-// Values: 0 = draw/unknown, 2d = side to move wins in d plies, 2d+1 = loses in d plies.
-// Cells are named like the other games: columns a.., ranks from the bottom (row R-1 is rank 1).
+// Solver for 傾盤 Qingpan (GambitAura Game 05): tilt the board, every piece slides.
+// Board R x C (5 x 5), cell = row*C + col, row 0 at the top (rank 5). Fixed pillars and two holes:
+// Mint's target and Coral's, a half turn apart. Each side has K pieces. A turn: tilt the board
+// N/E/S/W (every piece of both sides slides until it meets the edge, a pillar, a piece or the other
+// side's hole; a piece that slides into its own hole falls in), or step one own piece one square
+// (into an empty square, or into its own hole). After a move: if a mover's piece fell in, the mover
+// wins; else if the other side's did, the other side wins. A tilt must move something. --ban 2
+// (shipped): no tilting straight back the way the other side just tilted (bit 1 would ban the same
+// way, which never matters: a tilt the same way moves nothing). A side with no move passes.
+// Values: 0 = draw, 2d = side to move wins in d plies, 2d+1 = loses in d plies.
+// State index: ((rank(Mint) * CK + rank(Coral)) * 5 + last tilt (0..3, 4 = none)) * 2 + side, where
+// rank is the colex rank of a side's K-subset of the free squares (all squares but pillars and holes,
+// in increasing order) and CK = C(free, K). engine.js computes the same number in hashKey().
 //
+// Shipped design: pillars b5 d1, Mint's hole a4 (Coral's e2), 3 pieces each, tilt or step, no
+// tilting straight back. Opening: Mint c2 d2 c1, Coral c4 b4 c5.
 // Build: gcc -O3 -march=native -fopenmp -o solver solver.c
-// The candidate: pillars b5 d1, Mint's hole a4 (Coral's e2), 3 pieces each, tilt or step, no
-// tilting straight back; Mint starts c2 d2 c1 (Coral c4 b4 c5). Side to move wins 81.3%, loses
-// 7.9%, draw 10.8%, longest forced win 49; the start is a draw, 3 of 8 first moves hold; 10% slips
-// 50.2 / 49.8; a one-move player loses about 99.9% within about 10 moves.
-//   ./solver --pillars "0,1" --hole 1 0 --k 3 --step 1 --ban 2 --start c2,d2,c1
-//   ./solver --pillars "0,1" --hole 1 0 --k 3 --step 1 --ban 2 --top 4 --minmoves 4 --balance --half
-//   ./solver --pillars "1,1;1,3" --hole 1 2 --k 3 --step 0 --ban 2 --top 4 --minmoves 2 --balance
-//            (tilt only: longest forced win 49 too, but games run about 126 moves with slips)
-// --pillars lists r,c pairs (row 0 at the top); each also places its half-turn twin.
+// Use:   ./solver --start c2,d2,c1                  every first move, simulations
+//        ./solver --start c2,d2,c1 --perft 6        move counts; must match perft() in ../engine.js
+//        ./solver --dump table.bin                  the table for check_table.mjs and probe_ai.mjs
+//        ./solver --top 4 --minmoves 4 --balance --half   the most even fair starts in own halves
+//        ./solver --pillars "1,1;1,3" --hole 1 2 --step 0 --top 4 --minmoves 2 --balance
+//                                                   the tilt-only design (longest forced win 49 too)
+// --pillars lists r,c pairs (row 0 at the top); each also places its half-turn twin. --hole r c is
+// Mint's hole; Coral's is its half-turn twin.
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -205,6 +209,12 @@ static int mscore(int kind, long ch) {
   uint16_t v = val[ch]; if (!v) return 0;
   return (v & 1) ? 10000 - (int)(v / 2) : -10000 + (int)(v / 2);
 }
+static long perft(long s, int d) {
+  if (d == 0) return 1;
+  int kind[64]; long c[64]; int n = succ(s, kind, c); long t = 0;
+  for (int j = 0; j < n; j++) t += kind[j] ? 1 : perft(c[j], d - 1);
+  return t;
+}
 static long startState(uint32_t mm, uint32_t cm) { return sidx((long)rankOf(mm) * CK + rankOf(cm), 4, 0); }
 
 // play one game; mode 0: both perfect with slip eps; mode 1: perfect (side pf) vs one-move player
@@ -233,7 +243,8 @@ static void cellName(int cell, char *b) { sprintf(b, "%c%d", 'a' + cell % C, R -
 static void printStart(uint32_t mm) { char b[8]; for (int i = 0; i < N; i++) if (mm >> i & 1) { cellName(fcell[i], b); printf("%s ", b); } }
 
 int main(int argc, char **argv) {
-  int pil[64], np = 0, hr = 0, hc = 2, top = 0, minMoves = 0, home = 0, balance = 0, half = 0; char *startArg = 0;
+  int pil[64], np = 1, hr = 1, hc = 0, top = 0, minMoves = 0, home = 0, balance = 0, half = 0, perftD = 0; char *startArg = 0; const char *dump = 0;
+  pil[0] = 0 * 100 + 1;   // b5 (and its twin d1)
   for (int i = 1; i < argc; i++) {
     if (!strcmp(argv[i], "--rc")) { R = atoi(argv[++i]); C = atoi(argv[++i]); }
     else if (!strcmp(argv[i], "--k")) K = atoi(argv[++i]);
@@ -241,13 +252,15 @@ int main(int argc, char **argv) {
     else if (!strcmp(argv[i], "--ban")) BAN = atoi(argv[++i]);
     else if (!strcmp(argv[i], "--nullt")) NULLT = atoi(argv[++i]);
     else if (!strcmp(argv[i], "--hole")) { hr = atoi(argv[++i]); hc = atoi(argv[++i]); }
-    else if (!strcmp(argv[i], "--pillars")) { char *s = argv[++i]; while (*s) { int r, c, k; if (sscanf(s, "%d,%d%n", &r, &c, &k) < 2) break; pil[np++] = r * 100 + c; s += k; if (*s == ';') s++; } }
+    else if (!strcmp(argv[i], "--pillars")) { np = 0; char *s = argv[++i]; while (*s) { int r, c, k; if (sscanf(s, "%d,%d%n", &r, &c, &k) < 2) break; pil[np++] = r * 100 + c; s += k; if (*s == ';') s++; } }
     else if (!strcmp(argv[i], "--top")) top = atoi(argv[++i]);
     else if (!strcmp(argv[i], "--minmoves")) minMoves = atoi(argv[++i]);
     else if (!strcmp(argv[i], "--home")) home = 1;
     else if (!strcmp(argv[i], "--start")) startArg = argv[++i];
     else if (!strcmp(argv[i], "--balance")) balance = 1;
     else if (!strcmp(argv[i], "--half")) half = 1;
+    else if (!strcmp(argv[i], "--perft")) perftD = atoi(argv[++i]);
+    else if (!strcmp(argv[i], "--dump")) dump = argv[++i];
   }
   NCELL = R * C;
   memset(type, 0, sizeof type);
@@ -293,23 +306,47 @@ int main(int argc, char **argv) {
       printf("  home start "); printStart(mm); printf(": %s %d | %d of %d first moves hold\n", !v ? "draw" : (v & 1) ? "first loses in" : "first wins in", v ? v / 2 : 0, safe, n);
     }
   }
+  if (dump) { FILE *f = fopen(dump, "wb"); fwrite(val, 2, NS, f); fclose(f); }
   if (startArg) {
     int cells[8], k = 0; char *q = startArg;
     while (*q && k < K) { int c = q[0] - 'a', r = R - atoi(q + 1); cells[k++] = r * C + c; while (*q && *q != ',') q++; if (*q) q++; }
     uint32_t mm = maskOfCells(cells, K), cm = rotMask(mm);
     long st = startState(mm, cm); uint16_t v = val[st];
-    printf("  start "); printStart(mm); printf(": %s %d (Mint first)\n", !v ? "draw" : (v & 1) ? "loses in" : "wins in", v / 2);
-    static const char *DN[5] = {"tilt N", "tilt E", "tilt S", "tilt W", "step"};
-    for (uint32_t j = off[(st / 2 / L) * 2]; j < off[(st / 2 / L) * 2 + 1]; j++) {
-      int d = mdir[j]; long ch = mchild[j] >= 0 ? sidx(mchild[j], d, 1) : -1; uint16_t w = ch >= 0 ? val[ch] : 0;
-      printf("    %s%s -> %s\n", DN[d], d == 4 ? "" : "", mchild[j] == -1 ? "wins at once" : mchild[j] == -2 ? "loses at once" : !w ? "draw" : (w & 1) ? "Coral loses (first wins)" : "Coral wins");
-      if (d == 4) { /* steps print without squares; enough for counting */ }
+    printf("start "); printStart(mm); printf("(Coral "); printStart(cm); printf("), Mint first: %s", !v ? "draw" : (v & 1) ? "loses in " : "wins in "); if (v) printf("%d", v / 2); printf("\n");
+    // the moves in the order build() stores them: tilts N E S W, then each piece's steps N E S W
+    static const char *DN[4] = {"N", "E", "S", "W"};
+    char from[64][8], to[64][8]; int nm = 0;
+    { uint32_t om, oc; for (int d = 0; d < 4; d++) if (doTilt(mm, cm, 0, d, &om, &oc)) { sprintf(from[nm], "tilt"); sprintf(to[nm], "%s", DN[d]); nm++; } }
+    for (uint32_t x = mm; x; x &= x - 1) {
+      int cell = fcell[__builtin_ctz(x)];
+      for (int d = 0; d < 4; d++) {
+        int r = cell / C + DR[d], c = cell % C + DC[d];
+        if (r < 0 || r >= R || c < 0 || c >= C) continue;
+        int t = type[r * C + c];
+        if (t == 1 || t == 3) continue;
+        if (t == 0 && (((mm | cm) >> fidx[r * C + c]) & 1)) continue;
+        cellName(cell, from[nm]); cellName(r * C + c, to[nm]); nm++;
+      }
     }
-    int w3[3] = {0, 0, 0}; long len = 0;
-    for (int g = 0; g < 20000; g++) { int l; w3[play(st, 0.1, 0, 0, &l)]++; len += l; }
-    double pf[2], pl = 0;
-    for (int side = 0; side < 2; side++) { int win = 0; long tl = 0; for (int g = 0; g < 4000; g++) { int l; if (play(st, 0, 1, side, &l) == side) win++; tl += l; } pf[side] = 100.0 * win / 4000; pl += tl / 8000.0; }
-    printf("    10%% slips %.1f/%.1f/%.1f len %.0f | perfect beats 1-ply %.1f%% first, %.1f%% second (len %.0f)\n", 100.0 * w3[0] / 20000, 100.0 * w3[1] / 20000, 100.0 * w3[2] / 20000, len / 20000.0, pf[0], pf[1], pl);
+    int kind[64]; long ch[64]; int n = succ(st, kind, ch);
+    for (int j = 0; j < n && j < nm; j++) {
+      uint16_t w = kind[j] == 0 ? val[ch[j]] : 0;
+      printf("  %s %s -> %s", from[j], to[j], kind[j] == 1 ? "wins at once" : kind[j] == 2 ? "loses at once" : !w ? "draw" : (w & 1) ? "Coral loses" : "Coral wins");
+      if (kind[j] == 0 && w && !(w & 1)) printf(" within %d more moves", w / 2);
+      printf("\n");
+    }
+    if (perftD) {
+      for (int d = 1; d <= perftD; d++) printf("perft %d %ld\n", d, perft(st, d));
+    } else {
+      int w3[3] = {0, 0, 0}; long len = 0;
+      for (int g = 0; g < 20000; g++) { int l; w3[play(st, 0.1, 0, 0, &l)]++; len += l; }
+      printf("  10%% slips: first %.1f%% second %.1f%% draw %.1f%%, %.0f moves on average\n", 100.0 * w3[0] / 20000, 100.0 * w3[1] / 20000, 100.0 * w3[2] / 20000, len / 20000.0);
+      for (int side = 0; side < 2; side++) {
+        int win = 0; long tl = 0;
+        for (int g = 0; g < 4000; g++) { int l; if (play(st, 0, 1, side, &l) == side) win++; tl += l; }
+        printf("  perfect play %s beats a one-move player %.1f%%, %.0f moves on average\n", side ? "second" : "first", 100.0 * win / 4000, tl / 4000.0);
+      }
+    }
   }
   if (top && balance) {
     double *gap = malloc(sizeof(double) * nr), sum = 0, mn = 1, mx = -1;
