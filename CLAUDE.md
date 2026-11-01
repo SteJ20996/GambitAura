@@ -254,7 +254,12 @@ Owner, 2026-10-28: put several board and strategy games on one site, the homepag
 with each game at its own address; the four classics Hex, Reversi, Gomoku and Nim, "然後主要是我們
 自己構思創作平衡的棋類" (the main line stays our own originally designed, balanced games). So the
 hub has two shelves: **原創 Originals** (借路, 轉環, 光路, 日影, 傾盤, 潮汐, then a Game 07 slot "in the works") above **經典
-Classics** (four cards with mini boards drawn in the site's style).
+Classics** (four cards with mini boards drawn in the site's style). Owner, 2026-11-01 ("這幾句話和板塊
+先刪去，不要出現在網頁上"): the Originals shelf has no subtitle, and the original cards have no
+"已完整求解：雙方都無必勝 / Solved: no forced win" badge and no "我們怎麼檢查公平 / How we check
+fairness" button; a card is mini board, number, name, one paragraph, size line and the play button.
+The fairness pages still exist and are linked from each original game page's footer (公平性檢查),
+and the game pages' setup notes still open with 已完整求解. `tests/e2e.cjs` keeps the three off the hub.
 
 Fairness copy must stay honest. A game with no draws always has a forced winner under perfect
 play, so "solved so that neither side has a forced win" is only true of the originals we solve.
@@ -359,7 +364,7 @@ of boxes. Do not bring back rainbow gradients, gradient buttons, glossy orbs or 
   exception is the 中文 language chip, the way back for a Chinese reader. In running English text a
   game's name is set in italics.
 - Test every UI change in headless Chromium: start a static server and run `node tests/e2e.cjs`
-  (124 checks: the hub's game cards, a guard against version numbers, proposal wording and pinyin
+  (126 checks: the hub's game cards (no solved badge or fairness button), a guard against version numbers, proposal wording and pinyin
   names on every original game's pages, no Chinese on any English page, 借路 moves, tile moves, draw dialog and overlay, scoreboard, language, phone
   widths, no console errors) and the test of any classic you touched
   (`tests/<game>.cjs`; `tests/gomoku.cjs` has 151 checks across the three rule sets). Look at the

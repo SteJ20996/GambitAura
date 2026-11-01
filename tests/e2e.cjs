@@ -215,6 +215,16 @@ const cell = (n) => (n.charCodeAt(1) - 49) * 5 + (n.charCodeAt(0) - 65);
   await page.evaluate(() => localStorage.setItem('ga-jielu-lang', 'zh'));
   await page.goto(BASE);
   ok(await page.isVisible('.word .zh') && await page.isVisible('.ga-zh'), 'Chinese pages keep 罡曜 in the hero and the lockup');
+  // owner, 2026-11-01: the Originals subtitle, the "solved" badge and the fairness button are off the hub
+  const GONE = /我們自己設計的棋|已完整求解：雙方都無必勝|我們怎麼檢查公平|Games we design ourselves|Solved: no forced win|How we check fairness/;
+  for (const l of ['zh', 'en']) {
+    await page.evaluate((l) => localStorage.setItem('ga-jielu-lang', l), l);
+    await page.reload();
+    const t = await page.evaluate(() => document.body.innerText);
+    const g = t.match(GONE);
+    ok(!g && await page.locator('#games a[href$="analysis/"]').count() === 0, `hub (${l}) has no Originals subtitle, solved badge or fairness button` + (g ? ': ' + g[0] : ''));
+  }
+  await page.evaluate(() => localStorage.setItem('ga-jielu-lang', 'zh'));
   await p2.goto(BASE + 'jielu/analysis/');
   await p2.waitForTimeout(300);
   const sw3 = await p2.evaluate(() => document.documentElement.scrollWidth);
