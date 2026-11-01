@@ -6,6 +6,10 @@
 <meta name="description" content="罡曜 GambitAura：小棋盤、不靠運氣的雙人策略棋。原創的借路、轉環、光路、日影、傾盤與潮汐，以及六角連線、黑白棋、五子棋、取石子。" />
 <meta name="theme-color" content="#08090c" />
 <title>罡曜 GambitAura</title>
+<script>
+  // Language before the first paint, so an English page never flashes Chinese (same rule as initialLang in assets/shell.js).
+  (function () { var l; try { l = localStorage.getItem('ga-jielu-lang'); } catch (e) {} if (l !== 'zh' && l !== 'en') l = (navigator.language || '').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en'; document.documentElement.lang = l === 'zh' ? 'zh-Hant' : 'en'; })();
+</script>
 <link rel="icon" href="favicon.svg" type="image/svg+xml" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -113,14 +117,30 @@
     .classic p { margin: 6px 0 10px; font-size: .86rem; }
     .classic .go { margin-top: 10px; }
   }
+
+  /* English: no Chinese on the page (owner, 2026-11-01). The wordmark carries the hero on its
+     own, and the Latin names and shelf titles move up into the display type. */
+  html[lang="en"] .word .zh { display: none; }
+  html[lang="en"] .word .en {
+    margin-top: 0; padding-left: .2em;
+    font-size: clamp(2.3rem, 9vw, 6rem); letter-spacing: .2em;
+    background: linear-gradient(180deg, #fbf6ea 20%, #e3d3a9 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 0 34px rgba(217, 195, 143, .28));
+  }
+  html[lang="en"] .shelf-head h2 { font-family: var(--display); font-weight: 600; font-size: 2.1rem; letter-spacing: .04em; }
+  html[lang="en"] .game h2 small, html[lang="en"] .classic h3 small { margin-left: 0; font-family: var(--display); font-style: normal; font-weight: 600; letter-spacing: .02em; color: var(--ink); }
+  html[lang="en"] .game h2 small { font-size: 2.7rem; }
+  html[lang="en"] .classic h3 small { font-size: 1.75rem; }
+  @media (max-width: 560px) { html[lang="en"] .classic h3 small { font-size: 1.5rem; } }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="ga-top">
-    <a class="ga-brand" href="./" aria-label="罡曜 GambitAura">
+    <a class="ga-brand" href="./">
       <svg viewBox="0 0 64 64" aria-hidden="true"><defs><radialGradient id="gaCore" cx=".5" cy=".45" r=".55"><stop offset="0" stop-color="#fffaf0"/><stop offset=".55" stop-color="#ecdcb4"/><stop offset="1" stop-color="#c9ad74"/></radialGradient><radialGradient id="gaHalo" cx=".5" cy=".5" r=".5"><stop offset=".3" stop-color="#d9c38f" stop-opacity=".28"/><stop offset="1" stop-color="#d9c38f" stop-opacity="0"/></radialGradient></defs><circle cx="32" cy="32" r="30" fill="url(#gaHalo)"/><circle cx="32" cy="32" r="22" fill="none" stroke="#d9c38f" stroke-width="1.4" opacity=".7"/><circle cx="32" cy="32" r="15" fill="none" stroke="#d9c38f" stroke-width="1" stroke-dasharray="1.5 3.5" opacity=".6"/><circle cx="32" cy="32" r="7" fill="url(#gaCore)"/></svg>
-      <span class="ga-lock" aria-hidden="true"><span class="ga-zh">罡曜</span><span class="ga-word">Gambit<b>Aura</b></span></span>
+      <span class="ga-lock" aria-hidden="true"><span class="ga-zh">罡曜</span><span class="ga-word">Gambit<b>Aura</b></span></span><span class="sr"><span class="zh-only">罡曜 </span>GambitAura</span>
     </a>
     <div class="ga-langs" role="group" aria-label="Language">
       <button class="ga-chip" data-lang="zh" aria-pressed="true">中文</button>
@@ -145,21 +165,20 @@
     </div>
     <div class="ga-label kicker" data-t="kicker">A strategy game series</div>
     <h1 class="word"><span class="zh">罡曜</span><span class="en">Gambit<b>Aura</b></span></h1>
-    <div class="reading">gāng yào · <span class="bpmf" lang="zh-Hant">ㄍㄤ ㄧㄠˋ</span></div>
+    <div class="reading zh-only">gāng yào · <span class="bpmf" lang="zh-Hant">ㄍㄤ ㄧㄠˋ</span></div>
     <div class="rule" aria-hidden="true"></div>
     <p class="tag" data-t="tag">Small boards for two players. No dice, nothing hidden. Every move is yours.</p>
     <div class="cta">
-      <a class="ga-btn primary" href="jielu/" data-t="play">Play Jielu</a>
+      <a class="ga-btn primary" href="jielu/" data-t="play">Play Borrowed Road</a>
       <a class="ga-btn" href="#games" data-t="all">All games</a>
     </div>
   </section>
 
   <section class="shelf" id="games">
-    <div class="shelf-head"><h2 data-t="origT">原創</h2><span class="latin">Originals</span><p data-t="origS">Games we design ourselves. Before one goes live, a computer solves its opening.</p></div>
+    <div class="shelf-head"><h2 data-t="origT">Originals</h2><span class="latin zh-only">Originals</span><p data-t="origS">Games we design ourselves. Before one goes live, a computer solves its opening.</p></div>
     <div class="ga-card game">
     <div class="mini">
-      <svg viewBox="0 0 250 250" role="img" aria-labelledby="miniTitle">
-        <title id="miniTitle">借路 Jielu</title>
+      <svg viewBox="0 0 250 250" aria-hidden="true">
         <defs>
           <radialGradient id="bg" cx=".5" cy=".5" r=".75"><stop offset="0" stop-color="#14171e"/><stop offset="1" stop-color="#0a0b0f"/></radialGradient>
           <linearGradient id="tl" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2b303a"/><stop offset=".55" stop-color="#1c2028"/><stop offset="1" stop-color="#15181e"/></linearGradient>
@@ -178,98 +197,98 @@
     </div>
     <div>
       <div class="num">Game 01</div>
-      <h2>借路<small>Jielu</small></h2>
+      <h2><span class="zh-only">借路</span><small>Borrowed Road</small></h2>
       <p data-t="jielu1">Two pieces each, one flag to reach. On your turn, step one square or lift a floor tile and drop it into the water. Every road you build can also be borrowed by the other side.</p>
       <div class="meta">
         <span>5 × 5</span><span data-t="c2">2 players</span><span data-t="c3">2 pieces each</span><span class="ok" data-t="c4">Solved: no forced win</span>
       </div>
       <div class="links">
-        <a class="ga-btn primary" href="jielu/" data-t="play">Play Jielu</a>
+        <a class="ga-btn primary" href="jielu/" data-t="play">Play Borrowed Road</a>
         <a class="ga-btn" href="jielu/analysis/" data-t="check">How we check fairness</a>
       </div>
     </div>
   </div>
     <div class="ga-card game second">
       <div class="mini">
-        <svg viewBox="0 0 250 250" role="img" aria-label="轉環 Zhuanhuan"><rect width="250" height="250" fill="url(#bg)"/><g id="mZh"></g></svg>
+        <svg viewBox="0 0 250 250" aria-hidden="true"><rect width="250" height="250" fill="url(#bg)"/><g id="mZh"></g></svg>
       </div>
       <div>
         <div class="num">Game 02</div>
-        <h2>轉環<small>Zhuanhuan</small></h2>
+        <h2><span class="zh-only">轉環</span><small>Turning Rings</small></h2>
         <p data-t="zh1">Three pieces each, set out in a spiral. On your turn, turn a ring or step a piece. A turn carries every piece on that ring, the other side's too. First to line up three wins.</p>
         <div class="meta">
           <span data-t="zc1">3 rings × 8 spokes</span><span data-t="c2">2 players</span><span data-t="zc3">3 pieces each</span><span class="ok" data-t="c4">Solved: no forced win</span>
         </div>
         <div class="links">
-          <a class="ga-btn primary" href="zhuanhuan/" data-t="zplay">Play Zhuanhuan</a>
+          <a class="ga-btn primary" href="zhuanhuan/" data-t="zplay">Play Turning Rings</a>
           <a class="ga-btn" href="zhuanhuan/analysis/" data-t="check">How we check fairness</a>
         </div>
       </div>
     </div>
     <div class="ga-card game second">
       <div class="mini">
-        <svg viewBox="0 0 250 250" role="img" aria-label="光路 Guanglu"><rect width="250" height="250" fill="url(#bg)"/><g id="mGl"></g></svg>
+        <svg viewBox="0 0 250 250" aria-hidden="true"><rect width="250" height="250" fill="url(#bg)"/><g id="mGl"></g></svg>
       </div>
       <div>
         <div class="num">Game 03</div>
-        <h2>光路<small>Guanglu</small></h2>
+        <h2><span class="zh-only">光路</span><small>Light Path</small></h2>
         <p data-t="gl1">A field of two-sided mirrors and two beams of light. On your turn, flip one mirror that a beam passes through. Every flip can bend both beams. First to bring its own light home wins.</p>
         <div class="meta">
           <span data-t="glc1">4 × 5 mirrors</span><span data-t="c2">2 players</span><span class="ok" data-t="c4">Solved: no forced win</span>
         </div>
         <div class="links">
-          <a class="ga-btn primary" href="guanglu/" data-t="glplay">Play Guanglu</a>
+          <a class="ga-btn primary" href="guanglu/" data-t="glplay">Play Light Path</a>
           <a class="ga-btn" href="guanglu/analysis/" data-t="check">How we check fairness</a>
         </div>
       </div>
     </div>
     <div class="ga-card game second">
       <div class="mini">
-        <svg viewBox="0 0 250 250" role="img" aria-label="日影 Riying"><rect width="250" height="250" fill="url(#bg)"/><g id="mRy"></g></svg>
+        <svg viewBox="0 0 250 250" aria-hidden="true"><rect width="250" height="250" fill="url(#bg)"/><g id="mRy"></g></svg>
       </div>
       <div>
         <div class="num">Game 04</div>
-        <h2>日影<small>Riying</small></h2>
+        <h2><span class="zh-only">日影</span><small>Sun and Shade</small></h2>
         <p data-t="ry1">A sun walks round the board and the towers' shade turns with it. On your turn, move one tower one square; a tower standing in shade cannot move, whoever's shade it is. First to bring a tower to the middle of the far edge wins.</p>
         <div class="meta">
           <span data-t="ryc1">5 × 5 · 8 sun places</span><span data-t="c2">2 players</span><span data-t="ryc3">2 towers each</span><span class="ok" data-t="c4">Solved: no forced win</span>
         </div>
         <div class="links">
-          <a class="ga-btn primary" href="riying/" data-t="ryplay">Play Riying</a>
+          <a class="ga-btn primary" href="riying/" data-t="ryplay">Play Sun and Shade</a>
           <a class="ga-btn" href="riying/analysis/" data-t="check">How we check fairness</a>
         </div>
       </div>
     </div>
     <div class="ga-card game second">
       <div class="mini">
-        <svg viewBox="0 0 250 250" role="img" aria-label="傾盤 Qingpan"><rect width="250" height="250" fill="url(#bg)"/><g id="mQp"></g></svg>
+        <svg viewBox="0 0 250 250" aria-hidden="true"><rect width="250" height="250" fill="url(#bg)"/><g id="mQp"></g></svg>
       </div>
       <div>
         <div class="num">Game 05</div>
-        <h2>傾盤<small>Qingpan</small></h2>
+        <h2><span class="zh-only">傾盤</span><small>Tilt</small></h2>
         <p data-t="qp1">Tilt the board and every piece slides, yours and the other side's. Or step one piece one square. Drop one of your pieces into your own hole to win; the other side's hole stops you like a pillar.</p>
         <div class="meta">
           <span data-t="qpc1">5 × 5 · 2 pillars</span><span data-t="c2">2 players</span><span data-t="qpc3">3 pieces each</span><span class="ok" data-t="c4">Solved: no forced win</span>
         </div>
         <div class="links">
-          <a class="ga-btn primary" href="qingpan/" data-t="qpplay">Play Qingpan</a>
+          <a class="ga-btn primary" href="qingpan/" data-t="qpplay">Play Tilt</a>
           <a class="ga-btn" href="qingpan/analysis/" data-t="check">How we check fairness</a>
         </div>
       </div>
     </div>
     <div class="ga-card game second">
       <div class="mini">
-        <svg viewBox="0 0 250 250" role="img" aria-label="潮汐 Chaoxi"><rect width="250" height="250" fill="url(#bg)"/><g id="mCx"></g></svg>
+        <svg viewBox="0 0 250 250" aria-hidden="true"><rect width="250" height="250" fill="url(#bg)"/><g id="mCx"></g></svg>
       </div>
       <div>
         <div class="num">Game 06</div>
-        <h2>潮汐<small>Chaoxi</small></h2>
+        <h2><span class="zh-only">潮汐</span><small>Tides</small></h2>
         <p data-t="cx1">The tide rises and falls on a fixed schedule, and low ground goes under water. Move one piece one square onto dry land; a piece caught by the water waits for it to fall. First to reach the middle of the far shore wins.</p>
         <div class="meta">
           <span data-t="cxc1">5 × 5 · tide 0 1 2 3 2 1</span><span data-t="c2">2 players</span><span data-t="c3">2 pieces each</span><span class="ok" data-t="c4">Solved: no forced win</span>
         </div>
         <div class="links">
-          <a class="ga-btn primary" href="chaoxi/" data-t="cxplay">Play Chaoxi</a>
+          <a class="ga-btn primary" href="chaoxi/" data-t="cxplay">Play Tides</a>
           <a class="ga-btn" href="chaoxi/analysis/" data-t="check">How we check fairness</a>
         </div>
       </div>
@@ -278,39 +297,39 @@
   </section>
 
   <section class="shelf" id="classics">
-    <div class="shelf-head"><h2 data-t="clsT">經典</h2><span class="latin">Classics</span><p data-t="clsS">Well-known games. Each uses an accepted way to handle the first player's edge, and each page says how fair it really is.</p></div>
+    <div class="shelf-head"><h2 data-t="clsT">Classics</h2><span class="latin zh-only">Classics</span><p data-t="clsS">Well-known games. Each uses an accepted way to handle the first player's edge, and each page says how fair it really is.</p></div>
     <div class="classics">
       <a class="ga-card classic" href="hex/">
-        <div class="cmini"><svg viewBox="0 0 250 250" role="img" aria-label="六角連線 Hex"><rect width="250" height="250" fill="url(#bg)"/><g id="mHex"></g></svg></div>
+        <div class="cmini"><svg viewBox="0 0 250 250" aria-hidden="true"><rect width="250" height="250" fill="url(#bg)"/><g id="mHex"></g></svg></div>
         <div class="cbody">
-          <h3>六角連線<small>Hex</small></h3>
+          <h3><span class="zh-only">六角連線</span><small>Hex</small></h3>
           <p data-t="hex1">Join your two sides of the board. Someone always connects, so there are no draws.</p>
           <div class="cmeta"><span>7 · 9 · 11</span><span class="fair" data-t="hexF">Swap rule</span></div>
           <span class="go" data-t="go">Play</span>
         </div>
       </a>
       <a class="ga-card classic" href="reversi/">
-        <div class="cmini"><svg viewBox="0 0 250 250" role="img" aria-label="黑白棋 Reversi"><rect width="250" height="250" fill="url(#bg)"/><g id="mRv"></g></svg></div>
+        <div class="cmini"><svg viewBox="0 0 250 250" aria-hidden="true"><rect width="250" height="250" fill="url(#bg)"/><g id="mRv"></g></svg></div>
         <div class="cbody">
-          <h3>黑白棋<small>Reversi</small></h3>
+          <h3><span class="zh-only">黑白棋</span><small>Reversi</small></h3>
           <p data-t="rv1">Trap the other side's discs and turn them to your colour. More discs at the end wins.</p>
           <div class="cmeta"><span>8 × 8</span><span class="fair" data-t="rvF">Solved in 2023: a draw</span></div>
           <span class="go" data-t="go">Play</span>
         </div>
       </a>
       <a class="ga-card classic" href="gomoku/">
-        <div class="cmini"><svg viewBox="0 0 250 250" role="img" aria-label="五子棋 Gomoku"><rect width="250" height="250" fill="url(#bg)"/><g id="mGm"></g></svg></div>
+        <div class="cmini"><svg viewBox="0 0 250 250" aria-hidden="true"><rect width="250" height="250" fill="url(#bg)"/><g id="mGm"></g></svg></div>
         <div class="cbody">
-          <h3>五子棋<small>Gomoku</small></h3>
+          <h3><span class="zh-only">五子棋</span><small>Gomoku</small></h3>
           <p data-t="gm1">Five in a row, in any direction, wins.</p>
           <div class="cmeta"><span>15 × 15</span><span class="fair" data-t="gmF">Pro rules: Swap2, renju</span></div>
           <span class="go" data-t="go">Play</span>
         </div>
       </a>
       <a class="ga-card classic" href="nim/">
-        <div class="cmini"><svg viewBox="0 0 250 250" role="img" aria-label="取石子 Nim"><rect width="250" height="250" fill="url(#bg)"/><g id="mNim"></g></svg></div>
+        <div class="cmini"><svg viewBox="0 0 250 250" aria-hidden="true"><rect width="250" height="250" fill="url(#bg)"/><g id="mNim"></g></svg></div>
         <div class="cbody">
-          <h3>取石子<small>Nim</small></h3>
+          <h3><span class="zh-only">取石子</span><small>Nim</small></h3>
           <p data-t="nim1">Take stones from one pile at a time. Whoever takes the last stone wins.</p>
           <div class="cmeta"><span data-t="nimM">3 to 5 piles</span><span class="fair" data-t="nimF">One sets up, one picks the order</span></div>
           <span class="go" data-t="go">Play</span>
@@ -478,25 +497,25 @@
     en: {
       kicker: 'A strategy game series',
       tag: 'Small boards for two players. No dice, nothing hidden. Every move is yours.',
-      play: 'Play Jielu', check: 'How we check fairness',
+      play: 'Play Borrowed Road', check: 'How we check fairness',
       jielu1: 'Two pieces each, one flag to reach. On your turn, step one square or lift a floor tile and drop it into the water. Every road you build can also be borrowed by the other side.',
       zh1: 'Three pieces each, set out in a spiral. On your turn, turn a ring or step a piece. A turn carries every piece on that ring, the other side\'s too. First to line up three wins.',
-      zc1: '3 rings × 8 spokes', zc3: '3 pieces each', zplay: 'Play Zhuanhuan',
+      zc1: '3 rings × 8 spokes', zc3: '3 pieces each', zplay: 'Play Turning Rings',
       gl1: 'A field of two-sided mirrors and two beams of light. On your turn, flip one mirror that a beam passes through. Every flip can bend both beams. First to bring its own light home wins.',
-      glc1: '4 × 5 mirrors', glplay: 'Play Guanglu',
+      glc1: '4 × 5 mirrors', glplay: 'Play Light Path',
       ry1: 'A sun walks round the board and the towers\' shade turns with it. On your turn, move one tower one square; a tower standing in shade cannot move, whoever\'s shade it is. First to bring a tower to the middle of the far edge wins.',
-      ryc1: '5 × 5 · 8 sun places', ryc3: '2 towers each', ryplay: 'Play Riying',
+      ryc1: '5 × 5 · 8 sun places', ryc3: '2 towers each', ryplay: 'Play Sun and Shade',
       qp1: 'Tilt the board and every piece slides, yours and the other side\'s. Or step one piece one square. Drop one of your pieces into your own hole to win; the other side\'s hole stops you like a pillar.',
-      qpc1: '5 × 5 · 2 pillars', qpc3: '3 pieces each', qpplay: 'Play Qingpan',
+      qpc1: '5 × 5 · 2 pillars', qpc3: '3 pieces each', qpplay: 'Play Tilt',
       cx1: 'The tide rises and falls on a fixed schedule, and low ground goes under water. Move one piece one square onto dry land; a piece caught by the water waits for it to fall. First to reach the middle of the far shore wins.',
-      cxc1: '5 × 5 · tide 0 1 2 3 2 1', cxplay: 'Play Chaoxi',
+      cxc1: '5 × 5 · tide 0 1 2 3 2 1', cxplay: 'Play Tides',
       c2: '2 players', c3: '2 pieces each', c4: 'Solved: no forced win',
       f1: 'Open information', f1s: 'Both players see everything. Same position, same options.',
       f2: 'No luck', f2s: 'No dice, no shuffles, no timer. Only the moves decide.',
       f3: 'Fairness, stated plainly', f3s: 'Our own games have their openings solved by computer. The classics use an accepted balancing rule, and each one says how fair it really is.',
-      all: 'All games', origT: '原創', origS: 'Games we design ourselves. Before one goes live, a computer solves its opening.',
+      all: 'All games', origT: 'Originals', origS: 'Games we design ourselves. Before one goes live, a computer solves its opening.',
       g2: 'In the works', g2s: 'The next original game is being designed. Once its rules are final, it is solved before it goes live.',
-      clsT: '經典', clsS: 'Well-known games. Each uses an accepted way to handle the first player\'s edge, and each page says how fair it really is.',
+      clsT: 'Classics', clsS: 'Well-known games. Each uses an accepted way to handle the first player\'s edge, and each page says how fair it really is.',
       hex1: 'Join your two sides of the board. Someone always connects, so there are no draws.', hexF: 'Swap rule',
       rv1: 'Trap the other side\'s discs and turn them to your colour. More discs at the end wins.', rvF: 'Solved in 2023: a draw',
       gm1: 'Five in a row, in any direction, wins.', gmF: 'Pro rules: Swap2, renju',
@@ -511,6 +530,7 @@
   function apply(lang) {
     if (!T[lang]) lang = 'zh';
     document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+    document.title = lang === 'zh' ? '罡曜 GambitAura' : 'GambitAura';
     document.querySelectorAll('[data-t]').forEach(function (el) { el.textContent = T[lang][el.getAttribute('data-t')]; });
     document.querySelectorAll('[data-lang]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-lang') === lang)); });
   }

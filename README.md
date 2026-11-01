@@ -10,12 +10,12 @@ uses an accepted balancing rule and its page says plainly how fair it is.
 
 | Shelf | Game | Folder | Fairness, as the page states it |
 |-------|------|--------|---------------------------------|
-| Original 01 | 借路 Jielu | `jielu/` | Solved: the standard opening is a draw with perfect play (the original opening, a second-player win, stays selectable) |
-| Original 02 | 轉環 Zhuanhuan | `zhuanhuan/` | Solved: the spiral opening is a draw with perfect play; 12 of the 16 first moves hold |
-| Original 03 | 光路 Guanglu | `guanglu/` | Solved: the opening is a draw with perfect play; 8 of the 16 first moves hold |
-| Original 04 | 日影 Riying | `riying/` | Solved: the opening is a draw whoever moves first; 2 of the 5 first moves hold |
-| Original 05 | 傾盤 Qingpan | `qingpan/` | Solved: the opening is a draw with perfect play; 3 of the 8 first moves hold |
-| Original 06 | 潮汐 Chaoxi | `chaoxi/` | Solved: the opening is a draw with perfect play; 2 of the 3 first moves hold |
+| Original 01 | 借路 Borrowed Road | `jielu/` | Solved: the standard opening is a draw with perfect play (the original opening, a second-player win, stays selectable) |
+| Original 02 | 轉環 Turning Rings | `zhuanhuan/` | Solved: the spiral opening is a draw with perfect play; 12 of the 16 first moves hold |
+| Original 03 | 光路 Light Path | `guanglu/` | Solved: the opening is a draw with perfect play; 8 of the 16 first moves hold |
+| Original 04 | 日影 Sun and Shade | `riying/` | Solved: the opening is a draw whoever moves first; 2 of the 5 first moves hold |
+| Original 05 | 傾盤 Tilt | `qingpan/` | Solved: the opening is a draw with perfect play; 3 of the 8 first moves hold |
+| Original 06 | 潮汐 Tides | `chaoxi/` | Solved: the opening is a draw with perfect play; 2 of the 3 first moves hold |
 | Classic | 六角連線 Hex | `hex/` | No draws, so the first player has a forced win; the swap rule takes that edge away |
 | Classic | 黑白棋 Reversi | `reversi/` | 8 × 8 was weakly solved in 2023 (Takizawa): a draw with perfect play |
 | Classic | 五子棋 Gomoku | `gomoku/` | Casual by default (free-style is a first-player win, Allis 1994; Black alternates each game). Pro options: gomoku as at the Gomoku World Championship (Swap2, exactly five) and renju as at the Renju World Championship (Black's forbidden moves, Taraguchi-10 opening) |
@@ -47,7 +47,8 @@ uses an accepted balancing rule and its page says plainly how fair it is.
 - `chaoxi/`: Game 06, same files as 轉環. `chaoxi/analysis/`: how its rules, terrain and opening were
   chosen (`index.html`), the solver (`solver.c`, with the terrain search) and the same three checks.
 - `tests/e2e.cjs`: browser test of the hub, 借路 and its fairness page, plus a guard against version
-  numbers and proposal wording on every original game's pages. `tests/zhuanhuan.cjs`: 轉環.
+  numbers, proposal wording and pinyin names on every original game's pages, and a check that no
+  English page shows Chinese (the 中文 language chip aside). `tests/zhuanhuan.cjs`: 轉環.
   `tests/guanglu.cjs`: 光路. `tests/riying.cjs`: 日影. `tests/qingpan.cjs`: 傾盤. `tests/chaoxi.cjs`: 潮汐.
   `tests/hex.cjs`, `tests/reversi.cjs`, `tests/gomoku.cjs`, `tests/nim.cjs`: one browser test per classic.
 
@@ -68,33 +69,33 @@ for t in zhuanhuan guanglu riying qingpan chaoxi hex reversi gomoku nim; do node
 moves. The standard opening (water on A2 E2 A4 E4) is a theoretical draw and plays close to 50/50
 between equal players. Details and reproduction steps: `jielu/analysis/index.html`.
 
-轉環 Zhuanhuan (Game 02): every one of its 18,843,440 positions is solved. From the spiral opening
+轉環 Turning Rings (Game 02): every one of its 18,843,440 positions is solved. From the spiral opening
 (Mint d1 e2 f3, Coral h1 a2 b3) neither side can force a win; 4 of the first player's 16 first moves
 lose. The first draft (only three on a spoke wins) had no forced wins at all, because turning a ring
 always defends; adding three side by side on a ring fixed that. Details: `zhuanhuan/analysis/index.html`.
 
-光路 Guanglu (Game 03): a 4 × 5 field of two-sided mirrors; a turn flips one mirror that either beam
+光路 Light Path (Game 03): a 4 × 5 field of two-sided mirrors; a turn flips one mirror that either beam
 passes through, never the one just flipped. All 44,040,192 positions are solved. From the opening
 (every mirror / except d3 e3 a2 b2) neither side can force a win; 8 of the first player's 16 first
 moves lose within 7 moves. Earlier drafts were shallow (any mirror: longest forced win 7 moves) or a
 pure race (own beam only: 5% draws); without the no-flip-back rule every attack is undone at once
 (longest forced win 2). Details: `guanglu/analysis/index.html`.
 
-日影 Riying (Game 04): a sun goes round a 5 × 5 board one place per move; a tower shades 1 or 2
+日影 Sun and Shade (Game 04): a sun goes round a 5 × 5 board one place per move; a tower shades 1 or 2
 squares away from the sun, and any tower in any shade cannot move. All 4,857,600 positions are
 solved. From the opening (Mint a1 short, d1 tall; Coral e5, b5; sun in the south) neither side can
 force a win, whoever moves first. Earlier drafts were a race (any far-row square wins: 1.3% draws,
 no fair start) or fair only in theory (a side with no move passed: every fair start gave one side
 9 or more points in simulated games). Details: `riying/analysis/index.html`.
 
-傾盤 Qingpan (Game 05): tilt the 5 × 5 board (every piece of both sides slides) or step one piece;
+傾盤 Tilt (Game 05): tilt the 5 × 5 board (every piece of both sides slides) or step one piece;
 drop a piece into your own hole to win. All 10,852,800 positions are solved. From the opening (Mint
 c2 d2 c1, Coral c4 b4 c5) neither side can force a win; 3 of the first player's 8 first moves hold.
 Of 1,280 board and rule combinations, tilt-only games either dragged on or had almost no draws, and
 without the no-tilt-back rule the longest forced win is 10 moves. A sharp game: the side to move
 wins in 81% of positions. Details: `qingpan/analysis/index.html`.
 
-潮汐 Chaoxi (Game 06): every square has a height, the tide goes 0 1 2 3 2 1 one step per move, and
+潮汐 Tides (Game 06): every square has a height, the tide goes 0 1 2 3 2 1 one step per move, and
 squares below it are water; a piece in water cannot move until it falls. All 910,800 positions are
 solved. The rules and terrain won a search of 4,800 solves (two flooding rules, pushing, two win
 rules, three tide cycles, 200 random terrains each); the chosen terrain is a channel across the

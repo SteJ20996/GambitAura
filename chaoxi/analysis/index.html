@@ -3,8 +3,12 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="description" content="潮汐 Chaoxi 公平性檢查：規則和地形怎麼定出來、開局為什麼是和棋、電腦對手有多強。" />
+<meta name="description" content="潮汐 Tides 公平性檢查：規則和地形怎麼定出來、開局為什麼是和棋、電腦對手有多強。" />
 <title>潮汐 公平性檢查 · 罡曜 GambitAura</title>
+<script>
+  // Language before the first paint, so an English page never flashes Chinese (same rule as initialLang in assets/shell.js).
+  (function () { var l; try { l = localStorage.getItem('ga-jielu-lang'); } catch (e) {} if (l !== 'zh' && l !== 'en') l = (navigator.language || '').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en'; document.documentElement.lang = l === 'zh' ? 'zh-Hant' : 'en'; })();
+</script>
 <link rel="icon" href="../../favicon.svg" type="image/svg+xml" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -48,9 +52,9 @@
 <body>
 <div class="wrap">
   <header class="ga-top">
-    <a class="ga-brand" href="../../" aria-label="罡曜 GambitAura">
+    <a class="ga-brand" href="../../">
       <svg viewBox="0 0 64 64" aria-hidden="true"><defs><radialGradient id="gaCore" cx=".5" cy=".45" r=".55"><stop offset="0" stop-color="#fffaf0"/><stop offset=".55" stop-color="#ecdcb4"/><stop offset="1" stop-color="#c9ad74"/></radialGradient><radialGradient id="gaHalo" cx=".5" cy=".5" r=".5"><stop offset=".3" stop-color="#d9c38f" stop-opacity=".28"/><stop offset="1" stop-color="#d9c38f" stop-opacity="0"/></radialGradient></defs><circle cx="32" cy="32" r="30" fill="url(#gaHalo)"/><circle cx="32" cy="32" r="22" fill="none" stroke="#d9c38f" stroke-width="1.4" opacity=".7"/><circle cx="32" cy="32" r="15" fill="none" stroke="#d9c38f" stroke-width="1" stroke-dasharray="1.5 3.5" opacity=".6"/><circle cx="32" cy="32" r="7" fill="url(#gaCore)"/></svg>
-      <span class="ga-lock" aria-hidden="true"><span class="ga-zh">罡曜</span><span class="ga-word">Gambit<b>Aura</b></span></span>
+      <span class="ga-lock" aria-hidden="true"><span class="ga-zh">罡曜</span><span class="ga-word">Gambit<b>Aura</b></span></span><span class="sr"><span class="zh-only">罡曜 </span>GambitAura</span>
     </a>
     <div class="ga-langs" role="group" aria-label="Language">
       <button class="ga-chip" data-lang="zh" aria-pressed="true">中文</button>
@@ -156,7 +160,7 @@ node probe_ai.mjs table.bin 300                  # computer player against the t
 
 <!-- ======================= English ======================= -->
 <article data-l="en">
-  <h1>Chaoxi: how the rules were made, and how fair they are</h1>
+  <h1>Tides: how the rules were made, and how fair they are</h1>
   <p class="meta">2026-10-30 · GambitAura original game 06 · <a href="../">Back to the game</a></p>
 
   <div class="ga-card summary">
@@ -230,7 +234,7 @@ node probe_ai.mjs table.bin 300                  # computer player against the t
 
   <h2>7. Limits</h2>
   <ul>
-    <li>"A piece in water cannot move" is close to Riying's "a tower in shade cannot move". The difference is that in Riying the towers cast the shade, while in Chaoxi a fixed schedule and the terrain decide where the water is, and nobody can change them.</li>
+    <li>"A piece in water cannot move" is close to "a tower in shade cannot move" in <i>Sun and Shade</i>. The difference is that there the towers cast the shade, while in <i>Tides</i> a fixed schedule and the terrain decide where the water is, and nobody can change them.</li>
     <li>The terrain was picked from 200 random terrains, not from every possible one; there may be a better one.</li>
     <li>The channel terrain has few fair starts (12 of 60), so neither the placement nor the starting tide can be changed freely.</li>
     <li>A simulated slip is a random move, unlike human mistakes. The simulation does not apply the threefold-repetition draw; it stops at 300 moves instead. How people play it still needs play-testing.</li>
@@ -251,7 +255,7 @@ node probe_ai.mjs table.bin 300                  # computer player against the t
 </article>
 
   <footer class="ga-foot">
-    <a href="../">潮汐 Chaoxi</a>
+    <a href="../"><span class="zh-only">潮汐 </span>Tides</a>
     <a href="../../">GambitAura</a>
   </footer>
 </div>
@@ -263,7 +267,7 @@ node probe_ai.mjs table.bin 300                  # computer player against the t
   function apply(l) {
     if (l !== 'zh' && l !== 'en') l = 'zh';
     document.documentElement.lang = l === 'zh' ? 'zh-Hant' : 'en';
-    document.title = l === 'zh' ? '潮汐 公平性檢查 · 罡曜 GambitAura' : 'Chaoxi fairness check · GambitAura';
+    document.title = l === 'zh' ? '潮汐 公平性檢查 · 罡曜 GambitAura' : 'Tides fairness check · GambitAura';
     document.querySelectorAll('[data-lang]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-lang') === l)); });
   }
   document.querySelectorAll('[data-lang]').forEach(function (b) {

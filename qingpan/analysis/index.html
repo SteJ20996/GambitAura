@@ -3,8 +3,12 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="description" content="傾盤 Qingpan 公平性檢查：規則和棋盤怎麼定出來、開局為什麼是和棋、電腦對手有多強。" />
+<meta name="description" content="傾盤 Tilt 公平性檢查：規則和棋盤怎麼定出來、開局為什麼是和棋、電腦對手有多強。" />
 <title>傾盤 公平性檢查 · 罡曜 GambitAura</title>
+<script>
+  // Language before the first paint, so an English page never flashes Chinese (same rule as initialLang in assets/shell.js).
+  (function () { var l; try { l = localStorage.getItem('ga-jielu-lang'); } catch (e) {} if (l !== 'zh' && l !== 'en') l = (navigator.language || '').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en'; document.documentElement.lang = l === 'zh' ? 'zh-Hant' : 'en'; })();
+</script>
 <link rel="icon" href="../../favicon.svg" type="image/svg+xml" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -48,9 +52,9 @@
 <body>
 <div class="wrap">
   <header class="ga-top">
-    <a class="ga-brand" href="../../" aria-label="罡曜 GambitAura">
+    <a class="ga-brand" href="../../">
       <svg viewBox="0 0 64 64" aria-hidden="true"><defs><radialGradient id="gaCore" cx=".5" cy=".45" r=".55"><stop offset="0" stop-color="#fffaf0"/><stop offset=".55" stop-color="#ecdcb4"/><stop offset="1" stop-color="#c9ad74"/></radialGradient><radialGradient id="gaHalo" cx=".5" cy=".5" r=".5"><stop offset=".3" stop-color="#d9c38f" stop-opacity=".28"/><stop offset="1" stop-color="#d9c38f" stop-opacity="0"/></radialGradient></defs><circle cx="32" cy="32" r="30" fill="url(#gaHalo)"/><circle cx="32" cy="32" r="22" fill="none" stroke="#d9c38f" stroke-width="1.4" opacity=".7"/><circle cx="32" cy="32" r="15" fill="none" stroke="#d9c38f" stroke-width="1" stroke-dasharray="1.5 3.5" opacity=".6"/><circle cx="32" cy="32" r="7" fill="url(#gaCore)"/></svg>
-      <span class="ga-lock" aria-hidden="true"><span class="ga-zh">罡曜</span><span class="ga-word">Gambit<b>Aura</b></span></span>
+      <span class="ga-lock" aria-hidden="true"><span class="ga-zh">罡曜</span><span class="ga-word">Gambit<b>Aura</b></span></span><span class="sr"><span class="zh-only">罡曜 </span>GambitAura</span>
     </a>
     <div class="ga-langs" role="group" aria-label="Language">
       <button class="ga-chip" data-lang="zh" aria-pressed="true">中文</button>
@@ -159,7 +163,7 @@ node probe_ai.mjs table.bin 300               # computer player against the tabl
 
 <!-- ======================= English ======================= -->
 <article data-l="en">
-  <h1>Qingpan: how the rules were made, and how fair they are</h1>
+  <h1>Tilt: how the rules were made, and how fair they are</h1>
   <p class="meta">2026-10-30 · GambitAura original game 05 · <a href="../">Back to the game</a></p>
 
   <div class="ga-card summary">
@@ -191,7 +195,7 @@ node probe_ai.mjs table.bin 300               # computer player against the tabl
     <tr class="pick"><td>Chosen: two pillars (b5, d1), holes on a4 and e2, three pieces each, tilt or step, no tilting straight back</td><td class="num">81.3%</td><td class="num">7.9%</td><td class="num">10.8%</td><td class="num">49 moves</td><td></td></tr>
   </table></div>
   <p class="note">Shares count positions with Mint to move, no banned direction, and nothing decided yet. "Wins" includes positions where a piece can be dropped in at once.</p>
-  <p>Steps give the defence fine control: a tilt is the big move that shifts the whole board, and a step is the small move that sets a block in place. "No tilting straight back" works like the matching rules in Jielu, Zhuanhuan and Guanglu: every move lasts at least until the next turn. The other limit, "no tilting the same way again", never matters: right after a tilt one way, another tilt that way moves nothing.</p>
+  <p>Steps give the defence fine control: a tilt is the big move that shifts the whole board, and a step is the small move that sets a block in place. "No tilting straight back" works like the matching rules in <i>Borrowed Road</i>, <i>Turning Rings</i> and <i>Light Path</i>: every move lasts at least until the next turn. The other limit, "no tilting the same way again", never matters: right after a tilt one way, another tilt that way moves nothing.</p>
 
   <h2>3. How the opening was chosen</h2>
   <p>Openings were limited to fair shapes: the pieces look the same turned half way round, and so do the pillars and holes, so both players face the same board. We kept the draws with each side's pieces in its own half (Mint on ranks 1 and 2), at least 4 first moves, and both safe and losing ones among them. That leaves 5:</p>
@@ -257,7 +261,7 @@ node probe_ai.mjs table.bin 300               # computer player against the tabl
 </article>
 
   <footer class="ga-foot">
-    <a href="../">傾盤 Qingpan</a>
+    <a href="../"><span class="zh-only">傾盤 </span>Tilt</a>
     <a href="../../">GambitAura</a>
   </footer>
 </div>
@@ -269,7 +273,7 @@ node probe_ai.mjs table.bin 300               # computer player against the tabl
   function apply(l) {
     if (l !== 'zh' && l !== 'en') l = 'zh';
     document.documentElement.lang = l === 'zh' ? 'zh-Hant' : 'en';
-    document.title = l === 'zh' ? '傾盤 公平性檢查 · 罡曜 GambitAura' : 'Qingpan fairness check · GambitAura';
+    document.title = l === 'zh' ? '傾盤 公平性檢查 · 罡曜 GambitAura' : 'Tilt fairness check · GambitAura';
     document.querySelectorAll('[data-lang]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-lang') === l)); });
   }
   document.querySelectorAll('[data-lang]').forEach(function (b) {

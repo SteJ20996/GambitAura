@@ -101,6 +101,12 @@ button { font: inherit; color: inherit; }
   .ga-word { font-size: .6rem; letter-spacing: .34em; }
   .ga-brand svg { width: 30px; height: 30px; }
 }
+/* English pages show no Chinese (owner, 2026-11-01): .zh-only hides (Chinese game names, the
+   name's reading), and the lockup is the wordmark alone, a size up and in ivory. The language
+   chip 中文 stays, since it is how a Chinese reader finds the way back. */
+html[lang="en"] .zh-only, html[lang="en"] .ga-zh { display: none !important; }
+html[lang="en"] .ga-word { font-size: 1rem; letter-spacing: .34em; color: var(--ink); text-shadow: 0 0 18px rgba(217, 195, 143, .28); }
+@media (max-width: 520px) { html[lang="en"] .ga-word { font-size: .86rem; letter-spacing: .28em; } }
 
 /* Surfaces */
 .ga-card {

@@ -3,8 +3,12 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="description" content="光路 Guanglu 公平性檢查：規則怎麼定出來、光源放在哪裡、開局為什麼是和棋、電腦對手有多強。" />
+<meta name="description" content="光路 Light Path 公平性檢查：規則怎麼定出來、光源放在哪裡、開局為什麼是和棋、電腦對手有多強。" />
 <title>光路 公平性檢查 · 罡曜 GambitAura</title>
+<script>
+  // Language before the first paint, so an English page never flashes Chinese (same rule as initialLang in assets/shell.js).
+  (function () { var l; try { l = localStorage.getItem('ga-jielu-lang'); } catch (e) {} if (l !== 'zh' && l !== 'en') l = (navigator.language || '').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en'; document.documentElement.lang = l === 'zh' ? 'zh-Hant' : 'en'; })();
+</script>
 <link rel="icon" href="../../favicon.svg" type="image/svg+xml" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -48,9 +52,9 @@
 <body>
 <div class="wrap">
   <header class="ga-top">
-    <a class="ga-brand" href="../../" aria-label="罡曜 GambitAura">
+    <a class="ga-brand" href="../../">
       <svg viewBox="0 0 64 64" aria-hidden="true"><defs><radialGradient id="gaCore" cx=".5" cy=".45" r=".55"><stop offset="0" stop-color="#fffaf0"/><stop offset=".55" stop-color="#ecdcb4"/><stop offset="1" stop-color="#c9ad74"/></radialGradient><radialGradient id="gaHalo" cx=".5" cy=".5" r=".5"><stop offset=".3" stop-color="#d9c38f" stop-opacity=".28"/><stop offset="1" stop-color="#d9c38f" stop-opacity="0"/></radialGradient></defs><circle cx="32" cy="32" r="30" fill="url(#gaHalo)"/><circle cx="32" cy="32" r="22" fill="none" stroke="#d9c38f" stroke-width="1.4" opacity=".7"/><circle cx="32" cy="32" r="15" fill="none" stroke="#d9c38f" stroke-width="1" stroke-dasharray="1.5 3.5" opacity=".6"/><circle cx="32" cy="32" r="7" fill="url(#gaCore)"/></svg>
-      <span class="ga-lock" aria-hidden="true"><span class="ga-zh">罡曜</span><span class="ga-word">Gambit<b>Aura</b></span></span>
+      <span class="ga-lock" aria-hidden="true"><span class="ga-zh">罡曜</span><span class="ga-word">Gambit<b>Aura</b></span></span><span class="sr"><span class="zh-only">罡曜 </span>GambitAura</span>
     </a>
     <div class="ga-langs" role="group" aria-label="Language">
       <button class="ga-chip" data-lang="zh" aria-pressed="true">中文</button>
@@ -173,7 +177,7 @@ node probe_ai.mjs table.bin 300                          # computer player again
 
 <!-- ======================= English ======================= -->
 <article data-l="en">
-  <h1>Guanglu: how the rules were made, and how fair they are</h1>
+  <h1>Light Path: how the rules were made, and how fair they are</h1>
   <p class="meta">2026-10-29 · GambitAura original game 03 · <a href="../">Back to the game</a></p>
 
   <div class="ga-card summary">
@@ -204,7 +208,7 @@ node probe_ai.mjs table.bin 300                          # computer player again
     <tr class="pick"><td>Chosen: 4 × 5, mirrors on either beam, no flipping straight back</td><td class="num">30.1%</td><td class="num">12.1%</td><td class="num">57.8%</td><td class="num">88 moves</td></tr>
   </table></div>
   <p class="note">Each row shows the source and target places with the longest forced win (with flipping straight back allowed, no placement goes past 2 moves; the row uses the same places as the next one). Shares count only positions that are not decided yet and have no banned mirror. "Wins" includes positions where a beam can be brought home at once.</p>
-  <p>The key is "either beam". If you can only move your own light, you can hardly stop the other side. Once you can flip a mirror on the other beam, you can bend it away, and defence starts to matter. But a block can also be undone at once: if the mirror just flipped could be flipped straight back, every attack would be cancelled in one move. "No flipping straight back" follows Jielu's "no moving a tile straight back" and Zhuanhuan's "no turning straight back". It makes every move last at least until the next turn.</p>
+  <p>The key is "either beam". If you can only move your own light, you can hardly stop the other side. Once you can flip a mirror on the other beam, you can bend it away, and defence starts to matter. But a block can also be undone at once: if the mirror just flipped could be flipped straight back, every attack would be cancelled in one move. "No flipping straight back" follows "no moving a tile straight back" in <i>Borrowed Road</i> and "no turning straight back" in <i>Turning Rings</i>. It makes every move last at least until the next turn.</p>
   <p>The board did not grow to 5 × 5. That would be about 1.7 billion positions, too many to solve in full on this computer, and GambitAura only ships original rules that have been solved.</p>
 
   <h2>3. Where the light comes in and goes out</h2>
@@ -265,7 +269,7 @@ node probe_ai.mjs table.bin 300                          # computer player again
 
   <h2>7. Limits</h2>
   <ul>
-    <li>A simulated slip is a random flip, unlike human mistakes, and the one-move player is only a rough stand-in for a beginner. Whether Guanglu holds up for people still needs play-testing.</li>
+    <li>A simulated slip is a random flip, unlike human mistakes, and the one-move player is only a rough stand-in for a beginner. Whether <i>Light Path</i> holds up for people still needs play-testing.</li>
     <li>The simulation does not apply the threefold-repetition draw; it stops at 300 moves instead.</li>
     <li>Placements and openings were picked by numbers we chose (longest forced win, share of decided positions, how the one-move player fares, simulated results). Other measures could rank them differently.</li>
     <li>Only 4 × 5 was solved. A larger board might play better, but it cannot be solved in full yet, so it does not ship.</li>
@@ -285,7 +289,7 @@ node probe_ai.mjs table.bin 300                          # computer player again
 </article>
 
   <footer class="ga-foot">
-    <a href="../">光路 Guanglu</a>
+    <a href="../"><span class="zh-only">光路 </span>Light Path</a>
     <a href="../../">GambitAura</a>
   </footer>
 </div>
@@ -297,7 +301,7 @@ node probe_ai.mjs table.bin 300                          # computer player again
   function apply(l) {
     if (l !== 'zh' && l !== 'en') l = 'zh';
     document.documentElement.lang = l === 'zh' ? 'zh-Hant' : 'en';
-    document.title = l === 'zh' ? '光路 公平性檢查 · 罡曜 GambitAura' : 'Guanglu fairness check · GambitAura';
+    document.title = l === 'zh' ? '光路 公平性檢查 · 罡曜 GambitAura' : 'Light Path fairness check · GambitAura';
     document.querySelectorAll('[data-lang]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-lang') === l)); });
   }
   document.querySelectorAll('[data-lang]').forEach(function (b) {

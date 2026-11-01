@@ -31,9 +31,18 @@ export function bindLang(onChange) {
   }
 }
 
-// Static strings: [data-i18n] text, html lang, language chips.
+// Tab title. Each page's <title> carries both names ("潮汐 Tides · 罡曜 GambitAura"); English
+// drops the Chinese ones (owner, 2026-11-01: no Chinese on the English pages).
+let zhTitle = null;
+export function pageTitle(lang) {
+  if (zhTitle === null) zhTitle = document.title;
+  document.title = lang === 'zh' ? zhTitle : zhTitle.replace(/[\u3400-\u9fff]+ /g, '');
+}
+
+// Static strings: [data-i18n] text, html lang, tab title, language chips.
 export function applyStatic(L, lang) {
   document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+  pageTitle(lang);
   for (const el of document.querySelectorAll('[data-i18n]')) {
     const v = L[el.dataset.i18n];
     if (typeof v === 'string') el.textContent = v;
