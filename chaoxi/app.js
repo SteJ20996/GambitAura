@@ -13,7 +13,7 @@ const T = {
     level: '電腦', easy: '簡單', normal: '普通', hard: '困難',
     restart: '重新開始', next: '下一局（交換先手）',
     moves: '棋譜', noMoves: '還沒有人走棋。', rulesTitle: '怎麼玩',
-    footer1: '沒有骰子，沒有計時，沒有隱藏資訊。', footer2: '公平性檢查', footer3: '全部遊戲',
+    footer1: '沒有骰子，沒有計時，沒有隱藏資訊。', footer3: '全部遊戲',
     tag: '5 × 5 · 潮位 0 1 2 3 2 1',
     side: ['薄荷', '珊瑚'], you: '你', cpu: '電腦',
     round: (n) => `第 ${n} 局`, firstMove: (s) => `${T.zh.side[s]}先手`,
@@ -36,7 +36,6 @@ const T = {
     cellLabel: (n, what) => `${n}${what ? '，' + what : ''}`,
     lblHeight: (h, wet) => `地勢 ${h}${wet ? '，現在是水' : ''}`,
     lblPiece: (side) => `${T.zh.side[side]}的棋子`, lblDest: '可以走到這裡',
-    note: '<b>已完整求解。</b>從這個開局，電腦把 910,800 個局面都算過了：雙方都無法強迫取勝，誰先走都一樣。先走的一方有 3 種第一手，2 種保持均勢；另一種（d1→d2）會讓對手強迫取勝，不過還要再走 39 手。',
     rules: `
       <ol>
         <li><b>目標：</b>把自己的一枚棋子走到對岸的正中格。薄荷要到 c5，珊瑚要到 c1。</li>
@@ -53,7 +52,7 @@ const T = {
     level: 'Computer', easy: 'Easy', normal: 'Normal', hard: 'Hard',
     restart: 'Restart', next: 'Next game (swap first move)',
     moves: 'Moves', noMoves: 'No moves yet.', rulesTitle: 'How to play',
-    footer1: 'No dice, no timer, nothing hidden.', footer2: 'How we checked fairness', footer3: 'All games',
+    footer1: 'No dice, no timer, nothing hidden.', footer3: 'All games',
     tag: '5 × 5 · tide 0 1 2 3 2 1',
     side: ['Mint', 'Coral'], you: 'You', cpu: 'Computer',
     round: (n) => `Game ${n}`, firstMove: (s) => `${T.en.side[s]} first`,
@@ -76,7 +75,6 @@ const T = {
     cellLabel: (n, what) => `${n}${what ? ', ' + what : ''}`,
     lblHeight: (h, wet) => `height ${h}${wet ? ', under water now' : ''}`,
     lblPiece: (side) => `${T.en.side[side]} piece`, lblDest: 'can move here',
-    note: '<b>Solved.</b> From this start a computer has worked through all 910,800 positions: neither side can force a win, whoever moves first. The first player has 3 first moves; 2 keep the balance, and the other (d1 to d2) lets the opponent force a win, though it takes another 39 moves.',
     rules: `
       <ol>
         <li><b>Goal:</b> bring one of your pieces to the middle of the far shore. Mint aims for c5, Coral for c1.</li>
@@ -284,7 +282,6 @@ function render() {
   applyStatic(L, lang);
   setSeg('modeSeg', mode); setSeg('levelSeg', level);
   $('levelRow').hidden = mode !== 'ai';
-  $('note').innerHTML = L.note;
   $('rulesBody').innerHTML = L.rules;
   $('tag').textContent = L.tag;
   $('nextBtn').hidden = !over();

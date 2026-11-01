@@ -13,7 +13,7 @@ const T = {
     level: '電腦', easy: '簡單', normal: '普通', hard: '困難',
     restart: '重新開始', next: '下一局（交換先手）',
     moves: '棋譜', noMoves: '還沒有人走棋。', rulesTitle: '怎麼玩',
-    footer1: '沒有骰子，沒有計時，沒有隱藏資訊。', footer2: '公平性檢查', footer3: '全部遊戲',
+    footer1: '沒有骰子，沒有計時，沒有隱藏資訊。', footer3: '全部遊戲',
     tag: '5 × 5 · 兩根石柱',
     dir: ['上', '右', '下', '左'],
     side: ['薄荷', '珊瑚'], you: '你', cpu: '電腦',
@@ -37,7 +37,6 @@ const T = {
     cellLabel: (n, what) => `${n}${what ? '，' + what : ''}`,
     lblPiece: (side) => `${T.zh.side[side]}的棋子`, lblDest: '可以走到這裡', lblPillar: '石柱', lblHole: (side) => `${T.zh.side[side]}的洞`,
     arrowLabel: (d, ok) => `往${T.zh.dir[d]}傾斜${ok ? '' : '（現在不行）'}`,
-    note: '<b>已完整求解。</b>從這個開局，電腦把 10,852,800 個局面都算過了：雙方都無法強迫取勝，誰先走都一樣。先走的一方有 8 種第一手，3 種保持均勢；另外 5 種會輸，最快的一種讓對手下一手就贏。',
     rules: `
       <ol>
         <li><b>目標：</b>讓自己的一枚棋子落進自己的洞。薄荷的洞在 a4，珊瑚的洞在 e2。</li>
@@ -54,7 +53,7 @@ const T = {
     level: 'Computer', easy: 'Easy', normal: 'Normal', hard: 'Hard',
     restart: 'Restart', next: 'Next game (swap first move)',
     moves: 'Moves', noMoves: 'No moves yet.', rulesTitle: 'How to play',
-    footer1: 'No dice, no timer, nothing hidden.', footer2: 'How we checked fairness', footer3: 'All games',
+    footer1: 'No dice, no timer, nothing hidden.', footer3: 'All games',
     tag: '5 × 5 · two pillars',
     dir: ['up', 'right', 'down', 'left'],
     side: ['Mint', 'Coral'], you: 'You', cpu: 'Computer',
@@ -78,7 +77,6 @@ const T = {
     cellLabel: (n, what) => `${n}${what ? ', ' + what : ''}`,
     lblPiece: (side) => `${T.en.side[side]} piece`, lblDest: 'can step here', lblPillar: 'pillar', lblHole: (side) => `${T.en.side[side]}'s hole`,
     arrowLabel: (d, ok) => `Tilt ${T.en.dir[d]}${ok ? '' : ' (not now)'}`,
-    note: '<b>Solved.</b> From this start a computer has worked through all 10,852,800 positions: neither side can force a win, whoever moves first. The first player has 8 first moves; 3 keep the balance, and the other 5 lose, the worst one at once.',
     rules: `
       <ol>
         <li><b>Goal:</b> drop one of your pieces into your own hole. Mint's hole is on a4, Coral's on e2.</li>
@@ -318,7 +316,6 @@ function render() {
   applyStatic(L, lang);
   setSeg('modeSeg', mode); setSeg('levelSeg', level);
   $('levelRow').hidden = mode !== 'ai';
-  $('note').innerHTML = L.note;
   $('rulesBody').innerHTML = L.rules;
   $('tag').textContent = L.tag;
   $('nextBtn').hidden = !over();

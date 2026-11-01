@@ -13,7 +13,7 @@ const T = {
     level: '電腦', easy: '簡單', normal: '普通', hard: '困難',
     restart: '重新開始', next: '下一局（交換先手）',
     moves: '棋譜', noMoves: '還沒有人翻鏡子。', rulesTitle: '怎麼玩',
-    footer1: '沒有骰子，沒有計時，沒有隱藏資訊。', footer2: '公平性檢查', footer3: '全部遊戲',
+    footer1: '沒有骰子，沒有計時，沒有隱藏資訊。', footer3: '全部遊戲',
     tag: `${R} × ${C} 鏡陣`,
     side: ['薄荷', '珊瑚'], you: '你', cpu: '電腦',
     round: (n) => `第 ${n} 局`, firstMove: (s) => `${T.zh.side[s]}先手`,
@@ -33,7 +33,6 @@ const T = {
     look: '看一下棋盤',
     logFlip: (c) => `翻 ${c}`, logPass: '跳過',
     cellLabel: (n, lit, ban) => `${n}${ban ? '，剛被翻過，這一手不能翻' : lit ? '，光經過，可以翻' : ''}`,
-    note: '<b>已完整求解。</b>從這個開局，電腦把 44,040,192 個局面都算過了：雙方都無法強迫取勝。先走的一方有 16 種第一手，8 種保持均勢，另外 8 種會讓對手在 7 手內強迫取勝。',
     rules: `
       <ol>
         <li><b>目標：</b>把自己的光送進自己的目標光環。薄荷的光從下方射入，珊瑚的光從上方射入，兩邊的位置互為轉半圈。</li>
@@ -49,7 +48,7 @@ const T = {
     level: 'Computer', easy: 'Easy', normal: 'Normal', hard: 'Hard',
     restart: 'Restart', next: 'Next game (swap first move)',
     moves: 'Moves', noMoves: 'No mirror flipped yet.', rulesTitle: 'How to play',
-    footer1: 'No dice, no timer, nothing hidden.', footer2: 'How we checked fairness', footer3: 'All games',
+    footer1: 'No dice, no timer, nothing hidden.', footer3: 'All games',
     tag: `${R} × ${C} mirrors`,
     side: ['Mint', 'Coral'], you: 'You', cpu: 'Computer',
     round: (n) => `Game ${n}`, firstMove: (s) => `${T.en.side[s]} first`,
@@ -69,7 +68,6 @@ const T = {
     look: 'Look at the board',
     logFlip: (c) => `flips ${c}`, logPass: 'passes',
     cellLabel: (n, lit, ban) => `${n}${ban ? ', just flipped, cannot flip back now' : lit ? ', lit, can flip' : ''}`,
-    note: '<b>Solved.</b> From this start a computer has worked through all 44,040,192 positions: neither side can force a win. The first player has 16 first moves; 8 keep the balance, and the other 8 let the opponent force a win within 7 moves.',
     rules: `
       <ol>
         <li><b>Goal:</b> send your own beam into your own target ring. Mint's light comes in from the bottom and Coral's from the top; their places are a half turn of each other.</li>
@@ -289,7 +287,6 @@ function render() {
   applyStatic(L, lang);
   setSeg('modeSeg', mode); setSeg('levelSeg', level);
   $('levelRow').hidden = mode !== 'ai';
-  $('note').innerHTML = L.note;
   $('rulesBody').innerHTML = L.rules;
   $('tag').textContent = L.tag;
   $('nextBtn').hidden = !over();

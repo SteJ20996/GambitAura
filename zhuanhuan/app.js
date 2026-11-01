@@ -13,7 +13,7 @@ const T = {
     level: '電腦', easy: '簡單', normal: '普通', hard: '困難',
     restart: '重新開始', next: '下一局（交換先手）',
     moves: '棋譜', noMoves: '還沒有人走棋。', rulesTitle: '怎麼玩',
-    footer1: '沒有骰子，沒有計時，沒有隱藏資訊。', footer2: '公平性檢查', footer3: '全部遊戲',
+    footer1: '沒有骰子，沒有計時，沒有隱藏資訊。', footer3: '全部遊戲',
     tag: '螺旋開局',
     side: ['薄荷', '珊瑚'], you: '你', cpu: '電腦',
     ringName: ['內環', '中環', '外環'],
@@ -36,7 +36,6 @@ const T = {
     endSmall: (how, n) => `${how} · 共 ${n} 手`,
     look: '看一下棋盤',
     logTurn: (r, d) => `${T.zh.ringName[r]} ${d > 0 ? '↻' : '↺'}`,
-    note: '<b>已完整求解。</b>從這個螺旋開局，電腦把每一個局面都算過了：雙方都無法強迫取勝。先走的一方第一手有 16 種走法，12 種保持均勢，4 種會輸。',
     spotLabel: (n, what) => `${n}${what ? '，' + what : ''}`,
     what: { mint: '薄荷棋', coral: '珊瑚棋', target: '可以走到這裡' },
     rules: `
@@ -55,7 +54,7 @@ const T = {
     level: 'Computer', easy: 'Easy', normal: 'Normal', hard: 'Hard',
     restart: 'Restart', next: 'Next game (swap first move)',
     moves: 'Moves', noMoves: 'No moves yet.', rulesTitle: 'How to play',
-    footer1: 'No dice, no timer, nothing hidden.', footer2: 'How we checked fairness', footer3: 'All games',
+    footer1: 'No dice, no timer, nothing hidden.', footer3: 'All games',
     tag: 'Spiral opening',
     side: ['Mint', 'Coral'], you: 'You', cpu: 'Computer',
     ringName: ['Inner', 'Middle', 'Outer'],
@@ -78,7 +77,6 @@ const T = {
     endSmall: (how, n) => `${how} · ${n} moves`,
     look: 'Look at the board',
     logTurn: (r, d) => `${T.en.ringName[r].toLowerCase()} ring ${d > 0 ? '↻' : '↺'}`,
-    note: '<b>Solved.</b> From this spiral start a computer has worked through every position: neither side can force a win. The first player has 16 first moves; 12 keep the balance and 4 lose.',
     spotLabel: (n, what) => `${n}${what ? ', ' + what : ''}`,
     what: { mint: 'Mint piece', coral: 'Coral piece', target: 'you can step here' },
     rules: `
@@ -357,7 +355,6 @@ function render() {
   applyStatic(L, lang);
   setSeg('modeSeg', mode); setSeg('levelSeg', level);
   $('levelRow').hidden = mode !== 'ai';
-  $('note').innerHTML = L.note;
   $('rulesBody').innerHTML = L.rules;
   $('tag').textContent = L.tag;
   $('nextBtn').hidden = !over();

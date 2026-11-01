@@ -85,7 +85,7 @@ const spot = (n) => (n.charCodeAt(1) - 49) * 8 + (n.charCodeAt(0) - 97);
   // English
   await page.click('[data-lang="en"]');
   ok((await page.textContent('[data-i18n="setup"]')) === 'Setup', 'English labels');
-  ok((await page.textContent('#note')).includes('neither side can force a win'), 'English fairness note');
+  ok((await page.locator('#note').count()) === 0, 'no solved note in the setup panel (owner, 2026-11-01)');
   const copy = await page.evaluate(() => document.body.innerText);
   ok(!copy.includes('—'), 'no em dashes in the page copy');
 
