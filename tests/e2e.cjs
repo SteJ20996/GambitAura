@@ -166,6 +166,9 @@ const cell = (n) => (n.charCodeAt(1) - 49) * 5 + (n.charCodeAt(0) - 65);
   ok(await page.isVisible('article[data-l="en"] h1'), 'analysis page switches to English');
   // owner, 2026-10-29: no version numbers or proposal wording anywhere a player reads
   const BANNED = /v0\.\d|提案|建議|原版|[Pp]ropos|[Ss]uggest(ed|ion)|[Vv]ersion/;
+  // owner, 2026-11-01: the originals carry short English names, never pinyin (lower-case folder
+  // names in the fairness pages' commands, like zhuanhuan/analysis, are paths, not names)
+  const PINYIN = /\b(Jielu|JIELU|Zhuanhuan|Guanglu|Riying|Qingpan|Chaoxi)\b/;
   for (const u of ['', 'jielu/', 'jielu/analysis/', 'zhuanhuan/', 'zhuanhuan/analysis/', 'guanglu/', 'guanglu/analysis/', 'riying/', 'riying/analysis/', 'qingpan/', 'qingpan/analysis/', 'chaoxi/', 'chaoxi/analysis/']) {
     for (const l of ['zh', 'en']) {
       await page.goto(BASE + u);
@@ -175,8 +178,43 @@ const cell = (n) => (n.charCodeAt(1) - 49) * 5 + (n.charCodeAt(0) - 65);
       const txt = await page.evaluate(() => document.body.innerText + ' ' + document.title);
       const hit = txt.match(BANNED);
       ok(!hit, `no version or proposal wording on /${u} (${l})` + (hit ? ': ' + hit[0] : ''));
+      const py = txt.match(PINYIN);
+      ok(!py, `no pinyin game names on /${u} (${l})` + (py ? ': ' + py[0] : ''));
     }
   }
+  // owner, 2026-11-01: the English pages show no Chinese at all (logo and game names in English
+  // only). Text a reader or a screen reader meets, labels on visible elements and the tab title;
+  // the one exception is the 中文 chip, the way back for a Chinese reader.
+  const ALL = ['', 'jielu/', 'zhuanhuan/', 'guanglu/', 'riying/', 'qingpan/', 'chaoxi/', 'hex/', 'reversi/', 'gomoku/', 'nim/',
+    'jielu/analysis/', 'zhuanhuan/analysis/', 'guanglu/analysis/', 'riying/analysis/', 'qingpan/analysis/', 'chaoxi/analysis/'];
+  for (const u of ALL) {
+    await page.goto(BASE + u);
+    await page.evaluate(() => localStorage.setItem('ga-jielu-lang', 'en'));
+    await page.reload();
+    await page.waitForTimeout(250);
+    const cjk = await page.evaluate(() => {
+      const CJK = /[\u2e80-\u2fdf\u3000-\u303f\u3100-\u312f\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uff00-\uffef]/;
+      for (const d of document.querySelectorAll('details')) d.open = true;
+      const seen = (el) => el.checkVisibility({ checkVisibilityCSS: true });   // true for .sr text too (clipped, not hidden)
+      const out = [];
+      if (CJK.test(document.title)) out.push('title: ' + document.title);
+      const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+      for (let n; (n = w.nextNode());) {
+        const el = n.parentElement;
+        if (el.closest('script, style, [data-lang="zh"]') || !CJK.test(n.nodeValue) || !seen(el)) continue;
+        out.push(n.nodeValue.trim().slice(0, 40));
+      }
+      for (const el of document.querySelectorAll('[aria-label], [title], [alt]')) {
+        if (!seen(el)) continue;
+        for (const a of ['aria-label', 'title', 'alt']) { const v = el.getAttribute(a); if (v && CJK.test(v)) out.push(a + ': ' + v); }
+      }
+      return out;
+    });
+    ok(cjk.length === 0, `no Chinese on the English /${u}` + (cjk.length ? ': ' + cjk.slice(0, 3).join(' | ') : ''));
+  }
+  await page.evaluate(() => localStorage.setItem('ga-jielu-lang', 'zh'));
+  await page.goto(BASE);
+  ok(await page.isVisible('.word .zh') && await page.isVisible('.ga-zh'), 'Chinese pages keep 罡曜 in the hero and the lockup');
   await p2.goto(BASE + 'jielu/analysis/');
   await p2.waitForTimeout(300);
   const sw3 = await p2.evaluate(() => document.documentElement.scrollWidth);

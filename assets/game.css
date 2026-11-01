@@ -9,8 +9,10 @@
 /* Title */
 .title-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
 .title { display: flex; align-items: baseline; gap: 14px; }
-h1 { font-family: var(--cjk); font-weight: 900; font-size: clamp(2.2rem, 6vw, 3rem); line-height: 1; letter-spacing: .14em; text-shadow: 0 0 30px rgba(217, 195, 143, .22); }
-.latin { font-family: var(--display); font-style: italic; font-weight: 500; font-size: 1.2rem; letter-spacing: .08em; color: var(--muted); }
+h1 { display: flex; align-items: baseline; gap: 14px; font-family: var(--cjk); font-weight: 900; font-size: clamp(2.2rem, 6vw, 3rem); line-height: 1; letter-spacing: .14em; text-shadow: 0 0 30px rgba(217, 195, 143, .22); }
+.latin { font-family: var(--display); font-style: italic; font-weight: 500; font-size: 1.2rem; letter-spacing: .08em; color: var(--muted); text-shadow: none; }
+/* English: the Latin name is the title (the Chinese one is .zh-only). */
+html[lang="en"] h1 .latin { font-style: normal; font-weight: 600; font-size: clamp(2.4rem, 6.4vw, 3.3rem); letter-spacing: .03em; color: var(--ink); text-shadow: 0 0 30px rgba(217, 195, 143, .22); }
 .opening-tag { font-family: var(--display); font-style: italic; font-size: .98rem; letter-spacing: .04em; color: var(--muted); white-space: nowrap; }
 
 /* Scoreboard: type only, the side to move is underlined in its own light */

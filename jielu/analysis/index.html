@@ -3,8 +3,12 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="description" content="借路 Jielu 公平性檢查：最初的開局後手必勝，標準開局經完整求解是和棋。" />
+<meta name="description" content="借路 Borrowed Road 公平性檢查：最初的開局後手必勝，標準開局經完整求解是和棋。" />
 <title>借路 公平性檢查 · 罡曜 GambitAura</title>
+<script>
+  // Language before the first paint, so an English page never flashes Chinese (same rule as initialLang in assets/shell.js).
+  (function () { var l; try { l = localStorage.getItem('ga-jielu-lang'); } catch (e) {} if (l !== 'zh' && l !== 'en') l = (navigator.language || '').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en'; document.documentElement.lang = l === 'zh' ? 'zh-Hant' : 'en'; })();
+</script>
 <link rel="icon" href="../../favicon.svg" type="image/svg+xml" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -48,9 +52,9 @@
 <body>
 <div class="wrap">
   <header class="ga-top">
-    <a class="ga-brand" href="../../" aria-label="罡曜 GambitAura">
+    <a class="ga-brand" href="../../">
       <svg viewBox="0 0 64 64" aria-hidden="true"><defs><radialGradient id="gaCore" cx=".5" cy=".45" r=".55"><stop offset="0" stop-color="#fffaf0"/><stop offset=".55" stop-color="#ecdcb4"/><stop offset="1" stop-color="#c9ad74"/></radialGradient><radialGradient id="gaHalo" cx=".5" cy=".5" r=".5"><stop offset=".3" stop-color="#d9c38f" stop-opacity=".28"/><stop offset="1" stop-color="#d9c38f" stop-opacity="0"/></radialGradient></defs><circle cx="32" cy="32" r="30" fill="url(#gaHalo)"/><circle cx="32" cy="32" r="22" fill="none" stroke="#d9c38f" stroke-width="1.4" opacity=".7"/><circle cx="32" cy="32" r="15" fill="none" stroke="#d9c38f" stroke-width="1" stroke-dasharray="1.5 3.5" opacity=".6"/><circle cx="32" cy="32" r="7" fill="url(#gaCore)"/></svg>
-      <span class="ga-lock" aria-hidden="true"><span class="ga-zh">罡曜</span><span class="ga-word">Gambit<b>Aura</b></span></span>
+      <span class="ga-lock" aria-hidden="true"><span class="ga-zh">罡曜</span><span class="ga-word">Gambit<b>Aura</b></span></span><span class="sr"><span class="zh-only">罡曜 </span>GambitAura</span>
     </a>
     <div class="ga-langs" role="group" aria-label="Language">
       <button class="ga-chip" data-lang="zh" aria-pressed="true">中文</button>
@@ -190,7 +194,7 @@ node verify_strategy.mjs coral.txt ../engine.js
 
 <!-- ======================= English ======================= -->
 <article data-l="en">
-  <h1>Jielu: how the rules were made, and how fair they are</h1>
+  <h1>Borrowed Road: how the rules were made, and how fair they are</h1>
   <p class="meta">2026-10-28 · GambitAura original game 01 · <a href="../">Back to the game</a></p>
 
   <div class="ga-card summary">
@@ -319,7 +323,7 @@ node verify_strategy.mjs coral.txt ../engine.js
 </article>
 
   <footer class="ga-foot">
-    <a href="../">借路 Jielu</a>
+    <a href="../"><span class="zh-only">借路 </span>Borrowed Road</a>
     <a href="../../">GambitAura</a>
   </footer>
 </div>
@@ -331,7 +335,7 @@ node verify_strategy.mjs coral.txt ../engine.js
   function apply(l) {
     if (l !== 'zh' && l !== 'en') l = 'zh';
     document.documentElement.lang = l === 'zh' ? 'zh-Hant' : 'en';
-    document.title = l === 'zh' ? '借路 公平性檢查 · 罡曜 GambitAura' : 'Jielu fairness check · GambitAura';
+    document.title = l === 'zh' ? '借路 公平性檢查 · 罡曜 GambitAura' : 'Borrowed Road fairness check · GambitAura';
     document.querySelectorAll('[data-lang]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-lang') === l)); });
   }
   document.querySelectorAll('[data-lang]').forEach(function (b) {

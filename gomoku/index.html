@@ -6,6 +6,10 @@
 <meta name="description" content="五子棋 Gomoku：罡曜 GambitAura 的經典棋。用 Swap2 開局，先連成五子的一方獲勝。" />
 <meta name="theme-color" content="#08090c" />
 <title>五子棋 Gomoku · 罡曜 GambitAura</title>
+<script>
+  // Language before the first paint, so an English page never flashes Chinese (same rule as initialLang in assets/shell.js).
+  (function () { var l; try { l = localStorage.getItem('ga-jielu-lang'); } catch (e) {} if (l !== 'zh' && l !== 'en') l = (navigator.language || '').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en'; document.documentElement.lang = l === 'zh' ? 'zh-Hant' : 'en'; })();
+</script>
 <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -114,9 +118,9 @@
 <body class="gm-page">
 <div class="wrap">
   <header class="ga-top">
-    <a class="ga-brand" href="../" aria-label="罡曜 GambitAura">
+    <a class="ga-brand" href="../">
       <svg viewBox="0 0 64 64" aria-hidden="true"><defs><radialGradient id="gaCore" cx=".5" cy=".45" r=".55"><stop offset="0" stop-color="#fffaf0"/><stop offset=".55" stop-color="#ecdcb4"/><stop offset="1" stop-color="#c9ad74"/></radialGradient><radialGradient id="gaHalo" cx=".5" cy=".5" r=".5"><stop offset=".3" stop-color="#d9c38f" stop-opacity=".28"/><stop offset="1" stop-color="#d9c38f" stop-opacity="0"/></radialGradient></defs><circle cx="32" cy="32" r="30" fill="url(#gaHalo)"/><circle cx="32" cy="32" r="22" fill="none" stroke="#d9c38f" stroke-width="1.4" opacity=".7"/><circle cx="32" cy="32" r="15" fill="none" stroke="#d9c38f" stroke-width="1" stroke-dasharray="1.5 3.5" opacity=".6"/><circle cx="32" cy="32" r="7" fill="url(#gaCore)"/></svg>
-      <span class="ga-lock" aria-hidden="true"><span class="ga-zh">罡曜</span><span class="ga-word">Gambit<b>Aura</b></span></span>
+      <span class="ga-lock" aria-hidden="true"><span class="ga-zh">罡曜</span><span class="ga-word">Gambit<b>Aura</b></span></span><span class="sr"><span class="zh-only">罡曜 </span>GambitAura</span>
       <span class="ga-crumb">· Classic</span>
     </a>
     <div class="ga-langs" role="group" aria-label="Language">
@@ -128,7 +132,7 @@
   <main class="game">
     <section class="stage">
       <div class="col title-row">
-        <div class="title"><h1>五子棋</h1><span class="latin">Gomoku</span></div>
+        <div class="title"><h1><span class="zh-only">五子棋</span><span class="latin">Gomoku</span></h1></div>
         <span class="opening-tag" id="tag"></span>
       </div>
 

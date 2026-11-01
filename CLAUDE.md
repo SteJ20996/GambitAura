@@ -16,7 +16,7 @@ Built first inside the portfolio repo (SteJ20996/SteJ20996.github.io, folder `ga
 solver, first demo). Moved here as `gambitaura#2` (2026-10-28) with the "Aura Noir" redesign. The
 portfolio repo keeps only a pointer in its CLAUDE.md; do not copy this repo back there.
 
-## Game 01: 借路 Jielu
+## Game 01: 借路 Borrowed Road
 
 5×5 board, two pieces per side. A turn is one step (up, down, left, right onto empty floor, never
 onto the other side's flag) or one tile move (an empty floor tile next to one of your pieces goes
@@ -45,12 +45,12 @@ deterministic. `app.js` is the UI: a piece first means a step, a tile first mean
 v0.4 the same square can be both a step target and a liftable tile). The C solver and the JS engine
 must agree on `perft` and on `replay.mjs`; run both after touching move rules.
 
-## Game 02: 轉環 Zhuanhuan (gambitaura#5, 2026-10-29)
+## Game 02: 轉環 Turning Rings (gambitaura#5, 2026-10-29)
 
 Owner, 2026-10-29: of the two Game 02 concepts (concentric rings; light paths), "兩個都可以保留，先做
 concentric rings". So 轉環 is Game 02 and **light paths** (25 two-sided mirror tiles; a turn flips one
 mirror, not the one just flipped; first to steer your own beam to your target wins; every flip
-changes both beams) is kept as the Game 03 candidate (built as 光路, below). Name 轉環 Zhuanhuan
+changes both beams) is kept as the Game 03 candidate (built as 光路, below). Name 轉環
 confirmed by the owner on 2026-10-29 ("就用轉環"; 星軌 and 連星 were the alternatives offered).
 
 Rules: 3 rings (1 inner, 2 middle, 3 outer) × 8 spokes (a at the top, clockwise), spot = ring*8+ray
@@ -83,7 +83,7 @@ is the viewBox origin, which is the board centre here (50% 50% was the bug). Tur
 the row of buttons under the board; the banned direction is disabled and explained in the status.
 Test: `tests/zhuanhuan.cjs` (31 checks).
 
-## Game 03: 光路 Guanglu (gambitaura#7, 2026-10-29)
+## Game 03: 光路 Light Path (gambitaura#7, 2026-10-29)
 
 Owner, 2026-10-29: "開始做光路，先用求解器檢查" (the light-paths candidate, named 光路 by the owner).
 Rules: a 4 × 5 field (cells a..e, ranks 4 at the top to 1), every cell a two-sided mirror, / or \.
@@ -125,7 +125,7 @@ repetition is marked 和 and asks first. The hub card's mini board and the analy
 figure are drawn from `engine.js`, so they follow `DESIGN`. Test: `tests/guanglu.cjs` (27 checks;
 its scripted win and repetition are found with the engine, so they follow the shipped layout).
 
-## Game 04: 日影 Riying (gambitaura#10, 2026-10-29)
+## Game 04: 日影 Sun and Shade (gambitaura#10, 2026-10-29)
 
 Owner, 2026-10-29: of five new concepts (換位 swap, 傾盤 tilt, 秤 balance, 潮汐 tide, 日影 sun and
 shade) "我們試一下2和5", then after both were solved "先做日影吧". Rules: 5 × 5 board, cell = row*5+col,
@@ -167,7 +167,7 @@ previews (dashed) the shade the other side will face after the move. The hub car
 page's figure are drawn from `engine.js`. Test: `tests/riying.cjs` (29 checks; its lines are found
 with the engine: a target win, a line to a tower stuck in shade, an 8-move cycle for the repetition).
 
-## Game 05: 傾盤 Qingpan (gambitaura#11, 2026-10-30)
+## Game 05: 傾盤 Tilt (gambitaura#11, 2026-10-30)
 
 Owner, 2026-10-29: "上線 然後做另外一個" (after 日影, build the other solved concept). Rules: 5 × 5,
 cell = row*5+col, row 0 = rank 5. Pillars b5 d1 (cells 1, 23). Holes: Mint's a4 (5), Coral's e2
@@ -207,7 +207,7 @@ piece shrinks into the hole, and the whole SVG leans 5 degrees the way it tilts;
 piece, then a dot. Hub card and analysis figure come from `engine.js`. Test: `tests/qingpan.cjs`
 (27 checks; its lines are found with the engine).
 
-## Game 06: 潮汐 Chaoxi (gambitaura#12, 2026-10-30)
+## Game 06: 潮汐 Tides (gambitaura#12, 2026-10-30)
 
 Owner, 2026-10-30: "先把潮汐做出來". Rules: 5 × 5, cell = row*5+col, row 0 = rank 5. Heights (`HEIGHTS`):
 rank 5 shore 33333, rank 4 21323, rank 3 10101 (the channel), rank 2 32312, rank 1 shore 33333; rocks
@@ -323,7 +323,9 @@ of boxes. Do not bring back rainbow gradients, gradient buttons, glossy orbs or 
 - Brand mark: concentric champagne rings around a glowing core (an aura), also the favicon. Lockup
   in every header: 罡曜 (Noto Serif TC 700, ivory, soft champagne glow) over GAMBITAURA (Cormorant,
   wide tracking, AURA in champagne). The series hero centres 罡曜 large inside a breathing halo with
-  two slow rings and a few rising motes, then the reading line (gāng yào · ㄍㄤ ㄧㄠˋ).
+  two slow rings and a few rising motes, then the reading line (gāng yào · ㄍㄤ ㄧㄠˋ). English pages
+  show the lockup as GAMBITAURA alone (a size up, ivory) and the hero as the wordmark in large
+  gradient capitals, with no reading line (see "English pages" under Working rules).
 - Controls: primary button is an ivory pill, secondary a hairline pill; segmented choices are plain
   words with a champagne underline; panels are sections split by hairlines, not cards.
 - Board: a dark pool with light moving under it; water squares are carved recesses; floor tiles
@@ -346,9 +348,19 @@ of boxes. Do not bring back rainbow gradients, gradient buttons, glossy orbs or 
   em dashes in site copy, short sentences. zh-Hant and English for every string. No version numbers
   and no proposal or suggestion wording in site copy (owner, 2026-10-29): the games are presented
   as they are, and design history says "the original opening" or "the first rules".
+- English pages (owner, 2026-11-01: "英文版請把所有中文元素刪去，logo和每種棋局的名字只保留英文", then
+  "不要拼音，要簡潔的英文翻譯"): no Chinese anywhere on an English page, and the originals go by short
+  English names, never pinyin: 借路 Borrowed Road, 轉環 Turning Rings, 光路 Light Path, 日影 Sun and
+  Shade, 傾盤 Tilt, 潮汐 Tides (the classics keep Hex, Reversi, Gomoku, Nim). Chinese pages show
+  both, e.g. 潮汐 with Tides beside it. Folder names, storage keys and code keep the pinyin ids
+  (`jielu/`, `ga-jielu-lang`). Mechanics: `html[lang="en"] .zh-only` hides (ga.css), each page's
+  head sets `lang` before the first paint, `pageTitle()` in shell.js drops the Chinese words from
+  the tab title, and the brand link's name is an `.sr` span whose 罡曜 is `.zh-only`. The one
+  exception is the 中文 language chip, the way back for a Chinese reader. In running English text a
+  game's name is set in italics.
 - Test every UI change in headless Chromium: start a static server and run `node tests/e2e.cjs`
-  (80 checks: the hub's game cards, a guard against version numbers and proposal wording on every
-  original game's pages, 借路 moves, tile moves, draw dialog and overlay, scoreboard, language, phone
+  (124 checks: the hub's game cards, a guard against version numbers, proposal wording and pinyin
+  names on every original game's pages, no Chinese on any English page, 借路 moves, tile moves, draw dialog and overlay, scoreboard, language, phone
   widths, no console errors) and the test of any classic you touched
   (`tests/<game>.cjs`; `tests/gomoku.cjs` has 151 checks across the three rule sets). Look at the
   screenshots in `tests/out/`.

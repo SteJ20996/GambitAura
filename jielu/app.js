@@ -1,5 +1,6 @@
 import * as E from './engine.js';
 import { search, sameMove } from './ai.js';
+import { pageTitle } from '../assets/shell.js';
 
 const { MINT, CORAL } = E;
 
@@ -326,6 +327,7 @@ $('passBtn').onclick = () => {
 function render() {
   const L = T[lang];
   document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+  pageTitle(lang);
   for (const el of document.querySelectorAll('[data-i18n]')) {
     const v = L[el.dataset.i18n];
     if (typeof v === 'string') el.textContent = v;
