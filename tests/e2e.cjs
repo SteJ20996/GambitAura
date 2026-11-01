@@ -215,6 +215,30 @@ const cell = (n) => (n.charCodeAt(1) - 49) * 5 + (n.charCodeAt(0) - 65);
   await page.evaluate(() => localStorage.setItem('ga-jielu-lang', 'zh'));
   await page.goto(BASE);
   ok(await page.isVisible('.word .zh') && await page.isVisible('.ga-zh'), 'Chinese pages keep 罡曜 in the hero and the lockup');
+  // owner, 2026-11-01: the Originals subtitle, the "solved" badge and the fairness button are off the hub
+  const GONE = /我們自己設計的棋|已完整求解：雙方都無必勝|我們怎麼檢查公平|Games we design ourselves|Solved: no forced win|How we check fairness/;
+  for (const l of ['zh', 'en']) {
+    await page.evaluate((l) => localStorage.setItem('ga-jielu-lang', l), l);
+    await page.reload();
+    const t = await page.evaluate(() => document.body.innerText);
+    const g = t.match(GONE);
+    ok(!g && await page.locator('#games a[href$="analysis/"]').count() === 0, `hub (${l}) has no Originals subtitle, solved badge or fairness button` + (g ? ': ' + g[0] : ''));
+  }
+  // ...and the original game pages carry no solved note and no link to their fairness page
+  const SOLVED = /完整求解|已求解|[Ss]olved|computer solve|公平性檢查|[Ff]airness check|checked fairness/;
+  for (const u of ['jielu/', 'zhuanhuan/', 'guanglu/', 'riying/', 'qingpan/', 'chaoxi/']) {
+    for (const l of ['zh', 'en']) {
+      await page.goto(BASE + u);
+      await page.evaluate((l) => localStorage.setItem('ga-jielu-lang', l), l);
+      await page.reload();
+      await page.waitForTimeout(250);
+      for (const d of await page.locator('details').all()) await d.evaluate((e) => { e.open = true; });
+      const t = await page.evaluate(() => document.body.innerText);
+      const g = t.match(SOLVED);
+      ok(!g && await page.locator('a[href="analysis/"]').count() === 0, `/${u} (${l}) has no solved note or fairness link` + (g ? ': ' + g[0] : ''));
+    }
+  }
+  await page.evaluate(() => localStorage.setItem('ga-jielu-lang', 'zh'));
   await p2.goto(BASE + 'jielu/analysis/');
   await p2.waitForTimeout(300);
   const sw3 = await p2.evaluate(() => document.documentElement.scrollWidth);

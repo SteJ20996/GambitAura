@@ -13,7 +13,7 @@ const T = {
     level: '電腦', easy: '簡單', normal: '普通', hard: '困難',
     restart: '重新開始', next: '下一局（交換先手）',
     moves: '棋譜', noMoves: '還沒有人走棋。', rulesTitle: '怎麼玩',
-    footer1: '沒有骰子，沒有計時，沒有隱藏資訊。', footer2: '公平性檢查', footer3: '全部遊戲',
+    footer1: '沒有骰子，沒有計時，沒有隱藏資訊。', footer3: '全部遊戲',
     sunAt: (k) => `太陽在${['北', '東北', '東', '東南', '南', '西南', '西', '西北'][k]}方`,
     side: ['薄荷', '珊瑚'], you: '你', cpu: '電腦',
     tower: ['矮塔', '高塔'],
@@ -36,7 +36,6 @@ const T = {
     cellLabel: (n, what) => `${n}${what ? '，' + what : ''}`,
     lblTower: (side, tw, fz) => `${T.zh.side[side]}${tw}${fz ? '，在影子裡' : ''}`,
     lblDest: '可以走到這裡',
-    note: '<b>已完整求解。</b>從這個開局，電腦把 4,857,600 個局面都算過了：不論誰先走，雙方都無法強迫取勝。先走的一方有 5 種第一手，2 種保持均勢；另外 3 種會讓對手強迫取勝，但還要再走 35 到 63 手才分出勝負。',
     rules: `
       <ol>
         <li><b>目標：</b>把自己的一座塔走到對面邊的正中格。薄荷要到 c5，珊瑚要到 c1。</li>
@@ -53,7 +52,7 @@ const T = {
     level: 'Computer', easy: 'Easy', normal: 'Normal', hard: 'Hard',
     restart: 'Restart', next: 'Next game (swap first move)',
     moves: 'Moves', noMoves: 'No moves yet.', rulesTitle: 'How to play',
-    footer1: 'No dice, no timer, nothing hidden.', footer2: 'How we checked fairness', footer3: 'All games',
+    footer1: 'No dice, no timer, nothing hidden.', footer3: 'All games',
     sunAt: (k) => `Sun in the ${['north', 'north-east', 'east', 'south-east', 'south', 'south-west', 'west', 'north-west'][k]}`,
     side: ['Mint', 'Coral'], you: 'You', cpu: 'Computer',
     tower: ['short tower', 'tall tower'],
@@ -76,7 +75,6 @@ const T = {
     cellLabel: (n, what) => `${n}${what ? ', ' + what : ''}`,
     lblTower: (side, tw, fz) => `${T.en.side[side]} ${tw}${fz ? ', in shade' : ''}`,
     lblDest: 'can move here',
-    note: '<b>Solved.</b> From this start a computer has worked through all 4,857,600 positions: whichever side moves first, neither can force a win. The first player has 5 first moves; 2 keep the balance, and the other 3 let the opponent force a win, though it takes another 35 to 63 moves.',
     rules: `
       <ol>
         <li><b>Goal:</b> bring one of your towers to the middle of the far edge. Mint aims for c5, Coral for c1.</li>
@@ -319,7 +317,6 @@ function render() {
   applyStatic(L, lang);
   setSeg('modeSeg', mode); setSeg('levelSeg', level);
   $('levelRow').hidden = mode !== 'ai';
-  $('note').innerHTML = L.note;
   $('rulesBody').innerHTML = L.rules;
   $('tag').textContent = L.sunAt(state.sun);
   $('nextBtn').hidden = !over();

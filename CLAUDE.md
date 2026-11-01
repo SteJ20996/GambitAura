@@ -254,7 +254,15 @@ Owner, 2026-10-28: put several board and strategy games on one site, the homepag
 with each game at its own address; the four classics Hex, Reversi, Gomoku and Nim, "然後主要是我們
 自己構思創作平衡的棋類" (the main line stays our own originally designed, balanced games). So the
 hub has two shelves: **原創 Originals** (借路, 轉環, 光路, 日影, 傾盤, 潮汐, then a Game 07 slot "in the works") above **經典
-Classics** (four cards with mini boards drawn in the site's style).
+Classics** (four cards with mini boards drawn in the site's style). Owner, 2026-11-01 ("這幾句話和板塊
+先刪去，不要出現在網頁上"): the Originals shelf has no subtitle, and the original cards have no
+"已完整求解：雙方都無必勝 / Solved: no forced win" badge and no "我們怎麼檢查公平 / How we check
+fairness" button; a card is mini board, number, name, one paragraph, size line and the play button.
+Then ("也拿掉") the original game pages lost their solved notes too: the setup panel has no
+"已完整求解。… / Solved. …" note (借路 keeps "標準開局。水洞在 A2、E2、A4、E4。" and the same for the
+original opening, with the solve result cut) and the footer has no 公平性檢查 / fairness link. The
+fairness pages (`<game>/analysis/`) are still served but nothing on the site links to them now.
+`tests/e2e.cjs` keeps all of this off the hub and the six game pages, in both languages.
 
 Fairness copy must stay honest. A game with no draws always has a forced winner under perfect
 play, so "solved so that neither side has a forced win" is only true of the originals we solve.
@@ -359,7 +367,7 @@ of boxes. Do not bring back rainbow gradients, gradient buttons, glossy orbs or 
   exception is the 中文 language chip, the way back for a Chinese reader. In running English text a
   game's name is set in italics.
 - Test every UI change in headless Chromium: start a static server and run `node tests/e2e.cjs`
-  (124 checks: the hub's game cards, a guard against version numbers, proposal wording and pinyin
+  (138 checks: the hub's game cards and the original game pages (no solved notes, badges or fairness links), a guard against version numbers, proposal wording and pinyin
   names on every original game's pages, no Chinese on any English page, 借路 moves, tile moves, draw dialog and overlay, scoreboard, language, phone
   widths, no console errors) and the test of any classic you touched
   (`tests/<game>.cjs`; `tests/gomoku.cjs` has 151 checks across the three rule sets). Look at the
@@ -370,6 +378,9 @@ of boxes. Do not bring back rainbow gradients, gradient buttons, glossy orbs or 
 
 ## Open threads
 
+- Fairness pages unlinked (2026-11-01): `<game>/analysis/` for the six originals are still served
+  and still tested, but the hub and the game pages no longer link to them, at the owner's request.
+  Relinking them or taking them down is the owner's call.
 - The owner's mechanics document (`jielu/docs/mechanics-v0.4.md`, not linked from the site) still
   describes the original opening; updating it (§2 table, §4/§5.1 examples, §5.3 and §7.2 wording,
   §11) is the owner's call.
